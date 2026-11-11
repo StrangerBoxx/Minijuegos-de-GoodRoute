@@ -43,6 +43,8 @@ Si no hay conexión, **Jugar en esta pantalla** sigue funcionando como antes, en
 
 ### Activar Firebase (una sola vez)
 
+Ya está activado con el proyecto **minijuegos-goodroute** (Realtime Database en `us-central1`, con las reglas de abajo). Estos pasos sirven si algún día hay que armarlo de nuevo en otro proyecto.
+
 Los celulares se conectan con la pantalla a través de **Firebase Realtime Database**, un servicio gratuito de Google. Mientras no esté configurado, el botón aparece desactivado.
 
 1. Entra a https://console.firebase.google.com con tu cuenta de Google y crea un proyecto. Puedes desactivar Google Analytics.

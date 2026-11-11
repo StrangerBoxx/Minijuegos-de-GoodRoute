@@ -1,6 +1,7 @@
 /* firebase-config.js — conexión para jugar con celulares (QR) en los juegos táctiles.
  *
- * Mientras esto quede en null, el botón "Jugar con celulares" aparece desactivado
+ * Proyecto: minijuegos-goodroute (Realtime Database en us-central1).
+ * Si esto queda en null, el botón "Jugar con celulares" aparece desactivado
  * y los juegos se siguen jugando en la pantalla táctil.
  *
  * Para activarlo, pega aquí la configuración de tu proyecto de Firebase
@@ -18,4 +19,12 @@
  * Estos datos no son secretos (identifican el proyecto); lo que protege la base
  * son sus reglas. Las reglas recomendadas están en README.md.
  */
-window.FIREBASE_CONFIG = null;
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDGiNCT7EqU3pp5hxYMOruF3Ns11_ZZREw",
+  authDomain: "minijuegos-goodroute.firebaseapp.com",
+  databaseURL: "https://minijuegos-goodroute-default-rtdb.firebaseio.com",
+  projectId: "minijuegos-goodroute",
+  storageBucket: "minijuegos-goodroute.firebasestorage.app",
+  messagingSenderId: "982116281983",
+  appId: "1:982116281983:web:d9f7d29cbe426598cc194a",
+};
