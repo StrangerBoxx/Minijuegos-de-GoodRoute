@@ -35,7 +35,7 @@ Los juegos **grupales** se juegan de 2 a 4 personas en la misma partida y en la 
 En los juegos grupales de la sección **Celulares** (*Flota en Vivo* y *Duelo de Rutas*), cada persona puede jugar desde su teléfono:
 
 1. En la pantalla del stand, elige cuántos juegan y toca **Jugar con celulares**.
-2. Aparece un QR por color. Cada persona escanea el suyo, y así queda definido su color y su número.
+2. Aparece un QR a la vez, en orden: primero el del jugador 1, y cuando ese celular se conecta, el del 2, y así. Cada persona escanea el suyo cuando le toca, y así queda definido su color y su número.
 3. Cuando están todos conectados, la partida empieza sola. Cada uno juega en su celular y la pantalla grande muestra el juego en vivo.
 4. Al final, cada celular muestra su resultado. En *Duelo de Rutas* cada uno escribe su nombre para el ranking; en *Flota en Vivo* el jugador 1 escribe el nombre del equipo.
 

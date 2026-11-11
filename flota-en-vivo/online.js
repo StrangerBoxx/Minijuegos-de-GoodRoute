@@ -177,24 +177,33 @@
     };
   };
 
-  /** Tarjetas con QR, una por jugador. Devuelve actualizar(conectados) para marcar quién entró. */
+  /**
+   * Sala de espera: muestra UN QR a la vez, el del primer jugador que falta
+   * (1, luego 2…). Arriba, una fila con todos los colores marca quién ya entró.
+   * Devuelve actualizar(conectados).
+   */
   O.pintarSala = async (contenedor, sala, jugadores) => {
     if (!window.qrcode) await cargarScript(QR_LIB);
-    contenedor.innerHTML = jugadores.map((j, p) => {
-      const q = window.qrcode(0, "M");
-      q.addData(sala.urlControl(p)); q.make();
-      return `<div class="qr-tarjeta" data-p="${p}" style="--color:${j.color}">
-        <div class="qr-cab"><span class="qr-num">${p + 1}</span>${j.nombre}</div>
-        <div class="qr-img">${q.createSvgTag({ cellSize: 4, margin: 2, scalable: true })}</div>
-        <div class="qr-estado">Esperando…</div>
-      </div>`;
-    }).join("");
+    const qr = (p) => { const q = window.qrcode(0, "M"); q.addData(sala.urlControl(p)); q.make(); return q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); };
+    contenedor.innerHTML = `
+      <div class="qr-progreso">${jugadores.map((j, p) =>
+        `<span class="qr-paso" data-p="${p}" style="--color:${j.color}"><span class="qr-num">${p + 1}</span>${j.nombre}<b class="qr-check"></b></span>`).join("")}</div>
+      ${jugadores.map((j, p) => `<div class="qr-tarjeta" data-p="${p}" style="--color:${j.color}" hidden>
+        <div class="qr-cab">Turno de <span class="qr-num">${p + 1}</span>${j.nombre}</div>
+        <div class="qr-img">${qr(p)}</div>
+        <div class="qr-estado">Escanea con tu celular</div>
+      </div>`).join("")}
+      <div class="qr-listos" hidden>¡Están todos conectados!</div>`;
     return (conectados) => {
-      for (const el of contenedor.querySelectorAll(".qr-tarjeta")) {
-        const ok = !!conectados[el.dataset.p];
+      const falta = jugadores.findIndex((_, p) => !conectados[p]);
+      for (const el of contenedor.querySelectorAll(".qr-paso")) {
+        const p = Number(el.dataset.p), ok = !!conectados[p];
         el.classList.toggle("conectado", ok);
-        el.querySelector(".qr-estado").textContent = ok ? "¡Conectado!" : "Esperando…";
+        el.classList.toggle("actual", p === falta);
+        el.querySelector(".qr-check").textContent = ok ? "✓" : "";
       }
+      for (const el of contenedor.querySelectorAll(".qr-tarjeta")) el.hidden = Number(el.dataset.p) !== falta;
+      contenedor.querySelector(".qr-listos").hidden = falta !== -1;
     };
   };
 
