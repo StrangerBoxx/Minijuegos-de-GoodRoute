@@ -11,6 +11,12 @@
  * que GoodRoute despachó las mismas órdenes con las mismas camionetas,
  * decidiendo cada vez con lo que había llegado hasta ese momento.
  *
+ * Se puede jugar de dos formas:
+ * - En esta pantalla (táctil): cada uno arrastra desde su camioneta.
+ * - Con celulares: cada persona escanea el QR de su color y, en su teléfono
+ *   (control.html), toca una orden para que la tome su camioneta. Esta pantalla
+ *   muestra el mapa en vivo. La conexión está en online.js.
+ *
  * Todo lo que conviene ajustar tras probar con gente está en AJUSTES.
  */
 (() => {
@@ -33,6 +39,9 @@
     puntosAtrasada: 40,
     bonoGoodRoute: 300,         // si el equipo iguala o supera a GoodRoute
     segundosCuenta: 3,
+    segundosCuentaOnline: 5,    // con celulares: un poco más, para mirar el teléfono
+    segundosAutoInicio: 3,      // con celulares: cuando están todos, empieza solo
+    publicacionesPorSegundo: 6, // con celulares: estado que se manda a los teléfonos
     inactividadMs: 40000,
     claveRanking: "flota-en-vivo.ranking",
     claveTotal: "flota-en-vivo.total",       // órdenes atendidas por todos los equipos del stand
@@ -57,7 +66,10 @@
     rSinTu: $("r-sin-tu"), rSinGr: $("r-sin-gr"), rKmTu: $("r-km-tu"), rKmGr: $("r-km-gr"),
     form: $("form-nombre"), nombre: $("nombre"), rankingInicio: $("ranking-inicio"), rankingFinal: $("ranking-final"),
     totalStand: $("total-stand"),
+    sala: $("sala"), qrGrilla: $("qr-grilla"), btnEmpezar: $("btn-empezar"), salaCodigo: $("sala-codigo"),
+    btnCelulares: $("btn-celulares"), modoNota: $("modo-nota"), hudCel: $("hud-cel"),
   };
+  const O = window.Online;
   const vista = new C.Vista($("mapa"));
   const ranking = new C.Ranking(AJUSTES.claveRanking);
 
@@ -72,6 +84,8 @@
   let reloj = 0, cuentaHasta = 0;
   const arrastres = new Map();    // pointerId → { p, x0, y0, x, y }
   let firmaPanel = "";
+  // Con celulares
+  let sala = null, conectados = {}, autoInicio = null, ultimaPublicacion = 0, equipoGuardado = false, finalOnline = null;
 
   // ---------- Simulación del día (la misma para el equipo y para GoodRoute) ----------
   function nuevaSim() {
@@ -166,7 +180,7 @@
   }
 
   // ---------- Flujo ----------
-  function mostrar(capa) { for (const c of [ui.inicio, ui.aviso, ui.final]) c.hidden = c !== capa; }
+  function mostrar(capa) { for (const c of [ui.inicio, ui.sala, ui.aviso, ui.final]) c.hidden = c !== capa; }
 
   function pintarElegir() {
     ui.elegir.innerHTML = [2, 3, 4].map((n) =>
@@ -176,11 +190,123 @@
 
   function irAlInicio() {
     fase = "inicio"; mapa = null; sim = null; arrastres.clear();
+    cerrarSala();
     ui.hud.hidden = true; ui.panel.hidden = true;
+    const motivo = O.motivoNoDisponible();
+    ui.btnCelulares.disabled = !!motivo;
+    ui.modoNota.textContent = motivo ?? "";
     ranking.pintar(ui.rankingInicio, null);
     pintarElegir();
     mostrar(ui.inicio);
     ajustar();
+  }
+
+  // ---------- Con celulares ----------
+  async function abrirSala() {
+    if (!O.disponible()) return;
+    fase = "sala"; conectados = {}; equipoGuardado = false; finalOnline = null;
+    ui.btnEmpezar.disabled = true; ui.btnEmpezar.textContent = "Conectando…";
+    ui.qrGrilla.innerHTML = ""; ui.salaCodigo.textContent = "";
+    mostrar(ui.sala);
+    try {
+      sala = await O.crearSala("flota-en-vivo", nJug);
+      const actualizarQR = await O.pintarSala(ui.qrGrilla, sala, JUGADORES.slice(0, nJug));
+      ui.salaCodigo.textContent = `Sala ${sala.codigo}`;
+      sala.alJugadores((v) => { conectados = v; actualizarQR(v); revisarSala(); pintarCel(); });
+      sala.alEntrada(recibir);
+      revisarSala();
+    } catch (e) {
+      cerrarSala();
+      irAlInicio();
+      ui.modoNota.textContent = "No se pudo conectar: " + (e.message || e) + " Puedes jugar en esta pantalla.";
+    }
+  }
+
+  const todosConectados = () => JUGADORES.slice(0, nJug).every((_, p) => conectados[p]);
+
+  function revisarSala() {
+    if (fase !== "sala") return;
+    const n = Object.keys(conectados).length;
+    clearTimeout(autoInicio);
+    if (todosConectados()) {
+      ui.btnEmpezar.disabled = false; ui.btnEmpezar.textContent = "¡Empezar!";
+      autoInicio = setTimeout(() => { if (fase === "sala" && todosConectados()) nuevaPartida(); }, AJUSTES.segundosAutoInicio * 1000);
+    } else {
+      ui.btnEmpezar.disabled = true; ui.btnEmpezar.textContent = `Esperando jugadores… ${n} de ${nJug}`;
+    }
+  }
+
+  function cerrarSala() {
+    clearTimeout(autoInicio);
+    if (sala) sala.cerrar();
+    sala = null; conectados = {};
+    ui.hudCel.hidden = true;
+  }
+
+  function pintarCel() {
+    ui.hudCel.hidden = !sala || fase === "sala";
+    ui.hudCel.innerHTML = "Celulares " + JUGADORES.slice(0, nJug).map((_, p) => `<i class="${conectados[p] ? "on" : ""}" style="${conectados[p] ? `background:${color(p)}` : ""}"></i>`).join("");
+  }
+
+  /** Jugada de un celular. */
+  function recibir(j) {
+    const p = Number(j.p);
+    if (!(p >= 0 && p < nJug)) return;
+    if (j.tipo === "tomar" && jugable() && sim) {
+      const i = Number(j.i), o = sim.ordenes[i];
+      if (o && (o.estado === "libre" || (o.estado === "asignada" && o.duenio !== p))) { asignar(i, p); actualizarPanel(); publicarVivo(); }
+    } else if (j.tipo === "nombre" && fase === "final" && p === 0 && !equipoGuardado) {
+      equipoGuardado = true;
+      registro = ranking.agregar(String(j.nombre || ""), puntosEquipo);
+      ui.form.hidden = true;
+      ranking.pintar(ui.rankingFinal, registro);
+      publicarVivo();
+    }
+  }
+
+  /** Posición de una camioneta en coordenadas de la grilla (columna, fila), para dibujarla en el celular. */
+  function posicionGrilla(tramos, t, nodo0) {
+    let nodo = nodo0, ang = 0;
+    for (const tr of tramos) {
+      if (t < tr.t0) break;
+      if (tr.tipo === "viaje" && tr.nodos.length > 1) {
+        const pasos = tr.nodos.length - 1;
+        if (t <= tr.t1) {
+          const s = pasos * (t - tr.t0) / Math.max(tr.t1 - tr.t0, 1e-6), i = Math.min(Math.floor(s), pasos - 1), f = s - i;
+          const a = tr.nodos[i], b = tr.nodos[i + 1];
+          const [ax, ay, bx, by] = [mapa.col(a), mapa.fila(a), mapa.col(b), mapa.fila(b)];
+          return { x: ax + (bx - ax) * f, y: ay + (by - ay) * f, ang: Math.atan2(by - ay, bx - ax) };
+        }
+        const a = tr.nodos[pasos - 1], b = tr.nodos[pasos];
+        ang = Math.atan2(mapa.fila(b) - mapa.fila(a), mapa.col(b) - mapa.col(a));
+        nodo = b;
+      } else if (tr.nodo != null) nodo = tr.nodo;
+    }
+    return { x: mapa.col(nodo), y: mapa.fila(nodo), ang };
+  }
+
+  const CODIGO_ESTADO = { oculta: 0, libre: 1, asignada: 2, encamino: 3, atendida: 4 };
+  function publicarRonda() {
+    if (!sala) return;
+    sala.publicar("ronda", {
+      ciudad: C.datosCiudad(mapa), bases, finDia: AJUSTES.finDia, minutosPorSegundo: AJUSTES.minutosPorSegundo,
+      pedidos: pedidos.map((o) => ({ nodo: o.nodo, aparece: Math.round(o.aparece * 10) / 10, plazo: Math.round(o.plazo * 10) / 10, urgente: !!o.urgente })),
+    });
+  }
+  function publicarVivo() {
+    if (!sala || !sim) return;
+    ultimaPublicacion = performance.now();
+    sala.publicar("vivo", {
+      fase, reloj: Math.round(reloj * 10) / 10,
+      estados: sim.ordenes.map((o) => CODIGO_ESTADO[o.estado]).join(""),
+      duenios: sim.ordenes.map((o) => o.duenio),
+      llegadas: sim.ordenes.map((o) => (o.llegada == null ? -1 : Math.round(o.llegada))),
+      vans: sim.vans.map((v, p) => {
+        const q = posicionGrilla(v.tramos, reloj, bases[p]);
+        return { x: Math.round(q.x * 1000) / 1000, y: Math.round(q.y * 1000) / 1000, ang: Math.round(q.ang * 100) / 100, cola: v.cola.length + (v.viaje ? 1 : 0) };
+      }),
+      final: finalOnline ? { ...finalOnline, guardado: equipoGuardado } : null,
+    });
   }
 
   function generarPedidos() {
@@ -196,7 +322,9 @@
   }
 
   function nuevaPartida() {
-    const v = C.vertical();
+    clearTimeout(autoInicio);
+    // Con celulares la ciudad va vertical, como se sostiene el teléfono.
+    const v = sala ? true : C.vertical();
     mapa = C.crearCiudad({ cols: v ? 7 : 10, rows: v ? 9 : 7, obras: 10 });
     bases = mapa.elegirBases(nJug);
     pedidos = generarPedidos();
@@ -205,15 +333,19 @@
     reloj = 0; arrastres.clear(); firmaPanel = "";
     avanzar(0);
     fase = "cuenta";
-    cuentaHasta = performance.now() + AJUSTES.segundosCuenta * 1000;
+    cuentaHasta = performance.now() + (sala ? AJUSTES.segundosCuentaOnline : AJUSTES.segundosCuenta) * 1000;
     ui.hud.hidden = false; ui.panel.hidden = false;
     ui.hudReloj.textContent = C.hhmm(0);
-    ui.hudAyuda.textContent = "Arrastra desde tu camioneta hasta una orden";
+    ui.hudAyuda.textContent = sala ? "Cada uno toma órdenes desde su celular" : "Arrastra desde tu camioneta hasta una orden";
     actualizarPanel();
     ajustar();
     const quienes = JUGADORES.slice(0, nJug).map((j, p) => `<span style="color:${j.color}">${p + 1} ${j.nombre}</span>`).join(" · ");
-    ui.avisoTexto.innerHTML = `Busquen su camioneta<small>${quienes}<br>Ya pueden tomar las primeras órdenes</small>`;
+    ui.avisoTexto.innerHTML = sala
+      ? `Miren su celular<small>${quienes}<br>Toquen una orden para que vaya su camioneta</small>`
+      : `Busquen su camioneta<small>${quienes}<br>Ya pueden tomar las primeras órdenes</small>`;
     mostrar(ui.aviso);
+    pintarCel();
+    publicarRonda(); publicarVivo();
   }
 
   function asignar(i, p) {
@@ -231,6 +363,7 @@
     fase = "cierre"; arrastres.clear();
     ui.avisoTexto.innerHTML = `17:00<small>Terminó el día</small>`;
     mostrar(ui.aviso);
+    publicarVivo();
     setTimeout(() => { if (fase === "cierre") mostrarFinal(); }, 1600);
   }
 
@@ -263,6 +396,15 @@
     registro = null; ui.form.hidden = false; ui.nombre.value = "";
     ranking.pintar(ui.rankingFinal, null);
     mostrar(ui.final);
+    if (sala) {   // resumen para los celulares: lo del equipo y lo de cada uno
+      finalOnline = {
+        titulo: ui.finTitulo.textContent, puntos: puntosEquipo,
+        equipo: { aTiempo: tu.aTiempo, atendidas: tu.atendidas, gr: gr.aTiempo },
+        jug: tu.porJug.map((j) => ({ puntos: j.puntos, atendidas: j.atendidas, aTiempo: j.aTiempo, pct: tu.puntos ? Math.round((j.puntos / tu.puntos) * 100) : 0 })),
+        total, guardado: false,
+      };
+      publicarVivo();
+    }
   }
 
   /** Aporte de cada persona: órdenes, puntos, porcentaje del equipo e insignias. */
@@ -292,8 +434,10 @@
     e.preventDefault();
     if (registro) return;
     registro = ranking.agregar(ui.nombre.value, puntosEquipo);
+    equipoGuardado = true;
     ui.form.hidden = true; ui.nombre.blur();
     ranking.pintar(ui.rankingFinal, registro);
+    publicarVivo();
   });
 
   function actualizarPanel() {
@@ -448,7 +592,7 @@
 
   const jugable = () => fase === "jugar" || fase === "cuenta";
   vista.canvas.addEventListener("pointerdown", (e) => {
-    if (!jugable()) return;
+    if (!jugable() || sala) return;           // con celulares, se juega en los teléfonos
     const g = agarrar(e.clientX, e.clientY);
     if (!g) return;
     arrastres.set(e.pointerId, { p: g.p, x0: g.x0, y0: g.y0, x: e.clientX, y: e.clientY });
@@ -476,12 +620,15 @@
     pintarElegir();
   });
   $("btn-jugar").addEventListener("click", nuevaPartida);
+  ui.btnCelulares.addEventListener("click", abrirSala);
+  ui.btnEmpezar.addEventListener("click", () => { if (fase === "sala" && todosConectados()) nuevaPartida(); });
+  $("btn-sala-volver").addEventListener("click", irAlInicio);
   $("btn-otra").addEventListener("click", irAlInicio);
   addEventListener("resize", ajustar);
 
   C.modoStand({
     inactividadMs: AJUSTES.inactividadMs,
-    enJuego: () => fase !== "inicio",
+    enJuego: () => fase !== "inicio" && fase !== "sala",
     alInactivo: irAlInicio,
     ranking,
     alBorrar: () => ranking.pintar(ui.rankingInicio, null),
@@ -504,11 +651,12 @@
       if (reloj >= AJUSTES.finDia) cerrarDia();
     }
     actualizarPanel();
+    if (sala && sim && (fase === "jugar" || fase === "cuenta") && ahora - ultimaPublicacion > 1000 / AJUSTES.publicacionesPorSegundo) publicarVivo();
     dibujar();
     requestAnimationFrame(cuadro);
   }
 
-  window.__estadoJuego = () => ({ fase, nJug, sim, simGr, reloj, vista, bases, resumen, asignar, avanzar });
+  window.__estadoJuego = () => ({ fase, nJug, sim, simGr, reloj, vista, bases, resumen, asignar, avanzar, sala, conectados });
 
   irAlInicio();
   requestAnimationFrame(cuadro);

@@ -1,0 +1,58 @@
+/* online.css — jugar con celulares (QR): sala de espera en la pantalla y vista del celular.
+ * Este archivo es igual en las carpetas de los juegos que lo usan. */
+
+/* ---------- Pantalla del stand: elegir cómo jugar ---------- */
+.modos { display: grid; gap: 10px; margin-bottom: 4px; }
+.modos .btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.modos .btn svg { width: 22px; height: 22px; flex: none; }
+.modo-nota { margin: 0; font-size: 13px; color: var(--muted); }
+.modo-nota:empty { display: none; }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+/* ---------- Pantalla del stand: sala de espera con los QR ---------- */
+.tarjeta-sala { max-width: 980px; }
+.qr-grilla { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin: 14px 0 16px; }
+.qr-tarjeta {
+  width: 200px; padding: 12px; border-radius: 16px;
+  background: var(--bg); border: 3px solid var(--color);
+  transition: transform .2s, box-shadow .2s;
+}
+.qr-cab { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 18px; color: var(--color); margin-bottom: 8px; }
+.qr-num { width: 28px; height: 28px; border-radius: 8px; background: var(--color); color: #fff; display: grid; place-items: center; font-size: 16px; }
+.qr-img { background: #fff; border-radius: 10px; padding: 6px; }
+.qr-img svg { display: block; width: 100%; height: auto; }
+.qr-estado { margin-top: 8px; font-weight: 600; font-size: 15px; color: var(--muted); }
+.qr-tarjeta.conectado { box-shadow: 0 10px 28px rgba(28, 20, 20, .16); transform: translateY(-3px); }
+.qr-tarjeta.conectado .qr-img { opacity: .25; }
+.qr-tarjeta.conectado .qr-estado { color: var(--ok); font-size: 17px; }
+.sala-pie { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
+.sala-codigo { font-family: var(--mono); font-size: 14px; color: var(--muted); margin: 10px 0 0; }
+
+/* Indicador en el juego: hay celulares conectados */
+.chip-cel { display: inline-flex; align-items: center; gap: 6px; }
+.chip-cel i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--border); }
+.chip-cel i.on { background: var(--ok); }
+
+/* ---------- Celular ---------- */
+body.celular { touch-action: manipulation; }
+.tel-cab {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  background: var(--color, var(--accent)); color: #fff;
+}
+.tel-num { width: 34px; height: 34px; border-radius: 9px; background: rgba(255, 255, 255, .25); display: grid; place-items: center; font-weight: 700; font-size: 18px; flex: none; }
+.tel-quien { font-weight: 700; font-size: 18px; line-height: 1.1; }
+.tel-quien small { display: block; font-weight: 400; font-size: 13px; opacity: .85; }
+.tel-dato { margin-left: auto; text-align: right; font-family: var(--mono); font-weight: 600; font-size: 20px; line-height: 1.1; }
+.tel-dato small { display: block; font-family: var(--sans); font-weight: 400; font-size: 12px; opacity: .85; }
+.tel-pie {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); text-align: center;
+  background: color-mix(in srgb, var(--bg) 94%, transparent); border-top: 1px solid var(--border);
+  font-size: 15px; line-height: 1.35;
+}
+.tel-pie b { font-family: var(--mono); }
+.tel-msg { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 20px; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(3px); }
+.tel-msg .tarjeta { max-width: 420px; }
+.tel-msg .grande { font-family: var(--mono); font-size: 54px; font-weight: 600; color: var(--color, var(--accent)); line-height: 1.1; }
+.tel-msg .lead { margin-bottom: 8px; }

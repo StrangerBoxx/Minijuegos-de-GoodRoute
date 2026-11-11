@@ -13,10 +13,11 @@ window.CATALOGO = {
     individual: "Individuales",
     grupal: "Grupales",
   },
-  // Cómo se juega: "mouse" (sirve con un solo mouse) o "tactil" (necesita pantalla multitáctil).
+  // Cómo se juega: "mouse" (sirve con un solo mouse) o "tactil" (cada uno con su celular vía QR,
+  // o todos en una pantalla multitáctil).
   controles: {
     mouse: { nombre: "Mouse", detalle: "Se juegan por turnos: el mouse pasa de mano en mano." },
-    tactil: { nombre: "Táctil", detalle: "Juegan todos a la vez: necesitan una pantalla multitáctil." },
+    tactil: { nombre: "Celulares", detalle: "Juegan todos a la vez: cada uno escanea un QR y juega en su celular (o en una pantalla táctil)." },
   },
   juegos: [
     {

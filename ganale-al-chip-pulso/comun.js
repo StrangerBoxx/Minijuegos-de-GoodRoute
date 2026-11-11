@@ -39,8 +39,11 @@
    *   desaparece (m.cerradas) y los cruces que quedan adentro no se usan (m.interiores).
    *   Por defecto, uno por cada ~9 manzanas.
    * - Obras: calles cortadas (m.bloqueadas), que se dibujan como barreras.
+   * Con { datos } (de C.datosCiudad) no genera nada: arma la misma ciudad,
+   * por ejemplo en el celular de un jugador.
    */
-  C.crearCiudad = function ({ cols, rows, obras, edificios }) {
+  C.crearCiudad = function ({ cols, rows, obras = 0, edificios, datos }) {
+    if (datos) ({ cols, rows } = datos);
     const m = { cols, rows, bloqueadas: new Set(), cerradas: new Set(), interiores: new Set(), edificios: [], _bfs: new Map() };
     m.id = (c, r) => r * cols + c;
     m.col = (n) => n % cols;
@@ -68,6 +71,16 @@
     // Toda la ciudad alcanzable desde la esquina 0, salvo los cruces dentro de edificios.
     const conectada = () => bfs(0).dist.every((d, n) => d < Infinity || m.interiores.has(n));
 
+    if (datos) {
+      (datos.bloqueadas || []).forEach((k) => m.bloqueadas.add(k));
+      (datos.cerradas || []).forEach((k) => m.cerradas.add(k));
+      (datos.interiores || []).forEach((n) => m.interiores.add(n));
+      m.edificios = (datos.edificios || []).map(({ k, r, w, h }) => {
+        const manzanas = [];
+        for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) manzanas.push(m.id(k + i, r + j));
+        return { k, r, w, h, manzanas };
+      });
+    } else {
     const nEdificios = edificios ?? Math.round(((cols - 1) * (rows - 1)) / 9);
     const ocupadas = new Set();
     let intentos = 0;
@@ -100,6 +113,7 @@
       if (m.bloqueadas.has(k) || m.cerradas.has(k)) continue;
       m.bloqueadas.add(k);
       if (!conectada()) m.bloqueadas.delete(k);
+    }
     }
     const desde = (a) => { if (!m._bfs.has(a)) m._bfs.set(a, bfs(a)); return m._bfs.get(a); };
     m.dist = (a, b) => desde(a).dist[b];
@@ -143,6 +157,13 @@
     };
     return m;
   };
+
+  /** Datos mínimos para rearmar la ciudad en otro equipo (ver crearCiudad({ datos })). */
+  C.datosCiudad = (m) => ({
+    cols: m.cols, rows: m.rows,
+    bloqueadas: [...m.bloqueadas], cerradas: [...m.cerradas], interiores: [...m.interiores],
+    edificios: m.edificios.map(({ k, r, w, h }) => ({ k, r, w, h })),
+  });
 
   /**
    * Rutas abiertas óptimas (Held-Karp) desde una base sobre una lista de nodos.

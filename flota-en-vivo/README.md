@@ -32,6 +32,10 @@ Minijuego **grupal** del stand de Control Position para mostrar **GoodRoute**. J
 
 El ranking es por equipo: al final se escribe el nombre del equipo.
 
+## Con celulares
+
+Al empezar se elige **Jugar con celulares** o **Jugar en esta pantalla**. Con celulares, la pantalla muestra un QR por color; cada persona escanea el suyo y toca una orden en su celular para que la tome su camioneta, mientras la pantalla grande muestra el juego en vivo. Necesita Firebase configurado (ver el README principal). Para probar sin Firebase, abre `index.html?prueba=1` y los enlaces de los QR en otras pestañas del mismo navegador.
+
 ## Correrlo
 
 Es HTML, CSS y JS sin dependencias. Abre `index.html` en el navegador, o entra desde la biblioteca (`../index.html`).
@@ -56,3 +60,5 @@ Todo el balance está en `AJUSTES`, al comienzo de `juego.js`:
 - `juego.js`: la lógica del juego.
 - `comun.js` y `comun.css`: la base compartida con los otros minijuegos. Son iguales en todas las carpetas.
 - `estilos.css`: los estilos propios de este juego.
+- `online.js` y `online.css`: la sala con los QR y la conexión con los celulares (iguales en los juegos que los usan).
+- `control.html` y `control.js`: lo que ve cada jugador en su celular.

@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="comun.css" />
   <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="online.css" />
 </head>
 <body>
   <header class="hud" id="hud" hidden>
@@ -18,6 +19,7 @@
     <div class="hud-derecha">
       <span class="chip-dato">Clientes <b id="hud-clientes">5</b></span>
       <span class="chip-dato chip-gr">Chip <b id="hud-chip">?</b></span>
+      <span class="chip-dato chip-cel" id="hud-cel" hidden title="Celulares conectados"></span>
     </div>
   </header>
 
@@ -39,8 +41,30 @@
       </ul>
       <p class="elegir-titulo">¿Cuántos juegan?</p>
       <div class="elegir-jugadores" id="elegir-jugadores"></div>
-      <button class="btn btn-grande" id="btn-jugar">Jugar</button>
+      <div class="modos">
+        <button class="btn btn-grande" id="btn-celulares" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Jugar con celulares
+        </button>
+        <button class="btn btn-secundario" id="btn-jugar" type="button">Jugar en esta pantalla</button>
+        <p class="modo-nota" id="modo-nota"></p>
+      </div>
       <div class="ranking" id="ranking-inicio"></div>
+    </div>
+  </section>
+
+  <!-- Con celulares: cada uno escanea el QR de su color -->
+  <section class="capa" id="sala" hidden>
+    <div class="tarjeta tarjeta-sala">
+      <p class="eyebrow">Duelo de Rutas · con celulares</p>
+      <h2>Escanea el QR de tu color</h2>
+      <p class="lead">Cada uno juega en su celular. Cuando estén todos conectados, empieza el duelo.</p>
+      <div class="qr-grilla" id="qr-grilla"></div>
+      <div class="sala-pie">
+        <button class="btn" id="btn-empezar" type="button" disabled>Esperando jugadores…</button>
+        <button class="btn btn-secundario" id="btn-sala-volver" type="button">Volver</button>
+      </div>
+      <p class="sala-codigo" id="sala-codigo"></p>
     </div>
   </section>
 
@@ -77,6 +101,8 @@
   <button class="btn-pantalla" id="btn-pantalla" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
 
   <script src="comun.js"></script>
+  <script src="../firebase-config.js"></script>
+  <script src="online.js"></script>
   <script src="juego.js"></script>
 </body>
 </html>

@@ -10,6 +10,12 @@
  * (GoodRoute) calcula la ruta óptima exacta (Held-Karp) y al final de cada
  * ronda se ve en naranjo en todos los tableros: quien la iguala gana un extra.
  *
+ * Se puede jugar de dos formas:
+ * - En esta pantalla (táctil): cada tablero recibe los toques de su zona.
+ * - Con celulares: cada persona escanea el QR de su color y juega en su
+ *   teléfono (control.html). Esta pantalla muestra los tableros en vivo.
+ *   La conexión está en online.js.
+ *
  * Todo lo que conviene ajustar tras probar con gente está en AJUSTES.
  */
 (() => {
@@ -28,6 +34,9 @@
     bonoRapidez: [150, 100, 50, 0],   // por orden de llegada, solo con la ruta completa
     separacion: 8,              // px entre tableros
     altoCabecera: 40,
+    ciudadCelular: { cols: 5, rows: 7 },   // con celulares: vertical, como se sostiene el teléfono
+    segundosAutoInicio: 3,      // con celulares: cuando están todos, empieza solo
+    segundosResultadoOnline: 8, // con celulares: pasa sola a la siguiente ronda
     inactividadMs: 40000,
     claveRanking: "duelo-de-rutas.ranking",
     claveJugadores: "duelo-de-rutas.jugadores",
@@ -50,7 +59,10 @@
     btnSiguiente: $("btn-siguiente"),
     final: $("final"), finTitulo: $("fin-titulo"), finLista: $("fin-lista"), finGrupo: $("fin-grupo"),
     form: $("form-nombres"), nombres: $("nombres"), rankingInicio: $("ranking-inicio"), rankingFinal: $("ranking-final"),
+    sala: $("sala"), qrGrilla: $("qr-grilla"), btnEmpezar: $("btn-empezar"), salaCodigo: $("sala-codigo"),
+    btnCelulares: $("btn-celulares"), modoNota: $("modo-nota"), hudCel: $("hud-cel"),
   };
+  const O = window.Online;
   const canvas = $("mapa");
   const lienzo = new C.Vista(canvas);          // solo para limpiar y ajustar el canvas
   const ranking = new C.Ranking(AJUSTES.claveRanking);
@@ -67,6 +79,8 @@
   let jug = [];                   // por jugador: { seq, cuadras, terminado, puntosRonda, total, igualadas, cuadrasTot, chipTot }
   let llegadas = [];              // jugadores en el orden en que completaron la ruta
   let restante = 0, tRonda = 0, finPendiente = null;
+  // Con celulares
+  let sala = null, conectados = {}, autoInicio = null, ultimaN = [], segPublicado = -1, nombresGuardados = new Set();
 
   const ronda = () => AJUSTES.rondas[rondaIdx];
 
@@ -104,6 +118,7 @@
   }
 
   function dimensionesCiudad() {
+    if (sala) return AJUSTES.ciudadCelular;
     const r = calcularPaneles()[0], a = r.w / Math.max(1, r.h - AJUSTES.altoCabecera);
     return a > 1.25 ? { cols: 7, rows: 5 } : a < 0.8 ? { cols: 5, rows: 7 } : { cols: 6, rows: 6 };
   }
@@ -129,7 +144,7 @@
   }
 
   // ---------- Flujo ----------
-  function mostrar(capa) { for (const c of [ui.inicio, ui.aviso, ui.resultado, ui.final]) c.hidden = c !== capa; }
+  function mostrar(capa) { for (const c of [ui.inicio, ui.sala, ui.aviso, ui.resultado, ui.final]) c.hidden = c !== capa; }
 
   function pintarElegir() {
     ui.elegir.innerHTML = [2, 3, 4].map((n) =>
@@ -139,14 +154,103 @@
 
   function irAlInicio() {
     fase = "inicio"; mapa = null; paneles = [];
+    cerrarSala();
     ui.hud.hidden = true;
+    const motivo = O.motivoNoDisponible();
+    ui.btnCelulares.disabled = !!motivo;
+    ui.modoNota.textContent = motivo ?? "";
     ranking.pintar(ui.rankingInicio, null);
     pintarElegir();
     mostrar(ui.inicio);
     ajustar();
   }
 
+  // ---------- Con celulares ----------
+  async function abrirSala() {
+    if (!O.disponible()) return;
+    fase = "sala"; conectados = {}; nombresGuardados = new Set();
+    ui.btnEmpezar.disabled = true; ui.btnEmpezar.textContent = "Conectando…";
+    ui.qrGrilla.innerHTML = ""; ui.salaCodigo.textContent = "";
+    mostrar(ui.sala);
+    try {
+      sala = await O.crearSala("duelo-de-rutas", nJug);
+      const actualizarQR = await O.pintarSala(ui.qrGrilla, sala, JUGADORES.slice(0, nJug));
+      ui.salaCodigo.textContent = `Sala ${sala.codigo}`;
+      sala.alJugadores((v) => { conectados = v; actualizarQR(v); revisarSala(); pintarCel(); });
+      sala.alEntrada(recibir);
+      revisarSala();
+    } catch (e) {
+      cerrarSala();
+      irAlInicio();
+      ui.modoNota.textContent = "No se pudo conectar: " + (e.message || e) + " Puedes jugar en esta pantalla.";
+    }
+  }
+
+  const todosConectados = () => JUGADORES.slice(0, nJug).every((_, p) => conectados[p]);
+
+  function revisarSala() {
+    if (fase !== "sala") return;
+    const n = Object.keys(conectados).length;
+    clearTimeout(autoInicio);
+    if (todosConectados()) {
+      ui.btnEmpezar.disabled = false; ui.btnEmpezar.textContent = "¡Empezar!";
+      autoInicio = setTimeout(() => { if (fase === "sala" && todosConectados()) nuevaPartida(); }, AJUSTES.segundosAutoInicio * 1000);
+    } else {
+      ui.btnEmpezar.disabled = true; ui.btnEmpezar.textContent = `Esperando jugadores… ${n} de ${nJug}`;
+    }
+  }
+
+  function cerrarSala(vivoFinal) {
+    clearTimeout(autoInicio);
+    if (sala) sala.cerrar(vivoFinal);
+    sala = null; conectados = {};
+    ui.hudCel.hidden = true;
+  }
+
+  function pintarCel() {
+    ui.hudCel.hidden = !sala || fase === "sala";
+    ui.hudCel.innerHTML = "Celulares " + JUGADORES.slice(0, nJug).map((_, p) => `<i class="${conectados[p] ? "on" : ""}" style="${conectados[p] ? `background:${color(p)}` : ""}"></i>`).join("");
+  }
+
+  /** Jugada de un celular. */
+  function recibir(j) {
+    const p = Number(j.p);
+    if (!(p >= 0 && p < nJug)) return;
+    if (j.tipo === "tocar" && fase === "jugar") {
+      if (j.n != null) ultimaN[p] = Math.max(ultimaN[p] ?? 0, j.n);
+      tocarIndice(p, Number(j.i));
+    } else if (j.tipo === "nombre" && fase === "final" && !nombresGuardados.has(p)) {
+      nombresGuardados.add(p);
+      ranking.agregar(String(j.nombre || ""), jug[p].total);
+      ranking.pintar(ui.rankingFinal, null);
+    }
+  }
+
+  function publicarRonda() {
+    if (!sala) return;
+    sala.publicar("ronda", {
+      n: rondaIdx, total: AJUSTES.rondas.length, segundos: ronda().segundos,
+      ciudad: C.datosCiudad(mapa), base, clientes,
+    });
+  }
+
+  function vivo() {
+    return {
+      fase, ronda: rondaIdx, restante: Math.max(0, Math.ceil(restante)),
+      jug: jug.map((j, p) => ({
+        seq: j.seq, cuadras: j.cuadras, listo: j.terminado != null, lugar: llegadas.indexOf(p),
+        n: ultimaN[p] ?? 0, total: j.total, igualadas: j.igualadas,
+        ronda: fase === "resultado" && j.ultimo ? { puntos: j.ultimo.puntos, iguala: j.ultimo.iguala, completa: j.ultimo.completa } : null,
+      })),
+      chip: fase === "resultado" || fase === "final" ? { cuadras: chip.cuadras, orden: chip.orden } : null,
+      podio: fase === "final" ? jug.map((j, p) => ({ p, total: j.total })).sort((a, b) => b.total - a.total || a.p - b.p).map((x) => x.p) : null,
+    };
+  }
+  function publicarVivo() { if (sala) sala.publicar("vivo", vivo()); }
+
   function nuevaPartida() {
+    clearTimeout(autoInicio);
+    ultimaN = [];
     rondaIdx = 0;
     jug = Array.from({ length: nJug }, () => ({ seq: [], cuadras: 0, terminado: null, total: 0, igualadas: 0, cuadrasTot: 0, chipTot: 0, ultimo: null }));
     empezarRonda();
@@ -174,13 +278,22 @@
     ajustar();
     ui.avisoTexto.innerHTML = `Ronda ${rondaIdx + 1}<small>${clientes.length} clientes · ${r.segundos} s · la misma ciudad para todos</small>`;
     mostrar(ui.aviso);
-    setTimeout(() => { if (fase === "cuenta") { fase = "jugar"; mostrar(null); } }, 1700);
+    pintarCel();
+    publicarRonda(); publicarVivo();
+    setTimeout(() => { if (fase === "cuenta") { fase = "jugar"; mostrar(null); publicarVivo(); } }, sala ? 3000 : 1700);
   }
 
   function tocar(p, x, y) {
-    const j = jug[p], v = paneles[p].vista;
+    const v = paneles[p].vista;
     const { indice, distancia } = v.cercano(clientes, x, y);
     if (indice < 0 || distancia > Math.max(26, v.celda * 0.45)) return;
+    tocarIndice(p, indice);
+  }
+
+  /** Toca el cliente "indice" en el tablero del jugador p (desde la pantalla o desde su celular). */
+  function tocarIndice(p, indice) {
+    const j = jug[p];
+    if (!j || !(indice >= 0 && indice < clientes.length)) return;
     const k = j.seq.indexOf(indice);
     if (k >= 0) j.seq = j.seq.slice(0, k);    // deshacer desde ese cliente
     else j.seq.push(indice);
@@ -192,6 +305,7 @@
     // Cuando todos completaron, la ronda termina sola (con un respiro para deshacer).
     if (llegadas.length === nJug) finPendiente = performance.now() + 900;
     else finPendiente = null;
+    publicarVivo();
   }
 
   function terminarRonda() {
@@ -226,6 +340,11 @@
     ui.btnSiguiente.textContent = rondaIdx < AJUSTES.rondas.length - 1 ? "Siguiente ronda" : "Ver resultado";
     pintarCabeceras();
     mostrar(ui.resultado);
+    publicarVivo();
+    if (sala) {   // con celulares nadie toca esta pantalla: sigue sola
+      const ronda0 = rondaIdx;
+      setTimeout(() => { if (fase === "resultado" && rondaIdx === ronda0) siguiente(); }, AJUSTES.segundosResultadoOnline * 1000);
+    }
   }
 
   function siguiente() {
@@ -253,7 +372,8 @@
     ui.finGrupo.textContent = igualadas
       ? `Entre todos igualaron al chip ${igualadas} ${igualadas === 1 ? "vez" : "veces"} en ${rutas} rutas. Cada ruta óptima sumó para el grupo.`
       : `En ${rutas} rutas nadie igualó al chip. Encontrar la óptima a ojo es difícil; para eso está GoodRoute.`;
-    guardado = false; ui.form.hidden = false;
+    guardado = false; ui.form.hidden = !!sala;   // con celulares, cada uno escribe su nombre en su teléfono
+    publicarVivo();
     ui.nombres.innerHTML = orden.map(({ p, j }) =>
       `<label class="fila-nombre"><span class="num" style="background:${color(p)}">${p + 1}</span>
         <input data-p="${p}" maxlength="14" autocomplete="off" placeholder="Nombre de ${JUGADORES[p].nombre}" aria-label="Nombre de ${JUGADORES[p].nombre}" />
@@ -347,7 +467,7 @@
 
   // ---------- Entrada (cada tablero recibe sus propios toques) ----------
   canvas.addEventListener("pointerdown", (e) => {
-    if (fase !== "jugar") return;
+    if (fase !== "jugar" || sala) return;     // con celulares, se juega en los teléfonos
     const p = paneles.findIndex(({ rect: r }) => e.clientX >= r.x && e.clientX <= r.x + r.w && e.clientY >= r.y && e.clientY <= r.y + r.h);
     if (p >= 0) tocar(p, e.clientX, e.clientY);
   });
@@ -359,13 +479,16 @@
     pintarElegir();
   });
   $("btn-jugar").addEventListener("click", nuevaPartida);
+  ui.btnCelulares.addEventListener("click", abrirSala);
+  ui.btnEmpezar.addEventListener("click", () => { if (fase === "sala" && todosConectados()) nuevaPartida(); });
+  $("btn-sala-volver").addEventListener("click", irAlInicio);
   $("btn-otra").addEventListener("click", irAlInicio);
   ui.btnSiguiente.addEventListener("click", siguiente);
   addEventListener("resize", ajustar);
 
   C.modoStand({
     inactividadMs: AJUSTES.inactividadMs,
-    enJuego: () => fase !== "inicio",
+    enJuego: () => fase !== "inicio" && fase !== "sala",
     alInactivo: irAlInicio,
     ranking,
     alBorrar: () => ranking.pintar(ui.rankingInicio, null),
@@ -381,13 +504,14 @@
       const s = Math.max(0, Math.ceil(restante));
       ui.hudCentro.textContent = `0:${String(s).padStart(2, "0")}`;
       ui.hudCentro.classList.toggle("urgente", s <= 5);
+      if (s !== segPublicado) { segPublicado = s; publicarVivo(); }
       if (restante <= 0 || (finPendiente && ahora >= finPendiente)) terminarRonda();
     }
     dibujar();
     requestAnimationFrame(cuadro);
   }
 
-  window.__estadoJuego = () => ({ fase, nJug, rondaIdx, jug, chip, clientes, paneles, llegadas, tocar });
+  window.__estadoJuego = () => ({ fase, nJug, rondaIdx, jug, chip, clientes, paneles, llegadas, tocar, sala, conectados });
 
   irAlInicio();
   requestAnimationFrame(cuadro);

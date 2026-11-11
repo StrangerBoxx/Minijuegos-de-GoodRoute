@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#033E84" />
+  <title>Flota en Vivo · Tu celular · GoodRoute</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="comun.css" />
+  <link rel="stylesheet" href="online.css" />
+</head>
+<body class="celular">
+  <header class="tel-cab" id="cab">
+    <span class="tel-num" id="cab-num">?</span>
+    <span class="tel-quien"><span id="cab-nombre">Flota en Vivo</span><small id="cab-estado">Conectando…</small></span>
+    <span class="tel-dato" id="cab-dato"></span>
+  </header>
+
+  <canvas id="mapa"></canvas>
+
+  <footer class="tel-pie" id="pie" hidden></footer>
+
+  <section class="tel-msg" id="msg">
+    <div class="tarjeta" id="msg-tarjeta">
+      <img class="logo" src="logo-goodroute.gif" alt="GoodRoute" />
+      <p class="lead">Conectando con la pantalla…</p>
+    </div>
+  </section>
+
+  <script src="comun.js"></script>
+  <script src="../firebase-config.js"></script>
+  <script src="online.js"></script>
+  <script src="control.js"></script>
+</body>
+</html>
