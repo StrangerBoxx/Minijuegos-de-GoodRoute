@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Gánale al Chip · GoodRoute</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilos.css" />
+</head>
+<body>
+  <!-- Barra superior: nivel y cronómetros de la carrera -->
+  <header class="hud" id="hud" hidden>
+    <div class="hud-nivel"><span id="hud-nivel">Nivel 1 de 3</span><span class="hud-ayuda" id="hud-ayuda"></span></div>
+    <div class="hud-tiempos">
+      <div class="tiempo tiempo-tu"><span class="punto"></span>Tú <b id="t-tu">0.0 s</b></div>
+      <div class="tiempo tiempo-chip"><span class="punto"></span>Chip <b id="t-chip">0.0 s</b></div>
+    </div>
+  </header>
+
+  <canvas id="mapa"></canvas>
+
+  <!-- Pantalla de inicio (modo stand: vuelve aquí sola si nadie juega) -->
+  <section class="capa" id="inicio">
+    <div class="tarjeta tarjeta-inicio">
+      <img class="logo" id="logo" src="logo-goodroute.gif" alt="GoodRoute" />
+      <h1>Gánale al <span class="chip-txt">Chip</span></h1>
+      <p class="lead">El chip es nuestro optimizador de rutas. ¿Puedes armar una ruta mejor y llegar antes que él?</p>
+      <ol class="pasos">
+        <li><b>Toca los clientes</b> en el orden en que quieres visitarlos.</li>
+        <li>Tu auto sale apenas eliges el primero. El chip te da un poco de ventaja.</li>
+        <li>Gana quien visite a todos primero. Son 3 niveles.</li>
+      </ol>
+      <button class="btn btn-grande" id="btn-jugar">Jugar</button>
+      <div class="ranking" id="ranking-inicio"></div>
+    </div>
+  </section>
+
+  <!-- Cuenta regresiva -->
+  <section class="capa capa-transparente" id="cuenta" hidden>
+    <div class="cuenta" id="cuenta-num">3</div>
+  </section>
+
+  <!-- Resultado de cada nivel -->
+  <section class="capa capa-abajo" id="resultado" hidden>
+    <div class="tarjeta tarjeta-resultado">
+      <h2 id="res-titulo"></h2>
+      <div class="comparacion">
+        <div class="fila fila-tu"><span class="punto"></span><span>Tu ruta</span><b id="res-tu"></b></div>
+        <div class="fila fila-chip"><span class="punto"></span><span>Chip</span><b id="res-chip"></b></div>
+      </div>
+      <p class="res-detalle" id="res-detalle"></p>
+      <div class="res-puntos">+<b id="res-puntos">0</b> puntos</div>
+      <button class="btn" id="btn-siguiente">Siguiente nivel</button>
+    </div>
+  </section>
+
+  <!-- Final: puntaje y ranking -->
+  <section class="capa" id="final" hidden>
+    <div class="tarjeta tarjeta-final">
+      <p class="eyebrow">Puntaje final</p>
+      <div class="puntaje-final" id="fin-puntos">0</div>
+      <p class="lead" id="fin-mensaje"></p>
+      <form class="guardar" id="form-nombre">
+        <input id="nombre" maxlength="14" autocomplete="off" placeholder="Tu nombre" aria-label="Tu nombre" />
+        <button class="btn" type="submit">Guardar</button>
+      </form>
+      <div class="ranking" id="ranking-final"></div>
+      <p class="cta">Esto mismo hace el chip con las rutas de tus técnicos, todos los días y en milisegundos.</p>
+      <button class="btn btn-secundario" id="btn-otra">Jugar otra vez</button>
+    </div>
+  </section>
+
+  <button class="btn-pantalla" id="btn-pantalla" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
+
+  <script src="juego.js"></script>
+</body>
+</html>

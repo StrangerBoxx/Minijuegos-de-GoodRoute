@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Reparto · GoodRoute</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="comun.css" />
+  <link rel="stylesheet" href="estilos.css" />
+</head>
+<body>
+  <header class="hud" id="hud" hidden>
+    <div class="hud-titulo"><span id="hud-ronda">Ronda 1 de 2</span><span class="hud-ayuda" id="hud-ayuda"></span></div>
+    <div class="hud-centro" id="hud-centro">0:30</div>
+    <div class="hud-derecha">
+      <span class="chip-dato">Asignadas <b id="hud-asignadas">0</b></span>
+      <button class="btn btn-chico" id="btn-listo">Listo</button>
+    </div>
+  </header>
+
+  <canvas id="mapa"></canvas>
+
+  <!-- Jornada de cada técnico, se actualiza con cada asignación -->
+  <footer class="panel-barras" id="panel-barras" hidden>
+    <div class="barras" id="barras"></div>
+    <p class="leyenda">La línea marca las 18:00. Rojo: no alcanza antes de las 19:00.</p>
+  </footer>
+
+  <section class="capa" id="inicio">
+    <div class="tarjeta">
+      <img class="logo" id="logo" src="logo-goodroute.gif" alt="GoodRoute" />
+      <h1><span class="acento">Reparto</span></h1>
+      <p class="lead">Reparte las órdenes del día entre tus técnicos para que nadie termine tarde.</p>
+      <ul class="reglas">
+        <li><span class="ej">Toca</span> Toca una orden y elige qué técnico la hace.</li>
+        <li><span class="ej">2 h</span> Cada instalación toma 2 horas. Cada técnico arma solo su mejor ruta.</li>
+        <li><span class="ej">18:00</span> Bono si todos terminan antes de las 18:00. Nadie puede pasar de las 19:00.</li>
+      </ul>
+      <button class="btn btn-grande" id="btn-jugar">Jugar</button>
+      <div class="ranking" id="ranking-inicio"></div>
+    </div>
+  </section>
+
+  <section class="capa capa-transparente" id="aviso" hidden>
+    <div class="aviso" id="aviso-texto"></div>
+  </section>
+
+  <section class="capa capa-abajo" id="resultado" hidden>
+    <div class="tarjeta tarjeta-resultado">
+      <h2 id="res-titulo"></h2>
+      <table class="comparacion">
+        <thead><tr><th></th><th class="col-tu">Tú</th><th class="col-gr">GoodRoute</th></tr></thead>
+        <tbody>
+          <tr><td>Órdenes atendidas</td><td id="r-at-tu"></td><td id="r-at-gr"></td></tr>
+          <tr><td>Kilómetros</td><td id="r-km-tu"></td><td id="r-km-gr"></td></tr>
+          <tr><td>Último en terminar</td><td id="r-fin-tu"></td><td id="r-fin-gr"></td></tr>
+        </tbody>
+      </table>
+      <p class="res-detalle" id="res-detalle"></p>
+      <div class="res-puntos">+<b id="res-puntos">0</b> puntos</div>
+      <button class="btn" id="btn-siguiente">Siguiente ronda</button>
+    </div>
+  </section>
+
+  <section class="capa" id="final" hidden>
+    <div class="tarjeta">
+      <p class="eyebrow">Puntaje final</p>
+      <div class="puntaje-final" id="fin-puntos">0</div>
+      <p class="lead" id="fin-mensaje"></p>
+      <form class="guardar" id="form-nombre">
+        <input id="nombre" maxlength="14" autocomplete="off" placeholder="Tu nombre" aria-label="Tu nombre" />
+        <button class="btn" type="submit">Guardar</button>
+      </form>
+      <div class="ranking" id="ranking-final"></div>
+      <p class="cta">GoodRoute reparte así las órdenes de toda tu flota cada mañana, en segundos.</p>
+      <button class="btn btn-secundario" id="btn-otra">Jugar otra vez</button>
+    </div>
+  </section>
+
+  <button class="btn-pantalla" id="btn-pantalla" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
+
+  <script src="comun.js"></script>
+  <script src="juego.js"></script>
+</body>
+</html>

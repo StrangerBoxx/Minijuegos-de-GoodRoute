@@ -1,0 +1,20 @@
+/* Estilos propios de Gánale al Chip · A pulso (la base está en comun.css). */
+.chip-txt { color: var(--gr); }
+.ej-peligro { background: var(--tarde-soft); color: var(--tarde); border-color: transparent; }
+.ej-chip { background: var(--gr-soft); color: var(--gr); border-color: transparent; }
+.chip-tu b { color: var(--accent); }
+.chip-gr b { color: var(--gr); }
+.chip-choques b { color: var(--tarde); }
+
+canvas.agarrable { cursor: grab; }
+canvas.agarrado { cursor: grabbing; }
+
+/* Destello rojo al chocar */
+.destello {
+  position: fixed; inset: 0; z-index: 4; pointer-events: none; opacity: 0;
+  box-shadow: inset 0 0 0 10px var(--tarde); background: rgba(216, 68, 47, .12);
+}
+.destello.activo { animation: destello .45s ease-out; }
+@keyframes destello { from { opacity: 1; } to { opacity: 0; } }
+.aviso.choque { color: var(--tarde); }
+.aviso.cuenta { font-family: var(--mono); font-size: clamp(56px, 12vw, 110px); padding: 10px 56px; }

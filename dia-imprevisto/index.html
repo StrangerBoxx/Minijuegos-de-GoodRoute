@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Día Imprevisto · GoodRoute</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="comun.css" />
+  <link rel="stylesheet" href="estilos.css" />
+</head>
+<body>
+  <header class="hud" id="hud" hidden>
+    <div class="hud-titulo"><span>Día Imprevisto</span><span class="hud-ayuda" id="hud-ayuda"></span></div>
+    <div class="hud-centro" id="hud-reloj">08:00</div>
+    <div class="hud-derecha">
+      <span class="chip-dato chip-ok">Atendidas <b id="hud-hechas">0</b></span>
+      <span class="chip-dato chip-pend">Pendientes <b id="hud-pend">0</b></span>
+    </div>
+  </header>
+
+  <canvas id="mapa"></canvas>
+
+  <footer class="panel-barras" id="panel-barras" hidden>
+    <div class="barras" id="barras"></div>
+  </footer>
+
+  <section class="capa" id="inicio">
+    <div class="tarjeta">
+      <img class="logo" id="logo" src="logo-goodroute.gif" alt="GoodRoute" />
+      <h1>Día <span class="acento">Imprevisto</span></h1>
+      <p class="lead">El día ya está planificado. Cuando algo salga mal, decide rápido.</p>
+      <ul class="reglas">
+        <li><span class="ej">3 técnicos</span> Ana, Pedro y Luis salen con su ruta armada.</li>
+        <li><span class="ej ej-urg">5 s</span> Te van a pasar 4 imprevistos. Tienes 5 segundos para elegir; si no, pasa lo peor.</li>
+        <li><span class="ej">19:00</span> Lo que no alcanza antes de las 19:00 queda pendiente y resta puntos.</li>
+      </ul>
+      <button class="btn btn-grande" id="btn-jugar">Jugar</button>
+      <div class="ranking" id="ranking-inicio"></div>
+    </div>
+  </section>
+
+  <section class="capa capa-transparente" id="aviso" hidden>
+    <div class="aviso" id="aviso-texto"></div>
+  </section>
+
+  <!-- Imprevisto: el reloj se detiene y hay 5 s para elegir -->
+  <section class="capa capa-abajo" id="decision" hidden>
+    <div class="tarjeta tarjeta-decision">
+      <p class="eyebrow" id="dec-hora"></p>
+      <h2 id="dec-titulo"></h2>
+      <p class="dec-texto" id="dec-texto"></p>
+      <div class="opciones" id="opciones"></div>
+      <div class="cuenta"><span id="cuenta-barra"></span></div>
+    </div>
+  </section>
+
+  <section class="capa capa-abajo" id="resultado" hidden>
+    <div class="tarjeta tarjeta-resultado">
+      <h2 id="res-titulo"></h2>
+      <table class="comparacion">
+        <thead><tr><th></th><th class="col-tu">Tú</th><th class="col-gr">GoodRoute</th></tr></thead>
+        <tbody>
+          <tr><td>A tiempo</td><td id="r-ok-tu"></td><td id="r-ok-gr"></td></tr>
+          <tr><td>Pendientes</td><td id="r-pe-tu"></td><td id="r-pe-gr"></td></tr>
+          <tr><td>Kilómetros</td><td id="r-km-tu"></td><td id="r-km-gr"></td></tr>
+        </tbody>
+      </table>
+      <ul class="decisiones" id="decisiones"></ul>
+      <p class="res-detalle" id="res-detalle"></p>
+      <div class="res-puntos"><b id="res-puntos">0</b> puntos</div>
+      <button class="btn" id="btn-siguiente">Ver puntaje</button>
+    </div>
+  </section>
+
+  <section class="capa" id="final" hidden>
+    <div class="tarjeta">
+      <p class="eyebrow">Puntaje final</p>
+      <div class="puntaje-final" id="fin-puntos">0</div>
+      <p class="lead" id="fin-mensaje"></p>
+      <form class="guardar" id="form-nombre">
+        <input id="nombre" maxlength="14" autocomplete="off" placeholder="Tu nombre" aria-label="Tu nombre" />
+        <button class="btn" type="submit">Guardar</button>
+      </form>
+      <div class="ranking" id="ranking-final"></div>
+      <p class="cta">Cada vez que algo cambia en terreno, GoodRoute recalcula las rutas de toda la flota en segundos.</p>
+      <button class="btn btn-secundario" id="btn-otra">Jugar otra vez</button>
+    </div>
+  </section>
+
+  <button class="btn-pantalla" id="btn-pantalla" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
+
+  <script src="comun.js"></script>
+  <script src="juego.js"></script>
+</body>
+</html>

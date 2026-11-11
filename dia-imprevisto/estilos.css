@@ -1,0 +1,38 @@
+/* Estilos propios de Día Imprevisto (la base está en comun.css). */
+.ej-urg { background: var(--tarde-soft); color: var(--tarde); border-color: transparent; }
+.chip-ok b { color: var(--ok); }
+.chip-pend b { color: var(--tarde); }
+
+.panel-barras {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  padding: 10px 72px 10px 16px;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  border-top: 1px solid var(--border);
+}
+.panel-barras .barras { max-width: 760px; margin: 0 auto; }
+
+/* Decisión */
+.tarjeta-decision { max-width: 480px; padding: 18px 22px; margin-bottom: 8px; border: 2px solid var(--tarde); }
+.tarjeta-decision h2 { margin-bottom: 6px; }
+.dec-texto { margin: 0 0 14px; font-size: 17px; line-height: 1.4; }
+.opciones { display: grid; gap: 8px; }
+.opcion {
+  font: inherit; font-size: 18px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 10px; text-align: left;
+  padding: 14px 16px; border-radius: 12px; min-height: 56px;
+  border: 2px solid var(--border); background: var(--bg); color: var(--text);
+}
+.opcion:active { transform: scale(.98); border-color: var(--accent); }
+.opcion .punto { width: 14px; height: 14px; }
+.cuenta { height: 8px; border-radius: 4px; background: var(--border); margin-top: 14px; overflow: hidden; }
+.cuenta span { display: block; height: 100%; background: var(--tarde); width: 100%; }
+
+/* Resultado */
+.decisiones { list-style: none; padding: 0; margin: 4px 0 8px; text-align: left; display: grid; gap: 4px; font-size: 14px; }
+.decisiones li { display: grid; grid-template-columns: 22px 1fr; gap: 6px; padding: 6px 8px; border-radius: 8px; background: var(--bg); }
+.decisiones .marca { font-weight: 700; }
+.decisiones .si { color: var(--ok); }
+.decisiones .no { color: var(--tarde); }
+.decisiones small { display: block; color: var(--muted); }
+
+@media (max-width: 640px) { .panel-barras { padding: 8px 60px 8px 10px; } .opcion { font-size: 16px; min-height: 50px; padding: 10px 12px; } }
