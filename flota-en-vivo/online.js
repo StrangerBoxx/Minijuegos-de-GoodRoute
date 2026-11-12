@@ -169,6 +169,8 @@
         if (v && !cerrada) { O.actividad(); cb(v); }
       })),
       publicar: (ruta, v) => (cerrada ? Promise.resolve() : b.set(`${raiz}/${ruta}`, v)),
+      /** cb(valor) cada vez que cambia salas/<código>/<ruta> (por ejemplo, lo que escriben los celulares). */
+      alValor: (ruta, cb) => quitar.push(b.alValor(`${raiz}/${ruta}`, (v) => { if (!cerrada) cb(v); })),
       cerrar: async (vivoFinal) => {
         if (cerrada) return;
         if (vivoFinal) await b.set(`${raiz}/vivo`, vivoFinal);
@@ -224,6 +226,8 @@
       juego, nJug,
       escuchar: (ruta, cb) => b.alValor(`${raiz}/${ruta}`, cb),
       enviar: (jugada) => b.push(`${raiz}/entradas`, { ...jugada, p }),
+      /** Escribe un dato propio de este jugador en salas/<código>/<ruta>/<p> (se sobrescribe). */
+      marcar: (ruta, v) => b.set(`${raiz}/${ruta}/${p}`, v),
       salir: soltar,
     };
   };

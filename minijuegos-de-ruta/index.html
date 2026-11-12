@@ -135,6 +135,11 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
 .vivo-lista .fuera { color: var(--rojo); }
 /* Celular: color del jugador en la barra */
 .yo { display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 10px; color: #fff; font-weight: 800; margin-right: 8px; font-style: normal; }
+.btn-terminar-vivo { position: absolute; right: 14px; bottom: 14px; min-height: 40px; padding: 8px 18px; font-size: 14px; }
+.listos { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+.listos span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-weight: 600; font-size: 15px; background: var(--fondo); color: var(--suave); border: 2px solid var(--borde); }
+.listos span.si { background: var(--verde); border-color: var(--verde); color: #fff; }
+.listos i { width: 22px; height: 22px; border-radius: 7px; color: #fff; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 12px; }
 .espera-grande { font-size: 56px; font-weight: 800; font-style: italic; color: var(--naranjo); line-height: 1; margin: 6px 0; }
 </style>
 </head>
@@ -177,6 +182,7 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
           </div>
         </div>
         <p class="lead" id="intro-espera" hidden></p>
+        <button class="btn btn-naranjo" id="btn-listo" type="button" hidden>¡Estoy listo!</button>
       </div>
     </div>
 
@@ -211,6 +217,9 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
         </div>
       </div>
     </div>
+
+    <!-- Con celulares: durante la partida, la pantalla muestra el juego de cada uno -->
+    <button class="btn btn-claro btn-terminar-vivo" id="btn-terminar-vivo" type="button" hidden>Terminar partida</button>
 
     <div class="capa" id="capa-fin" hidden>
       <div class="panel">
@@ -482,6 +491,7 @@ const ui = {
   sala: $("capa-sala"), salaEtq: $("sala-etq"), qrGrilla: $("qr-grilla"), empezarSala: $("btn-empezar"), salaCodigo: $("sala-codigo"),
   vivo: $("capa-vivo"), vivoEtq: $("vivo-etq"), vivoTitulo: $("vivo-titulo"), vivoSub: $("vivo-sub"), vivoLista: $("vivo-lista"),
   vivoDato: $("vivo-dato"), vivoDatoTxt: $("vivo-dato-txt"), vivoBotones: $("vivo-botones"), podioBotones: $("podio-botones"),
+  listo: $("btn-listo"), terminarVivo: $("btn-terminar-vivo"),
 };
 const ctx = ui.lienzo.getContext("2d");
 
@@ -527,7 +537,8 @@ function ajustarLienzo() {
 function dibujarCuadro() {
   ctx.clearRect(0, 0, E.w, E.h);
   ctx.fillStyle = FONDO; ctx.fillRect(0, 0, E.w, E.h);
-  if (actual) actual.dibujar(ctx);
+  if (Online_.dibujar(ctx)) { /* pantalla grande: el juego de cada celular */ }
+  else if (actual) actual.dibujar(ctx);
   for (const f of E.flotantes) {
     const a = 1 - f.vida / 1.1;
     ctx.save(); ctx.globalAlpha = Math.max(0, a);
@@ -546,10 +557,11 @@ function cuadro(ahora) {
   const dt = Math.min(0.05, (ahora - anterior) / 1000 || 0);
   anterior = ahora;
   if (fase === "jugando" && actual) actual.actualizar(dt);
+  if (fase === "vivo") Online_.actualizar(dt);
   E.flotantes.forEach((f) => (f.vida += dt));
   E.flotantes = E.flotantes.filter((f) => f.vida < 1.1);
   dibujarCuadro();
-  if (fase === "jugando" || E.flotantes.length) bucle = requestAnimationFrame(cuadro);
+  if (fase === "jugando" || fase === "vivo" || E.flotantes.length) bucle = requestAnimationFrame(cuadro);
   else bucle = 0;
 }
 function arrancarBucle() { if (!bucle) { anterior = performance.now(); bucle = requestAnimationFrame(cuadro); } }
@@ -712,6 +724,8 @@ const juegoCorta = {
   },
 
   aPx(p, pan) { const s = pan.mapa.s; return { x: pan.mapa.x + p.x * s, y: pan.mapa.y + p.y * s }; },
+  VISTA: ["ronda", "tiempo", "puntos"],
+  adelantar(dt) { if (this.ronda && this.ronda.elegida < 0) this.tiempo -= dt; },
 
   actualizar(dt) {
     const r = this.ronda;
@@ -876,6 +890,9 @@ const juegoMemoria = {
   },
 
   radio() { return clamp(this.mapa.s * 0.045, 14, 22); },
+  VISTA: ["dep", "clientes", "orden", "recorrido", "tramos", "total", "vel", "t", "tocados", "error", "estado", "vidas", "nivel", "puntos"],
+  LISTAS: ["tocados"],
+  adelantar(dt) { if (this.estado === "mirar") this.t = Math.min(this.total, this.t + this.vel * dt); },
 
   dibujar(ctx) {
     const { x, y, s, cab } = this.mapa, rc = this.radio();
@@ -932,6 +949,8 @@ const juegoDespacho = {
   redimensionar() { const { w, h } = this.E, m = 12; this.mapa = { x: m, y: m, w: w - 2 * m, h: h - 2 * m }; },
   aPx(p) { const { x, y, w, h } = this.mapa; return { x: x + p.x * w, y: y + p.y * h }; },
   radio() { return clamp(Math.min(this.mapa.w, this.mapa.h) * 0.06, 20, 30); },
+  VISTA: ["tecs", "pedido", "pista", "tiempo", "puntos"],
+  adelantar(dt) { this.tiempo -= dt; if (this.pedido && !this.pedido.atendido) this.pedido.resto -= dt; },
 
   nuevoPedido() {
     const dur = Math.max(2, 4.6 - this.reloj * 0.07);
@@ -1118,6 +1137,11 @@ const juegoDesvio = {
     return f >= 0 && f < this.filas && k >= 0 && k < this.COLS ? { f, k } : null;
   },
   centro(cel) { return { x: this.ox + (cel.k + 0.5) * this.c, y: this.oy + (cel.f + 0.5) * this.c }; },
+  VISTA: ["filas", "bloq", "ini", "fin", "camino", "optimo", "estado", "tiempo", "puntos"],
+  LISTAS: ["bloq", "camino", "optimo"],
+  ver() { const v = {}; for (const k of this.VISTA) v[k] = this[k]; v.bloq = [...this.bloq]; return v; },
+  alVer() { this.bloq = new Set(this.bloq); },
+  adelantar(dt) { if (this.estado === "jugar") this.tiempo -= dt; },
 
   extender(cel) {
     if (!cel || this.estado !== "jugar" || this.bloq.has(this.id2(cel))) return;
@@ -1242,6 +1266,15 @@ const juegoCarril = {
     this.vanY = h - Math.max(80, h * 0.15); this.vanL = Math.min(this.lw * 0.62, 70);
   },
   xCarril(c) { return this.x0 + (c + 0.5) * this.lw; },
+  VISTA: ["objetos", "xc", "carril", "inv", "mult", "multT", "scroll", "vidas", "puntos", "vel"],
+  LISTAS: ["objetos"],
+  adelantar(dt) {
+    const dy = this.vel * dt;
+    this.scroll = (this.scroll + dy) % 1000;
+    for (const o of this.objetos) o.y += dy;
+    this.xc += (this.carril - this.xc) * Math.min(1, dt * 16);
+    if (this.inv > 0) this.inv -= dt;
+  },
 
   fila() {
     const libre = rint(0, 2), otros = [0, 1, 2].filter((c) => c !== libre);
@@ -1372,6 +1405,14 @@ const Online_ = (() => {
   const esCelular = !!(SALA && JUGADORES[YO] && DIRECTO);
   let nJug = 1, sala = null, jug = [], estadoSala = "", autoInicio = 0, semilla = 0;
   let conexion = null, envio = 0, ultimoEnviado = -1, ultimoVivo = null;
+  let preparados = {}, vistas = [], envioVista = 0, ultimaVista = "";
+  const CAB = 42;                 // alto de la cabecera de cada cuadro
+
+  /** Foto del estado de un juego, con números redondeados para que pese poco. */
+  function foto(j) {
+    const v = j.ver ? j.ver() : Object.fromEntries(j.VISTA.map((k) => [k, j[k]]));
+    return JSON.parse(JSON.stringify(v, (k, x) => (typeof x === "number" ? Math.round(x * 1000) / 1000 : x)));
+  }
 
   // ---------- Pantalla grande ----------
   function pintarNumeros() {
@@ -1400,6 +1441,17 @@ const Online_ = (() => {
         actualizarQR(v); revisarSala(); if (estadoSala === "jugar") pintarVivo();
       });
       sala.alEntrada(recibir);
+      // "¡Estoy listo!" de cada celular, y la foto de su partida.
+      sala.alValor("listos", (v) => { preparados = v || {}; revisarSala(); });
+      // Una escucha por jugador: así solo se descarga la foto que cambió.
+      jug.forEach((_, p) => sala.alValor(`vistas/${p}`, (f) => {
+        if (!actual || !f) return;
+        const inst = vistas[p] ||= Object.create(actual);
+        Object.assign(inst, f);
+        for (const l of actual.LISTAS || []) if (!Array.isArray(inst[l])) inst[l] = inst[l] ? Object.values(inst[l]) : [];
+        if (inst.alVer) inst.alVer();
+        inst.recibida = true;
+      }));
       estadoSala = "sala"; revisarSala();
     } catch (e) {
       cerrar(); ui.sala.hidden = true; ui.intro.hidden = false; fase = "intro";
@@ -1408,13 +1460,22 @@ const Online_ = (() => {
   }
 
   const todos = () => jug.length && jug.every((j) => j.conectado);
+  const todosListos = () => todos() && jug.every((_, p) => preparados[p]);
   function revisarSala() {
     if (estadoSala !== "sala") return;
     clearTimeout(autoInicio);
-    const n = jug.filter((j) => j.conectado).length;
-    if (todos()) {
+    const n = jug.filter((j) => j.conectado).length, nl = jug.filter((_, p) => preparados[p] && jug[p].conectado).length;
+    // Cuando están todos conectados, se ve quién confirmó en su celular.
+    const zona = ui.qrGrilla.querySelector(".qr-listos");
+    if (zona) zona.innerHTML = todos()
+      ? `${todosListos() ? "¡Todos listos!" : "Confirmen en su celular: ¿están listos?"}<div class="listos">${jug.map((_, p) =>
+          `<span class="${preparados[p] ? "si" : ""}"><i style="background:${JUGADORES[p].color}">${p + 1}</i>${JUGADORES[p].nombre}${preparados[p] ? " ✓" : "…"}</span>`).join("")}</div>`
+      : "";
+    if (todosListos()) {
       ui.empezarSala.disabled = false; ui.empezarSala.textContent = "¡Empezar!";
-      autoInicio = setTimeout(() => { if (estadoSala === "sala" && todos()) empezarPartida(); }, 3000);
+      autoInicio = setTimeout(() => { if (estadoSala === "sala" && todosListos()) empezarPartida(); }, 1500);
+    } else if (todos()) {
+      ui.empezarSala.disabled = true; ui.empezarSala.textContent = `Esperando confirmación… ${nl} de ${nJug} listos`;
     } else { ui.empezarSala.disabled = true; ui.empezarSala.textContent = `Esperando jugadores… ${n} de ${nJug}`; }
   }
 
@@ -1423,7 +1484,8 @@ const Online_ = (() => {
     semilla = Math.floor(Math.random() * 2 ** 31);
     estadoSala = "jugar";
     jug.forEach((j) => { j.puntos = 0; j.listo = false; j.stats = null; });
-    ui.sala.hidden = true; ui.vivo.hidden = false;
+    vistas = [];
+    ui.sala.hidden = true; ui.vivo.hidden = true; ui.terminarVivo.hidden = false;
     ui.vivoEtq.textContent = actual.nombre; ui.vivoTitulo.textContent = "En vivo";
     ui.vivoSub.textContent = "Cada uno juega en su celular. ¡Miren el marcador!";
     ui.vivoDato.hidden = true; ui.vivoBotones.hidden = false; ui.podioBotones.hidden = true;
@@ -1431,6 +1493,7 @@ const Online_ = (() => {
     E.marcador(`📱 En vivo · ${nJug} ${nJug === 1 ? "jugador" : "jugadores"}`);
     sala.publicar("vivo", { fase: "jugar", semilla, juego: actual.id });
     pintarVivo();
+    arrancarBucle();             // la pantalla dibuja en vivo el juego de cada celular
   }
 
   function recibir(m) {
@@ -1463,6 +1526,7 @@ const Online_ = (() => {
     pintarVivo(true);
     ui.vivoDatoTxt.textContent = actual.dato; ui.vivoDato.hidden = false;
     ui.vivoBotones.hidden = true; ui.podioBotones.hidden = false;
+    ui.vivo.hidden = false; ui.terminarVivo.hidden = true;
     // El mejor puntaje queda como récord de este juego (lo muestra la biblioteca).
     if (mejor && mejor.puntos > (leerRecords()[actual.id] || 0)) guardarRecord(actual.id, mejor.puntos);
     sala.cerrar({ fase: "podio", podio: o.map((j) => ({ p: j.p, puntos: j.puntos })) });
@@ -1472,14 +1536,58 @@ const Online_ = (() => {
   function cerrar() {
     clearTimeout(autoInicio);
     if (sala) sala.cerrar();
-    sala = null; estadoSala = "";
-    ui.sala.hidden = true; ui.vivo.hidden = true;
+    sala = null; estadoSala = ""; preparados = {}; vistas = [];
+    ui.sala.hidden = true; ui.vivo.hidden = true; ui.terminarVivo.hidden = true;
+  }
+
+  // ---------- Pantalla grande: un cuadro por jugador con su partida en vivo ----------
+  function cuadros() {
+    const n = jug.length, g = 10, W = E.w, H = E.h;
+    let mejor = null;
+    for (let cols = 1; cols <= n; cols++) {
+      const filas = Math.ceil(n / cols);
+      const w = (W - g * (cols + 1)) / cols, h = (H - g * (filas + 1)) / filas;
+      const valor = Math.min(w, (h - CAB) * 1.15);
+      if (!mejor || valor > mejor.valor) mejor = { cols, w, h, valor };
+    }
+    return jug.map((_, p) => ({ x: g + (p % mejor.cols) * (mejor.w + g), y: g + Math.floor(p / mejor.cols) * (mejor.h + g), w: mejor.w, h: mejor.h }));
+  }
+
+  function dibujarVivo(ctx) {
+    if (!(estadoSala === "jugar" || estadoSala === "podio") || !actual) return false;
+    ctx.fillStyle = "#e9e3dc"; ctx.fillRect(0, 0, E.w, E.h);
+    cuadros().forEach((r, p) => {
+      const J = JUGADORES[p], j = jug[p], inst = vistas[p];
+      ctx.save();
+      redondeado(ctx, r.x, r.y, r.w, r.h, 18); ctx.fillStyle = FONDO; ctx.fill();
+      ctx.clip();
+      if (inst && inst.recibida) {
+        // El juego del celular, dibujado con su mismo código en este cuadro.
+        inst.E = { w: r.w, h: r.h - CAB, flotar() {}, vibrar() {}, marcador() {}, terminar() {} };
+        ctx.save(); ctx.translate(r.x, r.y + CAB);
+        try { inst.redimensionar(); inst.dibujar(ctx); } catch { /* foto incompleta: se dibuja en la siguiente */ }
+        ctx.restore();
+      } else texto(ctx, j.conectado ? "Esperando su partida…" : "Desconectado", r.x + r.w / 2, r.y + r.h / 2, 16, "#6b7280", 600);
+      if (j.listo) {
+        ctx.fillStyle = "rgba(247,244,241,.72)"; ctx.fillRect(r.x, r.y + CAB, r.w, r.h - CAB);
+        texto(ctx, "✓ Terminó", r.x + r.w / 2, r.y + r.h / 2, 26, VERDE, 800, "center", true);
+      }
+      // Cabecera: color, nombre y puntos.
+      ctx.fillStyle = J.color; ctx.fillRect(r.x, r.y, r.w, CAB);
+      texto(ctx, `${p + 1}`, r.x + 22, r.y + CAB / 2, 20, "#fff", 800);
+      texto(ctx, J.nombre, r.x + 40, r.y + CAB / 2, 17, "#fff", 700, "left", true);
+      texto(ctx, `${fmt(inst && inst.recibida ? Math.max(j.puntos, Math.round(inst.puntos || 0)) : j.puntos)} pts`, r.x + r.w - 14, r.y + CAB / 2, 18, "#fff", 800, "right", true);
+      ctx.restore();
+      redondeado(ctx, r.x + 1.5, r.y + 1.5, r.w - 3, r.h - 3, 17); ctx.lineWidth = 3; ctx.strokeStyle = J.color; ctx.stroke();
+    });
+    return true;
   }
 
   ui.celulares.addEventListener("click", abrirSala);
-  ui.empezarSala.addEventListener("click", () => { if (estadoSala === "sala" && todos()) empezarPartida(); });
+  ui.empezarSala.addEventListener("click", () => { if (estadoSala === "sala" && todosListos()) empezarPartida(); });
   $("btn-sala-volver").addEventListener("click", () => { cerrar(); fase = "intro"; ui.intro.hidden = false; pintarNumeros(); });
   $("btn-terminar").addEventListener("click", podio);
+  ui.terminarVivo.addEventListener("click", podio);
   $("btn-otra-cel").addEventListener("click", () => { cerrar(); fase = "intro"; ui.intro.hidden = false; pintarNumeros(); });
   $("btn-otros-cel").addEventListener("click", () => { cerrar(); volverAlInicio(); });
 
@@ -1495,7 +1603,8 @@ const Online_ = (() => {
     const motivo = O ? O.motivoNoDisponible() : "No se pudo cargar la conexión.";
     if (motivo) { ui.introEspera.textContent = motivo; return; }
     try { conexion = await O.unirse(SALA, YO); } catch (e) { ui.introEspera.textContent = e.message || String(e); return; }
-    ui.introEspera.innerHTML = `<span class="espera-grande">¡Listo!</span><br>Eres el jugador <b>${YO + 1}</b>. Lee cómo se juega: la partida empieza cuando estén todos conectados.`;
+    ui.introEspera.innerHTML = `Eres el jugador <b>${YO + 1}</b> · ${J.nombre}.<br>Lee cómo se juega y, cuando estés preparado, confirma:`;
+    ui.listo.hidden = false;
     conexion.escuchar("vivo", (v) => {
       if (!v) { if (ultimoVivo && ultimoVivo.fase !== "podio") ui.introEspera.textContent = "La partida terminó."; return; }
       const antes = ultimoVivo; ultimoVivo = v;
@@ -1504,7 +1613,16 @@ const Online_ = (() => {
     });
   }
 
+  ui.listo.addEventListener("click", () => {
+    if (!conexion) return;
+    conexion.marcar("listos", true);
+    ui.listo.hidden = true;
+    ui.introEspera.innerHTML = `<span class="espera-grande">✓ ¡Listo!</span><br>Esperando a que los demás confirmen…`;
+    try { navigator.vibrate && navigator.vibrate(30); } catch { /* no disponible */ }
+  });
+
   async function cuentaRegresiva(s) {
+    ui.listo.hidden = true;
     for (const n of [3, 2, 1]) { ui.introEspera.innerHTML = `<span class="espera-grande">${n}</span><br>¡Prepárate!`; await new Promise((ok) => setTimeout(ok, 800)); }
     sembrar(s);
     empezar();
@@ -1515,6 +1633,17 @@ const Online_ = (() => {
       const pts = Math.round(Math.max(0, actual.puntos || 0));
       if (pts !== ultimoEnviado) { ultimoEnviado = pts; conexion.enviar({ tipo: "puntos", puntos: pts }); }
     }, 500);
+    // Y la foto de su partida, para que la vean en la pantalla grande.
+    clearInterval(envioVista);
+    envioVista = setInterval(mandarVista, 150);
+  }
+
+  function mandarVista() {
+    if (!actual || !(fase === "jugando" || fase === "fin")) return;
+    const v = foto(actual), t = JSON.stringify(v);
+    if (t === ultimaVista) return;
+    ultimaVista = t;
+    conexion.marcar("vistas", v);
   }
 
   function mostrarPuesto(podio) {
@@ -1528,18 +1657,21 @@ const Online_ = (() => {
     esCelular,
     alAbrir() {
       if (esCelular) { unirse(); return; }
-      ui.introModos.hidden = false; ui.introEspera.hidden = true; ui.jugar.hidden = false;
+      ui.introModos.hidden = false; ui.introEspera.hidden = true; ui.jugar.hidden = false; ui.listo.hidden = true;
       pintarNumeros();
     },
     alTerminar(puntos, stats) {
       if (!esCelular) return;
-      clearInterval(envio);
+      clearInterval(envio); clearInterval(envioVista); mandarVista();
       if (conexion) conexion.enviar({ tipo: "fin", puntos, stats });
       ui.finBotones.hidden = true; ui.finCelular.hidden = false;
       ui.finCelular.textContent = "Mira la pantalla grande: ahí está el marcador.";
       if (ultimoVivo && ultimoVivo.fase === "podio") mostrarPuesto(ultimoVivo.podio);
     },
     cerrar,
+    dibujar: dibujarVivo,
+    /** Entre una foto y la siguiente, cada vista sigue avanzando (camionetas, reloj…). */
+    actualizar(dt) { for (const v of vistas) if (v && v.recibida && v.adelantar) { try { v.adelantar(dt); } catch { /* foto incompleta */ } } },
     urlDe: (p) => (sala ? sala.urlControl(p) : null),     // para pruebas
     estado: () => ({ estadoSala, jug }),
   };

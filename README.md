@@ -20,8 +20,10 @@ Los 5 están en un solo archivo, `minijuegos-de-ruta/index.html`. La biblioteca 
 - **Jugar en esta pantalla:** 1 jugador, en la pantalla del stand.
 - **Jugar con celulares:** de 1 a 6 jugadores.
   1. Aparece un QR a la vez, en orden de jugador. Cada uno lo escanea cuando le toca.
-  2. Cuando están todos, la partida empieza en todos los celulares a la vez, con los mismos desafíos para todos.
-  3. La pantalla grande muestra el marcador en vivo y, al final, el podio. Cada celular muestra su puntaje y en qué lugar quedó.
+  2. Cada uno lee cómo se juega y toca **"¡Estoy listo!"** en su celular. La pantalla grande muestra quién confirmó.
+  3. Cuando **todos confirmaron**, la partida empieza en todos los celulares a la vez, con los mismos desafíos para todos.
+  4. Mientras juegan, la pantalla grande se divide en **un cuadro por jugador** y muestra **la partida de cada uno en vivo**, con su color, nombre y puntos, para que el público vea cómo juegan. Con "Terminar partida" se puede cortar antes.
+  5. Al final, la pantalla muestra el podio, y cada celular, su puntaje y en qué lugar quedó.
 
 Usa la misma conexión de Firebase que *Flota en Vivo* y *Duelo de Rutas* (`online.js`). Para probar sin Firebase, abre `minijuegos-de-ruta/index.html?juego=corta&prueba=1` y los enlaces de los QR en otras pestañas del mismo navegador.
 
