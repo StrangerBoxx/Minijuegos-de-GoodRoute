@@ -134,8 +134,11 @@
   O.actividad = () => document.dispatchEvent(new KeyboardEvent("keydown"));
 
   // ---------- Pantalla del stand ----------
-  /** Crea una sala para nJug jugadores. Devuelve las funciones para manejarla. */
-  O.crearSala = async (juego, nJug) => {
+  /**
+   * Crea una sala para nJug jugadores. Devuelve las funciones para manejarla.
+   * opciones.control: página que abre el celular (por defecto control.html).
+   */
+  O.crearSala = async (juego, nJug, opciones = {}) => {
     const b = await O.conectar();
     // Limpieza: salas abandonadas de hace horas.
     try {
@@ -151,8 +154,8 @@
       codigo,
       /** Dirección que abre el celular del jugador p (0…3). */
       urlControl: (p) => {
-        const u = new URL("control.html", location.href);
-        u.search = ""; u.hash = "";
+        const u = new URL(opciones.control || "control.html", location.href);
+        u.hash = "";
         u.searchParams.set("sala", codigo);
         u.searchParams.set("j", String(p + 1));
         if (O.prueba) u.searchParams.set("prueba", "1");

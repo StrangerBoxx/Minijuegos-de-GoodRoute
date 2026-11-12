@@ -16,6 +16,15 @@ La biblioteca (`index.html`) muestra **5 minijuegos de ruta**, en la pestaña In
 
 Los 5 están en un solo archivo, `minijuegos-de-ruta/index.html`. La biblioteca abre cada uno directo, con `?juego=corta`, `memoria`, `despacho`, `desvio` o `carril`. Ese archivo también se puede abrir solo: tiene su propio inicio con las 5 tarjetas, pensado para celular.
 
+**De 1 a 6 jugadores con celulares:** antes de jugar se elige cuántos juegan.
+- **Jugar en esta pantalla:** 1 jugador, en la pantalla del stand.
+- **Jugar con celulares:** de 1 a 6 jugadores.
+  1. Aparece un QR a la vez, en orden de jugador. Cada uno lo escanea cuando le toca.
+  2. Cuando están todos, la partida empieza en todos los celulares a la vez, con los mismos desafíos para todos.
+  3. La pantalla grande muestra el marcador en vivo y, al final, el podio. Cada celular muestra su puntaje y en qué lugar quedó.
+
+Usa la misma conexión de Firebase que *Flota en Vivo* y *Duelo de Rutas* (`online.js`). Para probar sin Firebase, abre `minijuegos-de-ruta/index.html?juego=corta&prueba=1` y los enlaces de los QR en otras pestañas del mismo navegador.
+
 **Los otros 9 minijuegos están ocultos.** Siguen en sus carpetas, sin cambios, pero en `biblioteca/juegos.js` tienen `oculto: true`. Para volver a mostrar uno, borra ese `oculto: true` de su entrada.
 
 ## Cómo se usa
