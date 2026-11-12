@@ -4,7 +4,7 @@ Biblioteca de los minijuegos del stand de Control Position. Cada juego muestra u
 
 ## Lo que se ve hoy
 
-La biblioteca (`index.html`) muestra **5 minijuegos de ruta**, en la pestaña Individuales:
+La biblioteca (`index.html`) muestra **5 minijuegos de ruta** en una sola grilla (sin pestañas Individuales / Grupales):
 
 | Juego | Etiqueta | Duración |
 |---|---|---|

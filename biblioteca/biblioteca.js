@@ -59,21 +59,21 @@
   }
 
   // ---------- Biblioteca ----------
+  // Sin pestañas Individuales / Grupales: todos los juegos visibles van en una sola grilla.
   function pintarFiltros() {
-    const cuenta = (t) => juegos.filter((j) => j.tipo === t).length;
-    ui.filtros.innerHTML = Object.entries(tipos).map(([clave, nombre]) =>
-      `<button class="filtro" type="button" data-filtro="${clave}" aria-pressed="${clave === filtro}">${escapar(nombre)}<b>${cuenta(clave)}</b></button>`).join("");
+    ui.filtros.innerHTML = "";
+    ui.filtros.hidden = true;
   }
 
   /** Controles presentes en la pestaña abierta. Con más de uno, aparece el sub-filtro. */
-  const controlesDe = (t) => Object.keys(controles).filter((c) => juegos.some((j) => j.tipo === t && j.control === c));
+  const controlesDe = () => Object.keys(controles).filter((c) => juegos.some((j) => j.control === c));
 
   function pintarSubfiltros() {
     const presentes = controlesDe(filtro);
     ui.barraSub.hidden = presentes.length < 2;
     if (ui.barraSub.hidden) return;
     if (!presentes.includes(control)) control = presentes[0];
-    const cuenta = (c) => juegos.filter((j) => j.tipo === filtro && j.control === c).length;
+    const cuenta = (c) => juegos.filter((j) => j.control === c).length;
     ui.subfiltros.innerHTML = presentes.map((c) =>
       `<button class="subfiltro subfiltro-${c}" type="button" data-control="${c}" aria-pressed="${c === control}">` +
       `${ICONO_CONTROL[c] ?? ""}${escapar(controles[c].nombre)}<b>${cuenta(c)}</b></button>`).join("");
@@ -83,14 +83,11 @@
   function pintarGrilla() {
     pintarSubfiltros();
     const conSub = !ui.barraSub.hidden;
-    const visibles = juegos.filter((j) => j.tipo === filtro && (!conSub || j.control === control));
+    const visibles = juegos.filter((j) => !conSub || j.control === control);
     ui.btnAzar.hidden = visibles.length < 2;
-    const modo = (ETIQUETA_TIPO[filtro] ?? "").toLowerCase();
-    ui.btnAzarTexto.textContent = conSub ? `Juego ${modo} al azar · ${controles[control].nombre.toLowerCase()}` : `Juego ${modo} al azar`;
+    ui.btnAzarTexto.textContent = conSub ? `Juego al azar · ${controles[control].nombre.toLowerCase()}` : "Juego al azar";
     if (!visibles.length) {
-      ui.grilla.innerHTML = filtro === "grupal"
-        ? `<p class="vacio"><b>Próximamente</b>Juegos grupales donde cada participación suma al resultado de todos.</p>`
-        : `<p class="vacio">No hay juegos en esta categoría todavía.</p>`;
+      ui.grilla.innerHTML = `<p class="vacio">No hay juegos todavía.</p>`;
       ui.conteo.textContent = `${juegos.length} minijuegos de GoodRoute`;
       return;
     }
