@@ -725,6 +725,7 @@ const juegoCorta = {
 
   aPx(p, pan) { const s = pan.mapa.s; return { x: pan.mapa.x + p.x * s, y: pan.mapa.y + p.y * s }; },
   VISTA: ["ronda", "tiempo", "puntos"],
+  estadisticas() { return [[this.aciertos, "aciertos"], [this.errores, "errores"], [this.mejorRacha, "mejor racha"]]; },
   adelantar(dt) { if (this.ronda && this.ronda.elegida < 0) this.tiempo -= dt; },
 
   actualizar(dt) {
@@ -892,6 +893,7 @@ const juegoMemoria = {
   radio() { return clamp(this.mapa.s * 0.045, 14, 22); },
   VISTA: ["dep", "clientes", "orden", "recorrido", "tramos", "total", "vel", "t", "tocados", "error", "estado", "vidas", "nivel", "puntos"],
   LISTAS: ["tocados"],
+  estadisticas() { return [[this.nivel, "nivel alcanzado"], [this.completadas, "rutas completas"], [this.mejorN, "clientes en tu mejor ruta"]]; },
   adelantar(dt) { if (this.estado === "mirar") this.t = Math.min(this.total, this.t + this.vel * dt); },
 
   dibujar(ctx) {
@@ -950,6 +952,7 @@ const juegoDespacho = {
   aPx(p) { const { x, y, w, h } = this.mapa; return { x: x + p.x * w, y: y + p.y * h }; },
   radio() { return clamp(Math.min(this.mapa.w, this.mapa.h) * 0.06, 20, 30); },
   VISTA: ["tecs", "pedido", "pista", "tiempo", "puntos"],
+  estadisticas() { return [[this.correctos, "correctos"], [this.incorrectos, "incorrectos"], [this.perdidos, "clientes esperando"]]; },
   adelantar(dt) { this.tiempo -= dt; if (this.pedido && !this.pedido.atendido) this.pedido.resto -= dt; },
 
   nuevoPedido() {
@@ -1139,6 +1142,7 @@ const juegoDesvio = {
   centro(cel) { return { x: this.ox + (cel.k + 0.5) * this.c, y: this.oy + (cel.f + 0.5) * this.c }; },
   VISTA: ["filas", "bloq", "ini", "fin", "camino", "optimo", "estado", "tiempo", "puntos"],
   LISTAS: ["bloq", "camino", "optimo"],
+  estadisticas() { return [[this.completados, "desafíos"], [this.perfectos, "perfectos"], [this.completados ? Math.round((this.sumaEf / this.completados) * 100) + "%" : "–", "eficiencia"]]; },
   ver() { const v = {}; for (const k of this.VISTA) v[k] = this[k]; v.bloq = [...this.bloq]; return v; },
   alVer() { this.bloq = new Set(this.bloq); },
   adelantar(dt) { if (this.estado === "jugar") this.tiempo -= dt; },
@@ -1268,6 +1272,7 @@ const juegoCarril = {
   xCarril(c) { return this.x0 + (c + 0.5) * this.lw; },
   VISTA: ["objetos", "xc", "carril", "inv", "mult", "multT", "scroll", "vidas", "puntos", "vel"],
   LISTAS: ["objetos"],
+  estadisticas() { return [[km(this.recorrido / 4000) + " km", "recorridos"], [this.clientes, "clientes"], [this.choques, "choques"]]; },
   adelantar(dt) {
     const dy = this.vel * dt;
     this.scroll = (this.scroll + dy) % 1000;
@@ -1406,6 +1411,7 @@ const Online_ = (() => {
   let nJug = 1, sala = null, jug = [], estadoSala = "", autoInicio = 0, semilla = 0;
   let conexion = null, envio = 0, ultimoEnviado = -1, ultimoVivo = null;
   let preparados = {}, vistas = [], envioVista = 0, ultimaVista = "";
+  let cortada = false, porPantalla = false;   // en el celular: la pantalla terminó la partida
   const CAB = 42;                 // alto de la cabecera de cada cuadro
 
   /** Foto del estado de un juego, con números redondeados para que pese poco. */
@@ -1520,6 +1526,8 @@ const Online_ = (() => {
   function podio() {
     if (estadoSala !== "jugar") return;
     estadoSala = "podio";
+    // El puntaje más reciente de cada uno (la foto de su partida llega más seguido que el puntaje).
+    jug.forEach((j, p) => { const v = vistas[p]; if (v && v.recibida) j.puntos = Math.max(j.puntos, Math.round(v.puntos || 0)); });
     const o = orden(), mejor = o[0];
     ui.vivoTitulo.textContent = o.length > 1 ? `¡Gana ${JUGADORES[mejor.p].nombre}!` : "¡Terminó!";
     ui.vivoSub.textContent = o.length > 1 ? `${fmt(mejor.puntos)} puntos` : `${fmt(mejor.puntos)} puntos`;
@@ -1609,7 +1617,7 @@ const Online_ = (() => {
       if (!v) { if (ultimoVivo && ultimoVivo.fase !== "podio") ui.introEspera.textContent = "La partida terminó."; return; }
       const antes = ultimoVivo; ultimoVivo = v;
       if (v.fase === "jugar" && (!antes || antes.fase !== "jugar")) cuentaRegresiva(v.semilla);
-      if (v.fase === "podio") mostrarPuesto(v.podio);
+      if (v.fase === "podio") { cortar(); mostrarPuesto(v.podio); }
     });
   }
 
@@ -1621,9 +1629,24 @@ const Online_ = (() => {
     try { navigator.vibrate && navigator.vibrate(30); } catch { /* no disponible */ }
   });
 
+  /** La pantalla terminó la partida: el juego se detiene y no se puede seguir jugando. */
+  function cortar() {
+    if (cortada) return;
+    cortada = true;
+    ui.listo.hidden = true;
+    clearInterval(envio); clearInterval(envioVista);
+    if (fase === "jugando" && actual) {
+      porPantalla = true;
+      terminarJuego(actual.puntos || 0, actual.estadisticas ? actual.estadisticas() : []);
+    } else if (fase === "intro") {
+      ui.introEspera.innerHTML = "<b>La partida terminó.</b><br>Para jugar otra, escanea un QR nuevo en la pantalla.";
+    }
+  }
+
   async function cuentaRegresiva(s) {
     ui.listo.hidden = true;
     for (const n of [3, 2, 1]) { ui.introEspera.innerHTML = `<span class="espera-grande">${n}</span><br>¡Prepárate!`; await new Promise((ok) => setTimeout(ok, 800)); }
+    if (cortada) return;          // la pantalla terminó la partida durante la cuenta
     sembrar(s);
     empezar();
     // El puntaje se manda seguido a la pantalla grande.
@@ -1649,7 +1672,8 @@ const Online_ = (() => {
   function mostrarPuesto(podio) {
     const k = (podio || []).findIndex((x) => x.p === YO);
     if (k < 0) return;
-    ui.finCelular.innerHTML = podio.length > 1 ? `<b>${k === 0 ? "¡Ganaste!" : `Quedaste ${k + 1}º de ${podio.length}`}</b>` : "<b>¡Bien jugado!</b>";
+    ui.finCelular.innerHTML = (porPantalla ? "La partida se terminó desde la pantalla.<br>" : "") +
+      (podio.length > 1 ? `<b>${k === 0 ? "¡Ganaste!" : `Quedaste ${k + 1}º de ${podio.length}`}</b>` : "<b>¡Bien jugado!</b>");
   }
 
   // ---------- Ganchos del motor ----------
@@ -1665,7 +1689,7 @@ const Online_ = (() => {
       clearInterval(envio); clearInterval(envioVista); mandarVista();
       if (conexion) conexion.enviar({ tipo: "fin", puntos, stats });
       ui.finBotones.hidden = true; ui.finCelular.hidden = false;
-      ui.finCelular.textContent = "Mira la pantalla grande: ahí está el marcador.";
+      ui.finCelular.innerHTML = porPantalla ? "La partida se terminó desde la pantalla." : "Mira la pantalla grande: ahí está el marcador.";
       if (ultimoVivo && ultimoVivo.fase === "podio") mostrarPuesto(ultimoVivo.podio);
     },
     cerrar,
