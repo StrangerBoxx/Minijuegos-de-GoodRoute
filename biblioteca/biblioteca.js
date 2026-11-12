@@ -22,7 +22,9 @@
     claveControl: "biblioteca.control",
   };
 
-  const { tipos, juegos, controles = {} } = window.CATALOGO;
+  const { tipos, controles = {} } = window.CATALOGO;
+  // Los juegos con "oculto: true" en el catálogo no aparecen (ni se abren por dirección).
+  const juegos = window.CATALOGO.juegos.filter((j) => !j.oculto);
   const ICONO_CONTROL = {
     mouse: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3v6" stroke="currentColor" stroke-width="2"/></svg>',
     tactil: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
@@ -112,7 +114,7 @@
           <p class="frase">${escapar(j.frase)}</p>
           <div class="datos">
             <span>${escapar(j.duracion)} · ${escapar(j.rondas)}</span>
-            ${r ? `<span class="record"><small>Récord</small> ${r.puntos} · ${escapar(r.nombre)}</span>` : "<span>Sin récord aún</span>"}
+            ${r ? `<span class="record"><small>Récord</small> ${r.puntos}${r.nombre ? ` · ${escapar(r.nombre)}` : ""}</span>` : "<span>Sin récord aún</span>"}
           </div>
         </div>
       </a>`;
@@ -183,7 +185,7 @@
     abierto = j;
     ui.barraTitulo.textContent = j.nombre;
     document.title = `${j.nombre} · Minijuegos GoodRoute`;
-    nuevoMarco(`${j.carpeta}/index.html`);
+    nuevoMarco(j.url || `${j.carpeta}/index.html`);
     ui.sala.hidden = false; ui.biblioteca.hidden = true;
     document.body.classList.add("jugando");
     ultimoToque = Date.now();
