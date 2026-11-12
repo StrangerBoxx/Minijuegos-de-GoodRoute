@@ -2,9 +2,37 @@
 
 Biblioteca de los minijuegos del stand de Control Position. Cada juego muestra una parte de **GoodRoute** en alrededor de un minuto.
 
+## Lo que se ve hoy: los 5 minijuegos de ruta
+
+La página principal (`index.html`) muestra **5 minijuegos para celular**, de menos de un minuto cada uno:
+
+| Juego | Etiqueta | Duración |
+|---|---|---|
+| ¿Cuál es más corta? | Ojo de optimizador | 40 s |
+| Memoriza la ruta | Orden de visitas | 3 vidas |
+| Despacho relámpago | Asignación | 45 s |
+| Desvío | Calles cortadas | 60 s |
+| Carril libre | Tráfico | 3 vidas |
+
+- Todo está en **un solo archivo**, `index.html`, con el logo y el ícono incluidos. Solo la tipografía Poppins se carga de Google Fonts.
+- Se juega tocando la pantalla, con mouse o con las flechas del teclado.
+- Los récords se guardan en el navegador de cada dispositivo.
+
+### Los minijuegos anteriores están ocultos
+
+Los 9 minijuegos anteriores (individuales y grupales) **no se borraron**:
+- Siguen en sus carpetas y funcionan igual.
+- Su biblioteca quedó en `biblioteca.html`, sin ningún enlace desde la página principal.
+
+**Para volver a mostrarlos**, hay dos opciones:
+- Agregar un enlace a `biblioteca.html` desde la página principal.
+- Volver a poner la biblioteca como página principal: renombrar `index.html` a otro nombre (por ejemplo `minijuegos-de-ruta.html`) y `biblioteca.html` a `index.html`.
+
+Todo lo que sigue describe esa biblioteca y sus 9 juegos.
+
 ## Cómo se usa
 
-1. Abre `index.html` (esta carpeta) en el navegador.
+1. Abre `biblioteca.html` (esta carpeta) en el navegador.
 2. Elige la pestaña **Individuales** o **Grupales** y toca la tarjeta de un juego. En Grupales hay un sub-filtro: **Mouse** (por turnos) o **Celulares** (cada uno con su teléfono). El botón naranjo **Juego … al azar** (con el logo GR, que gira) sortea uno de la pestaña abierta, con una ruleta que recorre las tarjetas.
 3. El juego se abre en la misma página. La barra de arriba tiene:
    - **← Biblioteca** para volver (el botón "atrás" del navegador también sirve).
@@ -101,7 +129,8 @@ Para que la tarjeta muestre el récord, el juego debe guardar su ranking en `loc
 
 ## Archivos
 
-- `index.html`: la biblioteca.
+- `index.html`: los 5 minijuegos de ruta (página principal, un solo archivo).
+- `biblioteca.html`: la biblioteca de los 9 minijuegos anteriores (oculta).
 - `biblioteca/juegos.js`: el catálogo (nombre, frase, modo individual o grupal, qué muestra, duración).
 - `biblioteca/biblioteca.js` y `biblioteca/biblioteca.css`: la lógica y los estilos de la biblioteca.
 - `biblioteca/miniaturas/`: una captura por juego.
