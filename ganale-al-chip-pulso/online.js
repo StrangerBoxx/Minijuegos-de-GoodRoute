@@ -62,10 +62,26 @@
       get: async (ruta) => (await db.ref(ruta).get()).val(),
       alValor: (ruta, cb) => { const r = db.ref(ruta), f = (s) => cb(s.val()); r.on("value", f); return () => r.off("value", f); },
       alAgregar: (ruta, cb) => { const r = db.ref(ruta), f = (s) => cb(s.key, s.val()); r.on("child_added", f); return () => r.off("child_added", f); },
-      /** Marca presencia en "ruta" mientras haya conexión (se vuelve a marcar si se corta y vuelve). */
-      presencia: (ruta, v) => {
+      /**
+       * Toma "ruta" para v.id solo si está libre o ya era suya (transacción: si dos
+       * celulares lo intentan a la vez, gana uno solo). Devuelve true si la tomó.
+       */
+      reclamar: async (ruta, v) => {
+        const r = await db.ref(ruta).transaction((actual) => (actual && actual.id && actual.id !== v.id ? undefined : v));
+        return r.committed;
+      },
+      /**
+       * Marca presencia en "ruta" mientras haya conexión. Si se corta y vuelve, la
+       * reclama de nuevo; si en ese rato la tomó otro, llama alPerder().
+       */
+      presencia: (ruta, v, alPerder) => {
         const info = db.ref(".info/connected");
-        const f = (s) => { if (s.val()) { db.ref(ruta).onDisconnect().remove(); db.ref(ruta).set(v); } };
+        const f = async (s) => {
+          if (!s.val()) return;
+          const r = await db.ref(ruta).transaction((actual) => (actual && actual.id && actual.id !== v.id ? undefined : v));
+          if (r.committed) db.ref(ruta).onDisconnect().remove();
+          else if (alPerder) alPerder();
+        };
         info.on("value", f);
         return () => { info.off("value", f); db.ref(ruta).onDisconnect().cancel(); db.ref(ruta).remove(); };
       },
@@ -113,6 +129,13 @@
         const s = () => { const v = leer(r) || {}; for (const k of Object.keys(v).sort()) if (!vistos.has(k)) { vistos.add(k); cb(k, copia(v[k])); } };
         subs.add(s); s();
         return () => subs.delete(s);
+      },
+      reclamar: async (r, v) => {
+        await new Promise((ok) => setTimeout(ok, 200));      // esperar el estado de las otras pestañas
+        const actual = leer(r);
+        if (actual && actual.id && actual.id !== v.id) return false;
+        enviar(r, v);
+        return true;
       },
       presencia: (r, v) => {
         enviar(r, v);
@@ -213,6 +236,27 @@
   };
 
   // ---------- Celular ----------
+  /** Identificador de este celular (de esta pestaña): sobrevive a recargar la página. */
+  function idCliente() {
+    try {
+      let id = sessionStorage.getItem("minijuegos.cliente");
+      if (!id) { id = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem("minijuegos.cliente", id); }
+      return id;
+    } catch { return Math.random().toString(36).slice(2); }
+  }
+
+  const OCUPADO = "Este jugador ya está ocupado: otra persona escaneó este QR antes. Espera tu turno y escanea el QR que aparece ahora en la pantalla.";
+
+  /** Aviso a pantalla completa cuando otro celular se quedó con el puesto. */
+  function avisoPuestoPerdido() {
+    if (document.getElementById("puesto-perdido")) return;
+    const d = document.createElement("div");
+    d.id = "puesto-perdido";
+    d.style.cssText = "position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:rgba(11,37,69,.92);color:#fff;font:600 18px/1.45 system-ui,sans-serif;text-align:center";
+    d.innerHTML = "<div><div style=\"font-size:44px\">⚠️</div><p>Otro celular se quedó con este jugador mientras estabas sin conexión.</p><p>Escanea el QR que aparece ahora en la pantalla.</p></div>";
+    document.body.append(d);
+  }
+
   /** Une este celular a la sala en el puesto p. Lanza un error con mensaje si no se puede. */
   O.unirse = async (codigo, p) => {
     const b = await O.conectar();
@@ -221,7 +265,10 @@
     if (!juego) throw new Error("Esta partida ya terminó o el código no existe. Escanea el QR que está en la pantalla.");
     const nJug = await b.get(`${raiz}/nJug`);
     if (!(p >= 0 && p < nJug)) throw new Error("Este QR no corresponde a un jugador de la partida.");
-    const soltar = b.presencia(`${raiz}/jugadores/${p}`, { desde: b.hora() });
+    // Un puesto, un celular: si otro ya lo tomó, este no entra.
+    const yo = { id: idCliente(), desde: b.hora() };
+    if (!(await b.reclamar(`${raiz}/jugadores/${p}`, yo))) throw new Error(OCUPADO);
+    const soltar = b.presencia(`${raiz}/jugadores/${p}`, yo, avisoPuestoPerdido);
     return {
       juego, nJug,
       escuchar: (ruta, cb) => b.alValor(`${raiz}/${ruta}`, cb),
