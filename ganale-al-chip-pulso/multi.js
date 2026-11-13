@@ -65,7 +65,7 @@
     const bloque = crear(`<div class="multi-modos">
       <p class="multi-cuantos">¿Cuántos juegan?</p>
       <div class="multi-num" role="group" aria-label="Cantidad de jugadores"></div>
-      <button class="btn multi-btn-cel" type="button">📱 Jugar con celulares</button>
+      <button class="btn multi-btn-cel" type="button">Jugar con celulares</button>
       <p class="multi-nota"></p>
     </div>`);
     btnJugar.parentNode.insertBefore(bloque, btnJugar);
