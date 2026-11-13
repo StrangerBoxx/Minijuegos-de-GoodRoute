@@ -309,4 +309,58 @@
   };
 
   window.Online = O;
+
+  // =====================================================================
+  // Celular: se juega en vertical
+  // =====================================================================
+  // En Android, al primer toque en un botón se pasa a pantalla completa y se bloquea en
+  // vertical (el navegador solo deja bloquear el giro en pantalla completa). En iPhone no
+  // se puede bloquear: si se gira, una capa tapa el juego hasta volver a ponerlo vertical.
+  // En computadores y tablets no hace nada.
+  (function soloVertical() {
+    const esCelular = () => {
+      try { return matchMedia("(pointer: coarse)").matches && Math.min(screen.width, screen.height) < 600; } catch { return false; }
+    };
+    if (!esCelular()) return;
+    // Orientación del aparato (no de la ventana: el teclado al escribir el nombre la achica)
+    const apaisado = () => (screen.orientation && screen.orientation.type
+      ? screen.orientation.type.startsWith("landscape")
+      : Math.abs(Number(window.orientation) || 0) === 90);
+
+    const estilo = document.createElement("style");
+    estilo.textContent = `
+      .gira-capa { position: fixed; inset: 0; z-index: 2147483000; display: grid; place-items: center; padding: 24px;
+        background: #0B2545; color: #fff; text-align: center; font: 600 18px/1.4 Poppins, system-ui, sans-serif; touch-action: none; }
+      .gira-capa[hidden] { display: none; }
+      .gira-capa svg { width: 74px; height: 74px; margin: 0 auto 14px; display: block; animation: gira-vuelta 1.8s ease-in-out infinite; }
+      .gira-capa b { display: block; font-size: 22px; font-style: italic; font-weight: 800; margin-bottom: 4px; }
+      .gira-capa small { display: block; font-weight: 400; font-size: 15px; opacity: .8; }
+      @keyframes gira-vuelta { 0%, 25% { transform: rotate(-90deg); } 60%, 100% { transform: rotate(0deg); } }
+      @media (prefers-reduced-motion: reduce) { .gira-capa svg { animation: none; } }`;
+    const capa = document.createElement("div");
+    capa.className = "gira-capa"; capa.hidden = true;
+    capa.setAttribute("role", "alert");
+    capa.innerHTML = `<div>
+      <svg viewBox="0 0 48 48" fill="none" stroke="#E8772E" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="14" y="4" width="20" height="40" rx="4"/><path d="M21 38h6"/></svg>
+      <b>Gira tu celular</b>Este juego se juega con el celular vertical.<small>Ponlo derecho para seguir.</small></div>`;
+    const revisar = () => { capa.hidden = !apaisado(); };
+    const montar = () => { document.head.append(estilo); document.body.append(capa); revisar(); };
+    if (document.body) montar(); else addEventListener("DOMContentLoaded", montar);
+    if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener("change", revisar);
+    addEventListener("orientationchange", revisar);
+    addEventListener("resize", revisar);
+
+    // Bloqueo real (Android): necesita un toque del jugador para pedir pantalla completa.
+    let intentado = false;
+    document.addEventListener("click", (e) => {
+      if (intentado || !e.target.closest("button")) return;
+      intentado = true;
+      const raiz = document.documentElement;
+      const pedir = raiz.requestFullscreen ? raiz.requestFullscreen({ navigationUI: "hide" }) : null;
+      Promise.resolve(pedir)
+        .then(() => screen.orientation && screen.orientation.lock ? screen.orientation.lock("portrait") : null)
+        .catch(() => { /* iPhone u otro navegador sin bloqueo: queda la capa */ });
+    }, true);
+  })();
 })();
