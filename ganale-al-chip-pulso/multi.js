@@ -28,8 +28,8 @@
   const CLAVE_RANKING = etiqueta?.dataset.ranking || `${JUEGO}.ranking`;
   const AJUSTES = {
     imagenesPorSegundo: 3,
-    anchoImagen: 220,          // px de la imagen que manda cada celular
-    calidadImagen: 0.55,
+    ladoImagen: 420,           // px del lado más largo de la imagen que manda cada celular
+    calidadImagen: 0.6,
     segundosAutoInicio: 1.5,   // cuando todos confirmaron
   };
   const JUGADORES = [
@@ -309,14 +309,36 @@
     }
 
     const lienzo = document.querySelector("canvas");
-    const mini = document.createElement("canvas");
+    const mini = document.createElement("canvas"), sonda = document.createElement("canvas");
+    /** Parte del lienzo con dibujo (el mapa), sin los márgenes del color de fondo. */
+    function recorte() {
+      const W = 90, H = Math.max(1, Math.round((lienzo.height / lienzo.width) * W));
+      sonda.width = W; sonda.height = H;
+      const g = sonda.getContext("2d", { willReadFrequently: true });
+      g.drawImage(lienzo, 0, 0, W, H);
+      const d = g.getImageData(0, 0, W, H).data, r0 = d[0], g0 = d[1], b0 = d[2];
+      let x0 = W, y0 = H, x1 = -1, y1 = -1;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 4;
+        if (Math.abs(d[i] - r0) + Math.abs(d[i + 1] - g0) + Math.abs(d[i + 2] - b0) > 24) {
+          if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+        }
+      }
+      if (x1 < 0) return { x: 0, y: 0, w: lienzo.width, h: lienzo.height };
+      const k = lienzo.width / W, borde = 2;
+      const x = Math.max(0, (x0 - borde) * k), y = Math.max(0, (y0 - borde) * k);
+      return { x, y, w: Math.min(lienzo.width, (x1 + 1 + borde) * k) - x, h: Math.min(lienzo.height, (y1 + 1 + borde) * k) - y };
+    }
     function imagen() {
       if (!lienzo || !lienzo.width) return null;
-      const w = AJUSTES.anchoImagen, h = Math.round((lienzo.height / lienzo.width) * w);
+      let r;
+      try { r = recorte(); } catch { r = { x: 0, y: 0, w: lienzo.width, h: lienzo.height }; }
+      const e = AJUSTES.ladoImagen / Math.max(r.w, r.h);
+      const w = Math.max(1, Math.round(r.w * e)), h = Math.max(1, Math.round(r.h * e));
       mini.width = w; mini.height = h;
       const g = mini.getContext("2d");
       g.fillStyle = "#FBF6F6"; g.fillRect(0, 0, w, h);
-      g.drawImage(lienzo, 0, 0, w, h);
+      g.drawImage(lienzo, r.x, r.y, r.w, r.h, 0, 0, w, h);
       try { return mini.toDataURL("image/jpeg", AJUSTES.calidadImagen); } catch { return null; }
     }
 
