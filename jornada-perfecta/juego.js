@@ -527,6 +527,9 @@
   function irAlInicio() {
     fase = "inicio";
     mapa = null; jugador = null; gr = null; reloj = null;
+    // Día de muestra (el primero), solo para verlo de fondo detrás del inicio (no empieza).
+    generarDia(AJUSTES.dias[0]);
+    jugador = nuevoTecnico();
     ui.hud.hidden = true;
     pintarRanking(ui.rankingInicio, null);
     mostrar(ui.inicio);

@@ -182,11 +182,25 @@
 
   function irAlInicio() {
     fase = "inicio"; mapa = null;
+    vistaPrevia();
     ui.hud.hidden = true;
     canvas.classList.remove("agarrable", "agarrado");
     ranking.pintar(ui.rankingInicio, null);
     mostrar(ui.inicio);
     ajustar();
+  }
+
+  /** Partida de muestra del nivel 1, solo para verla de fondo detrás del inicio (no empieza). */
+  function vistaPrevia() {
+    nivelIdx = 0;
+    const n = nivel(), v = C.vertical();
+    mapa = C.crearCiudad({ cols: v ? 6 : 8, rows: v ? 8 : 6, obras: n.obras });
+    base = mapa.elegirBases(1)[0];
+    clientes = mapa.elegirNodos(n.clientes, [base], 2).map((nodo) => ({ nodo }));
+    prepararChip();
+    yo = { gx: 0, gy: 0, ang: 0, agarrado: false, offset: [0, 0], visitados: [], cuadras: 0, choques: 0, fin: null, rastro: [] };
+    reiniciarCamioneta(base);
+    tCarrera = 0; finCarrera = null;
   }
 
   function nuevaPartida() { nivelIdx = 0; puntosTotal = 0; victorias = 0; empezarNivel(); }
