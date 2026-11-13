@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Poppins:ital,wght@0,400;0,600;0,700;1,800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="estilos.css" />
   <link rel="stylesheet" href="online.css" />
   <link rel="stylesheet" href="multi.css" />
@@ -30,16 +30,17 @@
 
   <!-- Inicio -->
   <section class="capa" id="inicio">
-    <div class="tarjeta">
-      <img class="logo" id="logo" src="logo-goodroute.gif" alt="GoodRoute" />
-      <h1>Jornada <span class="acento">Perfecta</span></h1>
-      <p class="lead">Arma el día de tu técnico: llega a la hora a cada cliente.</p>
-      <ul class="reglas">
-        <li><span class="ej ej-hora">10:30</span> Llega entre 30 min antes y 15 min después.</li>
-        <li><span class="ej ej-libre">Sin hora</span> Atiéndelo cuando quieras, antes de las 19:00.</li>
-        <li><span class="ej ej-toque">1·2·3</span> Toca los clientes en orden. El reloj parte con tu primer toque.</li>
-      </ul>
-      <button class="btn btn-grande" id="btn-jugar">Jugar</button>
+    <!-- Mismo diseño que el inicio de ¿Cuál es más corta? (estilos en multi.css).
+         Mantener presionada la etiqueta 3 s borra el ranking. -->
+    <div class="tarjeta inicio-ruta">
+      <span class="etq" id="logo">Ventanas horarias</span>
+      <h1>Jornada Perfecta</h1>
+      <ol class="reglas pasos">
+        <li><span>1</span>Toca los clientes en el orden en que tu técnico los visitará. El reloj parte con tu primer toque.</li>
+        <li><span>2</span>Si tiene hora (por ejemplo 10:30), llega entre 30 min antes y 15 min después.</li>
+        <li><span>3</span>Si dice "Sin hora", atiéndelo cuando quieras, antes de las 19:00.</li>
+      </ol>
+      <button class="btn" id="btn-jugar">Jugar en esta pantalla</button>
       <div class="ranking" id="ranking-inicio"></div>
     </div>
   </section>

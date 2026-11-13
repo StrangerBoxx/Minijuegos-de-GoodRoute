@@ -70,8 +70,8 @@
     </div>`);
     btnJugar.parentNode.insertBefore(bloque, btnJugar);
     const btnCel = bloque.querySelector(".multi-btn-cel"), nota = bloque.querySelector(".multi-nota");
-    btnJugar.insertAdjacentElement("afterend", btnCel);      // Jugar aquí · Jugar con celulares · nota
-    btnCel.insertAdjacentElement("afterend", nota);
+    btnJugar.insertAdjacentElement("beforebegin", btnCel);   // Jugar con celulares · Jugar aquí · nota
+    btnJugar.insertAdjacentElement("afterend", nota);
     btnJugar.classList.add("multi-jugar-aqui");
     const textoJugar = btnJugar.textContent;
     function pintarNumeros() {
@@ -80,7 +80,7 @@
       const motivo = O ? O.motivoNoDisponible() : "No se pudo cargar la conexión.";
       btnCel.disabled = !!motivo;
       btnJugar.disabled = nJug > 1;
-      btnJugar.textContent = nJug > 1 ? "Jugar en esta pantalla (1 jugador)" : textoJugar;
+      btnJugar.textContent = textoJugar;
       nota.textContent = motivo ? motivo : nJug > 1 ? "Con más de un jugador, cada uno juega en su celular." : "";
     }
     bloque.querySelector(".multi-num").addEventListener("click", (e) => {
