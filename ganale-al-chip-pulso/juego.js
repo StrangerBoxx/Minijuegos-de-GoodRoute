@@ -22,6 +22,7 @@
     largoObra: 0.14,            // media longitud de la obra a lo largo de la calle (en cuadras)
     alChocar: "inicio",         // "inicio": vuelve a la base y se borran los clientes · "cliente": vuelve al último cliente
     segundosExtra: 10,          // tiempo que te queda para terminar después de que llega el chip
+    aceleracionEspera: 2,       // si terminas antes que el chip, el resto de su recorrido se ve ×2 (menos espera)
     inactividadMs: 40000,
     // La dificultad sube en cada nivel: más clientes y obras, un chip más rápido que
     // sale antes y calles más angostas (anchoCalle, en fracción de cuadra).
@@ -480,7 +481,11 @@
     const dt = Math.min((ahora - anterior) / 1000, 0.05);
     anterior = ahora;
     if (fase === "carrera") {
-      tCarrera += dt;
+      // Si ya terminaste y el chip sigue en camino, su recorrido se acelera (×2) para esperar menos.
+      // El resultado no cambia: los tiempos se comparan en el tiempo del juego.
+      const esperando = yo.fin != null && tCarrera < chip.fin;
+      tCarrera += dt * (esperando ? AJUSTES.aceleracionEspera : 1);
+      if (esperando) ui.hudAyuda.textContent = `¡Terminaste! El chip termina su ruta (×${AJUSTES.aceleracionEspera})`;
       if (avisoHasta && ahora > avisoHasta) { ui.aviso.hidden = true; avisoHasta = 0; }
       const chipLlego = tCarrera >= chip.fin;
       if (yo.fin == null && chipLlego) {

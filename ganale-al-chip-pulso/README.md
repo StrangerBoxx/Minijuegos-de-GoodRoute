@@ -17,6 +17,7 @@ Minijuego del stand de Control Position para mostrar **GoodRoute**. Antes se lla
 
    Cuando vas muy cerca del borde, aparece un anillo rojo.
 4. **El chip:** sale con unos segundos de desventaja y recorre la ruta óptima, en naranjo. Gana quien visite a todos primero. Si el chip llega antes, te quedan 10 s para terminar.
+   Si terminas antes que el chip, el resto de su recorrido se ve al doble de velocidad (×2), para que la espera sea más corta. El resultado no cambia.
 5. **Resultado:** compara tiempo, cuadras y choques, y muestra en naranjo el orden del chip.
 
 Son 4 niveles, y cada uno es más difícil:
