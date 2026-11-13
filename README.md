@@ -4,32 +4,32 @@ Biblioteca de los minijuegos del stand de Control Position. Cada juego muestra u
 
 ## Lo que se ve hoy
 
-La biblioteca (`index.html`) muestra **5 minijuegos de ruta** en una sola grilla (sin pestañas Individuales / Grupales):
+La biblioteca (`index.html`) muestra **3 juegos** en una sola grilla, en orden alfabético:
 
 | Juego | Etiqueta | Duración |
 |---|---|---|
 | ¿Cuál es más corta? | Ojo de optimizador | 40 s |
-| Memoriza la ruta | Orden de visitas | 3 vidas |
-| Despacho relámpago | Asignación | 45 s |
-| Desvío | Calles cortadas | 60 s |
-| Carril libre | Tráfico | 3 vidas |
+| Gánale al Chip · A pulso | Ruta óptima | 1 min · 3 niveles |
+| Jornada Perfecta | Ventanas horarias | 1 min · 3 días |
 
-Los 5 están en un solo archivo, `minijuegos-de-ruta/index.html`. La biblioteca abre cada uno directo, con `?juego=corta`, `memoria`, `despacho`, `desvio` o `carril`. Ese archivo también se puede abrir solo: tiene su propio inicio con las 5 tarjetas, pensado para celular.
+Los tres se pueden jugar **en la pantalla del stand (1 jugador)** o **con celulares, de 1 a 6 jugadores**:
+1. Aparece un QR a la vez, en orden de jugador. Cada uno lo escanea cuando le toca.
+2. Cada uno lee cómo se juega y toca **"¡Estoy listo!"** en su celular. La pantalla grande muestra quién confirmó.
+3. Cuando **todos confirmaron**, la partida empieza en todos los celulares a la vez, con los mismos desafíos para todos.
+4. Mientras juegan, la pantalla grande muestra **un cuadro por jugador con su partida en vivo**, con su color, nombre y puntos. Con "Terminar partida" (solo en el computador) se corta la partida en todos los celulares.
+5. Al final, la pantalla muestra el podio, y cada celular, su puntaje y en qué lugar quedó.
 
-**De 1 a 6 jugadores con celulares:** antes de jugar se elige cuántos juegan.
-- **Jugar en esta pantalla:** 1 jugador, en la pantalla del stand.
-- **Jugar con celulares:** de 1 a 6 jugadores.
-  1. Aparece un QR a la vez, en orden de jugador. Cada uno lo escanea cuando le toca.
-  2. Cada uno lee cómo se juega y toca **"¡Estoy listo!"** en su celular. La pantalla grande muestra quién confirmó.
-  3. Cuando **todos confirmaron**, la partida empieza en todos los celulares a la vez, con los mismos desafíos para todos.
-  4. Mientras juegan, la pantalla grande se divide en **un cuadro por jugador** y muestra **la partida de cada uno en vivo**, con su color, nombre y puntos, para que el público vea cómo juegan. Con "Terminar partida" (solo en el computador) se corta la partida en todos los celulares: el juego se detiene, ya no se puede seguir jugando y cada uno ve su puntaje y su lugar.
-  5. Al final, la pantalla muestra el podio, y cada celular, su puntaje y en qué lugar quedó.
+Cómo está hecho:
+- **¿Cuál es más corta?** está en `minijuegos-de-ruta/index.html`, un solo archivo con los 5 minijuegos de ruta. La biblioteca lo abre con `?juego=corta`.
+- **Gánale al Chip · A pulso** y **Jornada Perfecta** suman el modo con celulares con `multi.js` (y `multi.css`), sin cambiar su lógica. En vivo, cada celular manda una imagen reducida de su pantalla.
+- Todos usan la conexión de Firebase de `online.js`. Para probar sin Firebase, agrega `?prueba=1` a la dirección del juego y abre los enlaces de los QR en otras pestañas del mismo navegador.
 
-Usa la misma conexión de Firebase que *Flota en Vivo* y *Duelo de Rutas* (`online.js`). Para probar sin Firebase, abre `minijuegos-de-ruta/index.html?juego=corta&prueba=1` y los enlaces de los QR en otras pestañas del mismo navegador.
+**Los otros 11 están ocultos.** No se ven en la biblioteca, pero siguen en el proyecto sin cambios, y en `biblioteca/juegos.js` tienen `oculto: true`:
+- *Carril libre*, *Desvío*, *Despacho relámpago* y *Memoriza la ruta*: minijuegos de ruta, en `minijuegos-de-ruta/index.html`.
+- *Día Imprevisto*: también tiene el modo con celulares.
+- *Gánale al Chip*, *Reparto*, *Ruta en Relevo*, *Turno de Crisis*, *Flota en Vivo* y *Duelo de Rutas*.
 
-**Además se ven 3 de los minijuegos anteriores:** *Gánale al Chip · A pulso*, *Jornada Perfecta* y *Día Imprevisto*. Los tres también se pueden jugar **con celulares, de 1 a 6 jugadores**, igual que los minijuegos de ruta: QR en orden, "¡Estoy listo!", la misma partida para todos, cuadros en vivo, podio y "Terminar partida" desde el computador. Esto lo agrega `multi.js` (con `multi.css`), que se suma a cada juego sin cambiar su lógica. En vivo, cada celular manda una imagen reducida de su pantalla unas 3 veces por segundo. En *Día Imprevisto*, el puntaje se calcula al final del día, así que su cuadro marca 0 hasta que termina.
-
-**Los otros 6 están ocultos:** *Gánale al Chip*, *Reparto*, *Ruta en Relevo*, *Turno de Crisis*, *Flota en Vivo* y *Duelo de Rutas*. Siguen en sus carpetas, sin cambios, pero en `biblioteca/juegos.js` tienen `oculto: true`. Para volver a mostrar uno, borra ese `oculto: true` de su entrada.
+Para volver a mostrar uno, borra ese `oculto: true` de su entrada.
 
 ## Cómo se usa
 

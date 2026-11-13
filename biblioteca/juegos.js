@@ -25,7 +25,7 @@ window.CATALOGO = {
     // Los 5 minijuegos de ruta viven en minijuegos-de-ruta/index.html (un solo archivo);
     // la biblioteca abre cada uno directo con ?juego=<id>.
     {
-      carpeta: "ruta-carril", url: "minijuegos-de-ruta/index.html?juego=carril", nombre: "Carril libre", tipo: "individual", control: "mouse",
+      oculto: true, carpeta: "ruta-carril", url: "minijuegos-de-ruta/index.html?juego=carril", nombre: "Carril libre", tipo: "individual", control: "mouse",
       frase: "Cambia de carril para esquivar los tacos y recoge clientes en el camino.",
       muestra: "Tráfico", duracion: "3 vidas", rondas: "sin fin",
     },
@@ -35,17 +35,17 @@ window.CATALOGO = {
       muestra: "Ojo de optimizador", duracion: "40 s", rondas: "contrarreloj",
     },
     {
-      carpeta: "ruta-despacho", url: "minijuegos-de-ruta/index.html?juego=despacho", nombre: "Despacho relámpago", tipo: "individual", control: "mouse",
+      oculto: true, carpeta: "ruta-despacho", url: "minijuegos-de-ruta/index.html?juego=despacho", nombre: "Despacho relámpago", tipo: "individual", control: "mouse",
       frase: "Asigna cada pedido al técnico más cercano antes de que expire.",
       muestra: "Asignación", duracion: "45 s", rondas: "contrarreloj",
     },
     {
-      carpeta: "ruta-desvio", url: "minijuegos-de-ruta/index.html?juego=desvio", nombre: "Desvío", tipo: "individual", control: "mouse",
+      oculto: true, carpeta: "ruta-desvio", url: "minijuegos-de-ruta/index.html?juego=desvio", nombre: "Desvío", tipo: "individual", control: "mouse",
       frase: "Esquiva las calles cortadas y traza el camino más corto hasta el cliente.",
       muestra: "Calles cortadas", duracion: "60 s", rondas: "contrarreloj",
     },
     {
-      carpeta: "dia-imprevisto", nombre: "Día Imprevisto", tipo: "individual", control: "mouse",
+      oculto: true, carpeta: "dia-imprevisto", nombre: "Día Imprevisto", tipo: "individual", control: "mouse",
       frase: "Reorganiza el día de tus técnicos cada vez que surge un imprevisto.",
       muestra: "Reprogramación", duracion: "1 min", rondas: "4 imprevistos",
     },
@@ -60,7 +60,7 @@ window.CATALOGO = {
       muestra: "Ventanas horarias", duracion: "1 min", rondas: "3 días",
     },
     {
-      carpeta: "ruta-memoria", url: "minijuegos-de-ruta/index.html?juego=memoria", nombre: "Memoriza la ruta", tipo: "individual", control: "mouse",
+      oculto: true, carpeta: "ruta-memoria", url: "minijuegos-de-ruta/index.html?juego=memoria", nombre: "Memoriza la ruta", tipo: "individual", control: "mouse",
       frase: "Mira el recorrido óptimo y repite el orden de visitas.",
       muestra: "Orden de visitas", duracion: "3 vidas", rondas: "niveles",
     },
