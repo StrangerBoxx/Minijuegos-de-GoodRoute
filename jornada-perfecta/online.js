@@ -151,6 +151,34 @@
   O.conectar = async () => (conexion ??= O.prueba ? conexionPrueba() : await conexionFirebase());
 
   const LETRAS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  /**
+   * QR con el estilo de GoodRoute: puntos redondos azules, esquinas redondeadas con
+   * centro naranjo y el logo al medio (qr-logo.png, junto a la página). Usa corrección
+   * de errores Q (25 %) para que se lea aunque el logo tape el centro.
+   */
+  function qrGoodRoute(texto) {
+    const q = window.qrcode(0, "Q"); q.addData(texto); q.make();
+    const n = q.getModuleCount(), m = 2, T = n + m * 2;
+    const AZUL = "#0B2545", NARANJO = "#E8772E";
+    const esOjo = (r, c) => (r < 7 && c < 7) || (r < 7 && c >= n - 7) || (r >= n - 7 && c < 7);
+    const centro = n / 2, radioLogo = n * 0.13;
+    let puntos = "";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+      if (!q.isDark(r, c) || esOjo(r, c)) continue;
+      if (Math.hypot(c + 0.5 - centro, r + 0.5 - centro) < radioLogo + 0.8) continue;   // espacio del logo
+      puntos += `<circle cx="${c + m + 0.5}" cy="${r + m + 0.5}" r="0.42"/>`;
+    }
+    const ojo = (r, c) =>
+      `<rect x="${c + m + 0.5}" y="${r + m + 0.5}" width="6" height="6" rx="1.9" fill="none" stroke="${AZUL}" stroke-width="1"/>` +
+      `<rect x="${c + m + 2}" y="${r + m + 2}" width="3" height="3" rx="0.85" fill="${NARANJO}"/>`;
+    const lx = m + centro - radioLogo;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${T} ${T}" role="img" aria-label="Código QR">` +
+      `<rect width="${T}" height="${T}" fill="#fff"/><g fill="${AZUL}">${puntos}</g>` +
+      ojo(0, 0) + ojo(0, n - 7) + ojo(n - 7, 0) +
+      `<circle cx="${m + centro}" cy="${m + centro}" r="${radioLogo + 0.3}" fill="#fff"/>` +
+      `<image href="qr-logo.png" x="${lx}" y="${lx}" width="${radioLogo * 2}" height="${radioLogo * 2}"/></svg>`;
+  }
   const nuevoCodigo = () => Array.from({ length: 5 }, () => LETRAS[Math.floor(Math.random() * LETRAS.length)]).join("");
 
   /** Avisa al modo stand (y a la biblioteca) que hay gente jugando, aunque nadie toque esta pantalla. */
@@ -179,6 +207,7 @@
       urlControl: (p) => {
         const u = new URL(opciones.control || "control.html", location.href);
         u.hash = "";
+        u.pathname = u.pathname.replace(/\/index\.html$/, "/");   // dirección más corta = QR menos denso
         u.searchParams.set("sala", codigo);
         u.searchParams.set("j", String(p + 1));
         if (O.prueba) u.searchParams.set("prueba", "1");
@@ -212,7 +241,7 @@
    */
   O.pintarSala = async (contenedor, sala, jugadores) => {
     if (!window.qrcode) await cargarScript(QR_LIB);
-    const qr = (p) => { const q = window.qrcode(0, "M"); q.addData(sala.urlControl(p)); q.make(); return q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); };
+    const qr = (p) => qrGoodRoute(sala.urlControl(p));
     contenedor.innerHTML = `
       <div class="qr-progreso">${jugadores.map((j, p) =>
         `<span class="qr-paso" data-p="${p}" style="--color:${j.color}"><span class="qr-num">${p + 1}</span>${j.nombre}<b class="qr-check"></b></span>`).join("")}</div>
