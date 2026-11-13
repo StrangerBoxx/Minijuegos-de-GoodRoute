@@ -70,8 +70,8 @@
     </div>`);
     btnJugar.parentNode.insertBefore(bloque, btnJugar);
     const btnCel = bloque.querySelector(".multi-btn-cel"), nota = bloque.querySelector(".multi-nota");
-    btnJugar.insertAdjacentElement("beforebegin", btnCel);   // Jugar con celulares · Jugar aquí · nota
-    btnJugar.insertAdjacentElement("afterend", nota);
+    btnJugar.insertAdjacentElement("afterend", btnCel);      // Jugar aquí · Jugar con celulares · nota
+    btnCel.insertAdjacentElement("afterend", nota);
     btnJugar.classList.add("multi-jugar-aqui");
     const textoJugar = btnJugar.textContent;
     function pintarNumeros() {

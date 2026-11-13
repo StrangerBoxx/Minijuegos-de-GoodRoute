@@ -111,8 +111,8 @@
   width: 100%; min-height: 50px; padding: 12px 26px; border-radius: 999px;
   font-family: inherit; font-size: 16px; font-weight: 600; color: #fff;
 }
-.inicio-ruta .multi-btn-cel { background: #E8772E; box-shadow: 0 6px 18px rgba(232, 119, 46, .32); margin: 0 0 10px; }
-.inicio-ruta #btn-jugar { background: #0B2545; margin: 0; }
+.inicio-ruta .multi-btn-cel { background: #E8772E; box-shadow: 0 6px 18px rgba(232, 119, 46, .32); margin: 0; }
+.inicio-ruta #btn-jugar { background: #0B2545; margin: 0 0 10px; }
 .inicio-ruta .multi-nota { font-size: 13px; }
 .inicio-ruta .ranking { font-family: var(--sans); }
 /* En el celular, la capa de espera muestra los mismos pasos */
