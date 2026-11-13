@@ -58,7 +58,7 @@
   // ---------- DOM ----------
   const $ = (id) => document.getElementById(id);
   const canvas = $("mapa");
-  const ctx = canvas.getContext("2d");
+  let ctx = canvas.getContext("2d");      // "let": la pantalla grande dibuja en otro lienzo (__vivo)
   const ui = {
     hud: $("hud"), hudDia: $("hud-dia"), hudAyuda: $("hud-ayuda"), hudReloj: $("hud-reloj"),
     cOk: $("c-ok"), cTarde: $("c-tarde"),
@@ -84,6 +84,7 @@
   let reloj = null;             // minutos desde las 8:00; null = el día aún no parte
   let ultimoToque = Date.now();
   let geo = { celda: 40, ox: 0, oy: 0 };
+  let serieDia = 0;             // cambia con cada día (para la transmisión a la pantalla grande)
 
   // ---------- Utilidades ----------
   const azar = (n) => Math.floor(Math.random() * n);
@@ -299,15 +300,18 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (!mapa) return;
     const arriba = ui.hud.hidden ? 16 : ui.hud.offsetHeight + 24;
-    const margen = Math.min(40, innerWidth * 0.08);   // deja espacio para las etiquetas de hora
-    const ancho = innerWidth - margen * 2;
-    const alto = innerHeight - arriba - margen * 2;
+    geo = encuadre(innerWidth, innerHeight, arriba);
+  }
+  /** Ubicación del mapa en un área de w × h px (con "arriba" px reservados para el HUD). */
+  function encuadre(w, h, arriba) {
+    const margen = Math.min(40, w * 0.08);   // deja espacio para las etiquetas de hora
+    const ancho = w - margen * 2;
+    const alto = h - arriba - margen * 2;
     // Si la pantalla se giró y quedó al revés del mapa, se dibuja acostado para que la llene.
-    geo.t = (mapa.rows > mapa.cols) !== (alto > ancho) && mapa.rows !== mapa.cols;
-    const cols = geo.t ? mapa.rows : mapa.cols, rows = geo.t ? mapa.cols : mapa.rows;
-    geo.celda = Math.min(ancho / (cols - 1), alto / (rows - 1));
-    geo.ox = (innerWidth - geo.celda * (cols - 1)) / 2;
-    geo.oy = arriba + margen + (alto - geo.celda * (rows - 1)) / 2;
+    const t = (mapa.rows > mapa.cols) !== (alto > ancho) && mapa.rows !== mapa.cols;
+    const cols = t ? mapa.rows : mapa.cols, rows = t ? mapa.cols : mapa.rows;
+    const celda = Math.min(ancho / (cols - 1), alto / (rows - 1));
+    return { t, celda, ox: (w - celda * (cols - 1)) / 2, oy: arriba + margen + (alto - celda * (rows - 1)) / 2 };
   }
   const px = (n) => geo.t ? [geo.ox + fila(n) * geo.celda, geo.oy + col(n) * geo.celda]
                           : [geo.ox + col(n) * geo.celda, geo.oy + fila(n) * geo.celda];
@@ -548,6 +552,7 @@
   }
 
   function empezarDia() {
+    serieDia++;
     const dia = diaActual();
     generarDia(dia);
     gr = optimizar();
@@ -747,6 +752,36 @@
   }
 
   // Solo lectura, para pruebas automáticas.
+  // ---------- Transmisión a la pantalla grande (multi.js) ----------
+  // El celular manda el mapa del día y la ruta de GoodRoute una vez, y su técnico y el reloj
+  // cuando cambian; la pantalla grande dibuja con este mismo código.
+  window.__vivo = {
+    clave: () => (mapa && jugador && (fase === "dia" || fase === "resultado") ? `j${serieDia}` : null),
+    nivel: () => ({
+      cols: mapa.cols, rows: mapa.rows, base: mapa.base, clientes: mapa.clientes,
+      bloqueadas: [...mapa.bloqueadas], edificios: mapa.edificios,
+      gr: gr ? { tramos: gr.tramos, orden: gr.orden } : null,
+    }),
+    estado: () => ({
+      f: fase, t: reloj == null ? null : Math.round(reloj * 10) / 10,
+      j: { tramos: jugador.tramos, res: jugador.res, elegidos: jugador.elegidos, libreDesde: jugador.libreDesde, nodo: jugador.nodo },
+    }),
+    pintar(el, nv, e) {
+      let cv = el.querySelector("canvas");
+      if (!cv) { el.innerHTML = ""; cv = document.createElement("canvas"); el.append(cv); }
+      const w = el.clientWidth, h = el.clientHeight, dpr = Math.min(window.devicePixelRatio || 1, 2);
+      if (!w || !h) return;
+      if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+      const c2 = cv.getContext("2d");
+      c2.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const antes = { ctx, mapa, jugador, gr, reloj, fase, geo };
+      mapa = { cols: nv.cols, rows: nv.rows, base: nv.base, clientes: nv.clientes, bloqueadas: nv.bloqueadas, edificios: nv.edificios };
+      ctx = c2; gr = nv.gr; jugador = e.j; reloj = e.t; fase = e.f;
+      geo = encuadre(w, h, 0);
+      try { dibujar(); } finally { ({ ctx, mapa, jugador, gr, reloj, fase, geo } = antes); }
+    },
+  };
+
   window.__estadoJuego = () => ({ fase, diaIdx, mapa, jugador, gr, geo, reloj, puntosTotal });
 
   irAlInicio();

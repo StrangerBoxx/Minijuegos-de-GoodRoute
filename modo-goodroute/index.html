@@ -4,8 +4,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Poppins:ital,wght@0,400;0,600;0,700;1,700;1,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="online.css?v=20261113f">
-<link rel="stylesheet" href="multi.css?v=20261113f">
+<link rel="stylesheet" href="online.css?v=20261113h">
+<link rel="stylesheet" href="multi.css?v=20261113h">
 <style>
 /* Una columna de celular: cabecera, fila sobre el mapa, mapa, barra de tres botones; lo demás en hojas que suben. */
 :root {
@@ -992,7 +992,9 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     };
   }
 
+  let serieNivel = 0;       // cambia con cada nivel (para la transmisión)
   function prepararNivel() {
+    serieNivel++;
     const cfg = NIVELES[idx];
     N = conSemilla(semillaPartida + idx * 7919, () => generarNivel(idx));
     busq = crearBusqueda(N, tiempoBusqueda(N));
@@ -1217,6 +1219,23 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     r.puntos = Math.round(PUNTOS.base + PUNTOS.viaje * viaje + PUNTOS.rapidez * rapidez);
   }
   const puntosTotal = () => resultados.reduce((s, r) => s + ((r && r.puntos) || 0), 0);
+  // Transmisión a la pantalla grande (multi.js): el mapa es SVG, así que el celular manda el
+  // dibujo mismo (vectorial, nítido a cualquier tamaño): la ciudad una vez por nivel y las
+  // rutas y órdenes cuando cambian.
+  window.__vivo = {
+    clave: () => (N && ultimoMapa && !ui.raiz.hidden ? `m${serieNivel}` : null),
+    nivel: () => ({ vb: ultimoMapa.vb, fijo: ultimoMapa.fijo }),
+    estado: () => ultimoMapa.mov,
+    pintar(el, nv, mov) {
+      let svg = el.querySelector("svg");
+      if (!svg) {
+        el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg>';
+        svg = el.firstChild;
+      }
+      svg.setAttribute("viewBox", nv.vb);
+      svg.innerHTML = nv.fijo + mov;
+    },
+  };
   // Para "Jugar con celulares" (multi.js): fase "final" = terminó; y su puntaje.
   window.__estadoJuego = () => ({ fase: fase === "fin" ? "final" : fase, puntosTotal: puntosTotal() });
 
@@ -1419,6 +1438,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
         ? `<rect x="${mx - 0.75}" y="${my - HW - 0.3}" width="1.5" height="${2 * HW + 0.6}" rx=".3" fill="url(#mg-rayas)" stroke="#c4560b" stroke-width=".2"/>`
         : `<rect x="${mx - HW - 0.3}" y="${my - 0.75}" width="${2 * HW + 0.6}" height="1.5" rx=".3" fill="url(#mg-rayas)" stroke="#c4560b" stroke-width=".2"/>`);
     }
+    const corte = s.length;   // hasta aquí, la ciudad (fija en el nivel); desde aquí, rutas y órdenes
     const T = N.tecs.length, comp = comparando();
     const trazo = (rs, ancho, casco, tono, extra) => rs.forEach((r, t) => {
       const off = (t - (T - 1) / 2) * 0.5, col = tono(N.tecs[t].color);
@@ -1469,9 +1489,10 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
       g.push("</g>");
       s.push(g.join(""));
     });
-    return { vb: `0 0 ${W} ${H}`, html: s.join("") };
+    return { vb: `0 0 ${W} ${H}`, html: s.join(""), fijo: s.slice(0, corte).join(""), mov: s.slice(corte).join("") };
   }
-  function pintarMapa() { const r = svgMapa(); ui.mapa.setAttribute("viewBox", r.vb); ui.mapa.innerHTML = r.html; }
+  let ultimoMapa = null;    // lo último que se dibujó en el mapa (para la transmisión)
+  function pintarMapa() { const r = svgMapa(); ultimoMapa = r; ui.mapa.setAttribute("viewBox", r.vb); ui.mapa.innerHTML = r.html; }
 
   const vistaSvg = $("mg-vista"), vistaEstado = $("mg-vista-estado");
   let vistaT = null, VISTA = null;
@@ -1731,8 +1752,8 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
 })();
 </script>
 <!-- Jugar con celulares (QR, de 1 a 6 jugadores) -->
-<script src="../firebase-config.js?v=20261113f"></script>
-<script src="online.js?v=20261113f"></script>
-<script src="multi.js?v=20261113f" data-juego="modo-goodroute" data-ranking="modo-goodroute.ranking"></script>
+<script src="../firebase-config.js?v=20261113h"></script>
+<script src="online.js?v=20261113h"></script>
+<script src="multi.js?v=20261113h" data-juego="modo-goodroute" data-ranking="modo-goodroute.ranking"></script>
 
 </body></html>

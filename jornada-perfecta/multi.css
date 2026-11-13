@@ -172,3 +172,8 @@
 .fin-ruta .botones .btn { width: 100%; min-height: 50px; margin: 0; padding: 12px 26px; border-radius: 999px; font-family: inherit; font-size: 16px; font-weight: 600; }
 .fin-ruta .btn-naranjo { background: #E8772E; color: #fff; box-shadow: 0 6px 18px rgba(232, 119, 46, .32); }
 .fin-ruta .btn-claro { background: #fff; color: #0B2545; border: 2px solid #ece6df; }
+
+/* Transmisión por datos: el recuadro dibuja la partida con el código del juego */
+.multi-dibujo { position: absolute; inset: 0; }
+.multi-dibujo[hidden] { display: none; }
+.multi-dibujo > canvas, .multi-dibujo > svg { display: block; position: static; inset: auto; width: 100%; height: 100%; }

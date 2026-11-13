@@ -46,7 +46,7 @@ En la pantalla de inicio de cada juego se elige cuántos juegan:
 
 Cómo está hecho:
 - **¿Cuál es más corta?:** cada celular manda una "foto" del estado de su juego y la pantalla la redibuja con el mismo código.
-- **Ruta a Mano y Jornada Perfecta:** usan `multi.js` (y `multi.css`), que se suma al juego sin cambiar su lógica. Cada celular manda una imagen reducida de su pantalla unas 3 veces por segundo.
+- **Ruta a Mano, Jornada Perfecta y Modo GoodRoute:** usan `multi.js` (y `multi.css`). Cada celular manda solo datos de su partida (`window.__vivo` en cada juego): el nivel una vez y lo que cambia (camioneta, reloj, órdenes elegidas) hasta 15 veces por segundo. La pantalla grande dibuja cada partida con el código del propio juego, nítida a cualquier tamaño. Modo GoodRoute manda su dibujo SVG, que es vectorial. Si un juego no tiene `__vivo`, se manda una imagen de la pantalla como respaldo.
 
 ### Firebase
 

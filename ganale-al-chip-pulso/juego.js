@@ -50,7 +50,7 @@
     final: $("final"), finPuntos: $("fin-puntos"), finRecord: $("fin-record"), finRecordAnt: $("fin-record-ant"), finStats: $("fin-stats"), form: $("form-nombre"), nombre: $("nombre"),
     rankingInicio: $("ranking-inicio"), rankingFinal: $("ranking-final"),
   };
-  const vista = new C.Vista($("mapa"));
+  let vista = new C.Vista($("mapa"));       // "let": la pantalla grande dibuja con otra vista (__vivo)
   const canvas = vista.canvas;
   const ranking = new C.Ranking(AJUSTES.claveRanking);
   const AZUL = C.COLOR.acento, NARANJO = C.COLOR.gr;
@@ -62,6 +62,7 @@
   let chip = null;                // { orden, cuadras, tramos, llegadas[], fin, ms }
   let yo = null;                  // camioneta del jugador (posición en coordenadas de grilla)
   let tCarrera = 0, finCarrera = null, avisoHasta = 0;
+  let serieNivel = 0;             // cambia con cada nivel (para la transmisión a la pantalla grande)
 
   const nivel = () => AJUSTES.niveles[nivelIdx];
   const anchoCalle = () => nivel().anchoCalle ?? AJUSTES.anchoCalle;
@@ -207,6 +208,7 @@
   function nuevaPartida() { nivelIdx = 0; puntosTotal = 0; victorias = 0; choquesTotal = 0; clientesTotal = 0; empezarNivel(); }
 
   function empezarNivel() {
+    serieNivel++;
     const n = nivel();
     const v = C.vertical();
     mapa = C.crearCiudad({ cols: v ? 6 : 8, rows: v ? 8 : 6, obras: n.obras });
@@ -521,6 +523,42 @@
     dibujar();
     requestAnimationFrame(cuadro);
   }
+
+  // ---------- Transmisión a la pantalla grande (multi.js) ----------
+  // El celular manda la ciudad y la ruta del optimizador una vez por nivel, y la camioneta,
+  // el reloj y el rastro cuando cambian; la pantalla grande dibuja con este mismo código.
+  const r3 = (v) => Math.round(v * 1000) / 1000;
+  function rastroCorto() {
+    const r = yo.rastro, out = [];
+    let ult = null;
+    for (const p of r) if (!ult || Math.hypot(p[0] - ult[0], p[1] - ult[1]) >= 0.12) { out.push([r3(p[0]), r3(p[1])]); ult = p; }
+    return out;
+  }
+  window.__vivo = {
+    clave: () => (mapa && yo && chip && ["cuenta", "carrera", "resultado"].includes(fase) ? `r${serieNivel}` : null),
+    nivel: () => ({ d: C.datosCiudad(mapa), base, cl: clientes.map((c) => c.nodo), chip, ni: nivelIdx }),
+    estado: () => ({
+      f: fase, t: Math.round(tCarrera * 100) / 100, x: r3(yo.gx), y: r3(yo.gy), a: Math.round(yo.ang * 100) / 100,
+      v: yo.visitados, g: yo.agarrado ? 1 : 0, fin: yo.fin, r: rastroCorto(),
+    }),
+    pintar(el, nv, e, cache) {
+      let cv = el.querySelector("canvas");
+      if (!cv) { el.innerHTML = ""; cv = document.createElement("canvas"); el.append(cv); }
+      const w = el.clientWidth, h = el.clientHeight, dpr = Math.min(window.devicePixelRatio || 1, 2);
+      if (!w || !h) return;
+      if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+      if (!cache.vista || cache.vista.canvas !== cv) cache.vista = new C.Vista(cv);
+      if (!cache.mapa) cache.mapa = C.crearCiudad({ datos: nv.d });
+      const v = cache.vista, m = cache.mapa;
+      v.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      v.encuadrar(m, { x: 0, y: 0, w, h }, Math.min(30, w * 0.05));
+      const antes = { vista, mapa, base, clientes, chip, yo, tCarrera, fase, nivelIdx };
+      vista = v; mapa = m; base = nv.base; clientes = nv.cl.map((nodo) => ({ nodo })); chip = nv.chip; nivelIdx = nv.ni;
+      yo = { gx: e.x, gy: e.y, ang: e.a, agarrado: !!e.g, visitados: e.v || [], fin: e.fin, rastro: e.r || [], offset: [0, 0], cuadras: 0, choques: 0 };
+      tCarrera = e.t; fase = e.f;
+      try { dibujar(); } finally { ({ vista, mapa, base, clientes, chip, yo, tCarrera, fase, nivelIdx } = antes); }
+    },
+  };
 
   window.__estadoJuego = () => ({ fase, nivelIdx, mapa, base, clientes, chip, yo, vista, tCarrera, puntosTotal, holgura });
 

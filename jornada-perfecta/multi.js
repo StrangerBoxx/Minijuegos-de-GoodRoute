@@ -3,7 +3,13 @@
  * Se agrega a un juego sin cambiar su lógica. El juego solo tiene que tener:
  *   - #inicio con #btn-jugar (empieza la partida) y .reglas;
  *   - window.__estadoJuego() con { fase, puntosTotal } (fase "final" = terminó);
- *   - un <canvas> o un <svg data-transmitir> con el mapa (lo que se ve en la pantalla grande).
+ *   - window.__vivo (recomendado): la pantalla grande dibuja cada partida con el código del
+ *     propio juego, nítida a cualquier tamaño, y los celulares mandan solo datos chicos:
+ *       clave()   → id del nivel en curso (o null si no hay nada que mostrar);
+ *       nivel()   → datos fijos del nivel (se mandan una vez por nivel);
+ *       estado()  → datos que cambian (se mandan cuando cambian, hasta 15 veces por segundo);
+ *       pintar(el, nivel, estado, cache) → dibuja en el elemento el (cache: objeto por nivel).
+ *   - si no hay __vivo: un <canvas> o un <svg data-transmitir>, que se manda como imagen.
  *
  * En la pantalla del stand (computador):
  *   1. Se elige cuántos juegan (1 a 6) y se toca "Jugar con celulares".
@@ -36,6 +42,7 @@
     ladoImagen: 480,           // px del lado más largo, si la pantalla no avisó
     ladoMin: 360, ladoMax: 1100,
     calidadImagen: 0.78,
+    datosPorSegundo: 15,       // con window.__vivo
     segundosAutoInicio: 1.5,   // cuando todos confirmaron
   };
   const JUGADORES = [
@@ -52,6 +59,7 @@
   const fmt = (n) => Math.round(n).toLocaleString("es-CL");
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const crear = (html) => { const d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstElementChild; };
+  const leerJSON = (s) => { try { return typeof s === "string" ? JSON.parse(s) : null; } catch { return null; } };
 
   /** Math.random con semilla (mulberry32): todos los celulares generan los mismos desafíos. */
   function sembrar(semilla) {
@@ -139,6 +147,10 @@
         sala.alJugadores((v) => { jug.forEach((j, p) => (j.conectado = !!v[p])); actualizarQR(v); revisarSala(); pintarVivo(); });
         sala.alEntrada(recibir);
         sala.alValor("listos", (v) => { preparados = v || {}; revisarSala(); });
+        jug.forEach((_, p) => {
+          sala.alValor(`vivoNivel/${p}`, (s) => { const v = leerJSON(s); if (v && jug[p]) { jug[p].nivel = v; jug[p].cache = {}; O.actividad(); dibujarDatos(p); } });
+          sala.alValor(`vivoEstado/${p}`, (s) => { const v = leerJSON(s); if (v && jug[p]) { jug[p].estado = v; O.actividad(); dibujarDatos(p); } });
+        });
         jug.forEach((_, p) => sala.alValor(`imagenes/${p}`, (img) => {
           if (!img || !jug[p]) return;
           jug[p].imagen = img; O.actividad();
@@ -180,7 +192,7 @@
       capaVivo.querySelector(".multi-cuadros").dataset.n = nJug;
       capaVivo.querySelector(".multi-cuadros").innerHTML = jug.map((_, p) => `<div class="multi-cuadro" data-p="${p}" style="--color:${JUGADORES[p].color}">
         <div class="multi-cuadro-cab"><b>${p + 1}</b><span>${JUGADORES[p].nombre}</span><em class="multi-pts">0 pts</em></div>
-        <div class="multi-cuadro-cuerpo"><img alt="" hidden><p class="multi-espera">Esperando su partida…</p><p class="multi-termino" hidden>✓ Terminó</p></div>
+        <div class="multi-cuadro-cuerpo"><img alt="" hidden><div class="multi-dibujo" hidden></div><p class="multi-espera">Esperando su partida…</p><p class="multi-termino" hidden>✓ Terminó</p></div>
       </div>`).join("");
       // Tamaño real de cada recuadro (en px de pantalla): los celulares mandan imágenes de ese tamaño.
       const cuerpo = capaVivo.querySelector(".multi-cuadro-cuerpo");
@@ -189,6 +201,24 @@
       sala.publicar("vivo", { fase: "jugar", semilla, lado: Math.max(AJUSTES.ladoMin, Math.min(AJUSTES.ladoMax, lado)) });
       pintarVivo();
     }
+
+    /** Dibuja la partida del jugador p con el código del juego (window.__vivo), una vez por cuadro. */
+    const pendientes = new Set();
+    function dibujarDatos(p) {
+      if (!window.__vivo || pendientes.has(p)) return;
+      pendientes.add(p);
+      requestAnimationFrame(() => {
+        pendientes.delete(p);
+        const j = jug[p], c = capaVivo.querySelector(`.multi-cuadro[data-p="${p}"]`);
+        if (!j || !c || !j.nivel || !j.estado || j.nivel.c !== j.estado.c) return;
+        const el = c.querySelector(".multi-dibujo");
+        el.hidden = false;
+        c.querySelector("img").hidden = true;
+        c.querySelector(".multi-espera").hidden = true;
+        try { window.__vivo.pintar(el, j.nivel.d, j.estado.e, j.cache || (j.cache = {})); } catch (e) { console.warn("vivo", e); }
+      });
+    }
+    addEventListener("resize", () => jug.forEach((_, p) => dibujarDatos(p)));
 
     function recibir(m) {
       const p = Number(m.p), j = jug[p];
@@ -317,7 +347,9 @@
       $("btn-jugar").click();
       // Puntaje e imagen de su pantalla, para la pantalla grande.
       envio = setInterval(tick, 1000 / AJUSTES.puntosPorSegundo);
-      envioImg = setInterval(enviarImagen, 1000 / AJUSTES.imagenesPorSegundo);
+      envioImg = window.__vivo
+        ? setInterval(enviarDatos, 1000 / AJUSTES.datosPorSegundo)
+        : setInterval(enviarImagen, 1000 / AJUSTES.imagenesPorSegundo);
     }
 
     const lienzo = document.querySelector("canvas");
@@ -388,6 +420,27 @@
       }
       return formatoImg;
     }
+    /** Manda los datos de la partida (window.__vivo): el nivel una vez y el estado cuando cambia.
+     *  Si hay envíos sin confirmar, se salta el cuadro para no acumular atraso. */
+    let ultimaClave = null, ultimoEstado = "";
+    function enviarDatos() {
+      if (!conexion || terminado) return;
+      let clave, s;
+      try {
+        clave = window.__vivo.clave();
+        if (!clave) return;
+        if (clave !== ultimaClave) {
+          ultimaClave = clave; ultimoEstado = "";
+          conexion.marcar("vivoNivel", JSON.stringify({ c: clave, d: window.__vivo.nivel() }));
+        }
+        if (enVuelo >= AJUSTES.imagenesEnVuelo) return;
+        s = JSON.stringify({ c: clave, e: window.__vivo.estado() });
+      } catch (e) { return; }
+      if (s === ultimoEstado) return;
+      ultimoEstado = s; enVuelo++;
+      Promise.resolve().then(() => conexion.marcar("vivoEstado", s)).catch(() => {}).finally(() => { enVuelo--; });
+    }
+
     /** Manda la imagen de la pantalla. Si hay envíos sin confirmar, se salta el cuadro:
      *  así la pantalla grande va al día en vez de ir mostrando cuadros atrasados. */
     function enviarImagen() {
