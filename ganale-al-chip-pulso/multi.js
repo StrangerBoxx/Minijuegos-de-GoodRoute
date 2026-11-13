@@ -2,7 +2,8 @@
  *
  * Se agrega a un juego sin cambiar su lógica. El juego solo tiene que tener:
  *   - #inicio con #btn-jugar (empieza la partida) y .reglas;
- *   - window.__estadoJuego() con { fase, puntosTotal } (fase "final" = terminó).
+ *   - window.__estadoJuego() con { fase, puntosTotal } (fase "final" = terminó);
+ *   - un <canvas> o un <svg data-transmitir> con el mapa (lo que se ve en la pantalla grande).
  *
  * En la pantalla del stand (computador):
  *   1. Se elige cuántos juegan (1 a 6) y se toca "Jugar con celulares".
@@ -332,7 +333,32 @@
       const x = Math.max(0, (x0 - borde) * k), y = Math.max(0, (y0 - borde) * k);
       return { x, y, w: Math.min(lienzo.width, (x1 + 1 + borde) * k) - x, h: Math.min(lienzo.height, (y1 + 1 + borde) * k) - y };
     }
+    const svgVivo = document.querySelector("svg[data-transmitir]");
+    /** Imagen del SVG del juego (se dibuja en un canvas y se manda igual que la del lienzo). */
+    function imagenSvg() {
+      const vb = svgVivo.viewBox && svgVivo.viewBox.baseVal;
+      const w0 = (vb && vb.width) || svgVivo.clientWidth, h0 = (vb && vb.height) || svgVivo.clientHeight;
+      if (!w0 || !h0) return null;
+      const e = AJUSTES.ladoImagen / Math.max(w0, h0), w = Math.round(w0 * e), h = Math.round(h0 * e);
+      const copia = svgVivo.cloneNode(true);
+      copia.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      copia.setAttribute("width", w); copia.setAttribute("height", h);
+      const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(copia));
+      return new Promise((ok) => {
+        const img = new Image();
+        img.onload = () => {
+          mini.width = w; mini.height = h;
+          const g = mini.getContext("2d");
+          g.fillStyle = "#FBF6F6"; g.fillRect(0, 0, w, h);
+          g.drawImage(img, 0, 0, w, h);
+          try { ok(mini.toDataURL(formato(), AJUSTES.calidadImagen)); } catch { ok(null); }
+        };
+        img.onerror = () => ok(null);
+        img.src = url;
+      });
+    }
     function imagen() {
+      if ((!lienzo || !lienzo.width) && svgVivo) return imagenSvg();
       if (!lienzo || !lienzo.width) return null;
       let r;
       try { r = recorte(); } catch { r = { x: 0, y: 0, w: lienzo.width, h: lienzo.height }; }
@@ -357,10 +383,14 @@
      *  así la pantalla grande va al día en vez de ir mostrando cuadros atrasados. */
     function enviarImagen() {
       if (!conexion || terminado || enVuelo >= AJUSTES.imagenesEnVuelo) return;
-      const img = imagen();
-      if (!img || img === ultimaImg) return;
-      ultimaImg = img; enVuelo++;
-      Promise.resolve().then(() => conexion.marcar("imagenes", img)).catch(() => {}).finally(() => { enVuelo--; });
+      enVuelo++;
+      Promise.resolve(imagen())
+        .then((img) => {
+          if (!img || img === ultimaImg || terminado) return;
+          ultimaImg = img;
+          return conexion.marcar("imagenes", img);
+        })
+        .catch(() => {}).finally(() => { enVuelo--; });
     }
 
     function tick() {

@@ -21,7 +21,7 @@ La biblioteca muestra 4 juegos, en orden alfabético:
 **La dificultad sube en cada nivel:**
 - **¿Cuál es más corta?:** cada ronda es un nivel. Suben los clientes (de 5 a 9) y las dos rutas se parecen cada vez más.
 - **Ruta a Mano:** 4 niveles. Suben los clientes y las obras, el optimizador va más rápido y sale antes, y las calles se angostan.
-- **Modo GoodRoute:** 5 niveles, de un técnico a un día al límite con varios técnicos, externos y órdenes que vencen hoy, más un nivel secreto contra el reloj. No tiene ranking ni juego con celulares.
+- **Modo GoodRoute:** 5 niveles, de un técnico a un día al límite con varios técnicos, externos y órdenes que vencen hoy, más un nivel secreto contra el reloj. Puntaje por nivel terminado a mano: 200 + hasta 500 por viaje (el de GoodRoute ÷ el tuyo) + hasta 300 por rapidez (unos 10 s por orden); si lo resuelve GoodRoute, 0. Se ajusta en `PUNTOS`. Se juega con celulares igual que los otros (se transmite el mapa SVG) y todos reciben los mismos mapas.
 - **Jornada Perfecta:** 4 días. Suben los clientes, los que tienen hora acordada y las obras, las horas quedan más justas y el reloj corre más rápido.
 
 Todo se ajusta en `AJUSTES`, al comienzo del código de cada juego.

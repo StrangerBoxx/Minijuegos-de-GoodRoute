@@ -1,0 +1,174 @@
+/* multi.css — "Jugar con celulares" en los minijuegos individuales (ver multi.js).
+ * Usa los colores de comun.css / estilos.css (--bg, --surface, --border, --muted, --accent…).
+ * Este archivo es igual en las carpetas de los juegos que lo usan. */
+
+/* Lo oculto no se muestra (algunos juegos no traen esta regla y las capas quedarían encima). */
+[hidden] { display: none !important; }
+
+/* ---------- Tarjeta de inicio: cuántos juegan ---------- */
+.multi-cuantos { margin: 0 0 8px; font-weight: 600; }
+.multi-num { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.multi-num button {
+  font: inherit; font-weight: 700; font-size: 18px; cursor: pointer;
+  width: 46px; height: 46px; border-radius: 12px;
+  border: 2px solid var(--border); background: var(--bg); color: var(--text);
+}
+.multi-num button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.multi-jugar-aqui { width: 100%; }
+.multi-btn-cel { width: 100%; }
+.multi-nota { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.multi-nota:empty { display: none; }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+/* ---------- Capas ---------- */
+.multi-capa {
+  position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+  padding: 16px; overflow: auto;
+  background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(3px);
+}
+.multi-panel {
+  width: 100%; max-width: 560px; margin: auto; text-align: center;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(28, 20, 20, .16); padding: 22px 20px;
+}
+.multi-panel h2 { margin: 4px 0 10px; font-size: 24px; }
+.multi-eyebrow { margin: 0; color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+.multi-listos { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 6px; }
+.multi-listos span { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font-weight: 600; font-size: 15px; background: var(--bg); color: var(--muted); border: 2px solid var(--border); }
+.multi-listos span.si { background: var(--ok); border-color: var(--ok); color: #fff; }
+.multi-listos i { width: 22px; height: 22px; border-radius: 7px; color: #fff; display: grid; place-items: center; font-style: normal; font-weight: 700; font-size: 12px; }
+
+/* ---------- Partida en vivo: un cuadro por jugador ---------- */
+.multi-vivo { position: fixed; inset: 0; z-index: 55; background: #e9e3dc; padding: 10px; }
+.multi-cuadros { height: 100%; display: grid; gap: 10px; grid-template-columns: repeat(var(--n, 2), 1fr); }
+.multi-cuadros[data-n="1"] { grid-template-columns: minmax(0, 520px); justify-content: center; }
+.multi-cuadros[data-n="4"] { grid-template-columns: repeat(4, 1fr); }
+.multi-cuadros[data-n="5"], .multi-cuadros[data-n="6"] { grid-template-columns: repeat(3, 1fr); }
+.multi-cuadro {
+  min-height: 0; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--bg); border: 3px solid var(--color); border-radius: 16px;
+}
+.multi-cuadro-cab { flex: none; display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: var(--color); color: #fff; }
+.multi-cuadro-cab b { font-size: 18px; }
+.multi-cuadro-cab span { font-weight: 700; font-style: italic; font-size: 16px; }
+.multi-cuadro-cab em { margin-left: auto; font-style: italic; font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; }
+.multi-cuadro-cuerpo { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; }
+.multi-cuadro-cuerpo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.multi-espera { color: var(--muted); font-weight: 600; margin: 0; }
+.multi-termino {
+  position: absolute; inset: 0; margin: 0; display: grid; place-items: center;
+  background: rgba(251, 246, 246, .72); color: var(--ok); font-weight: 800; font-size: 26px;
+}
+.multi-terminar { position: fixed; right: 16px; bottom: 16px; z-index: 56; margin: 0; min-height: 40px; padding: 8px 18px; font-size: 15px; }
+
+/* ---------- Podio ---------- */
+.multi-lista { list-style: none; padding: 0; margin: 14px 0; display: grid; gap: 8px; text-align: left; }
+.multi-lista li { display: grid; grid-template-columns: 34px 40px 1fr auto; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: var(--bg); }
+.multi-lista li.primero { background: #FAEAC8; }
+.multi-lista .pos { font-weight: 800; font-size: 20px; color: var(--muted); text-align: center; }
+.multi-lista .num { width: 40px; height: 40px; border-radius: 12px; color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 18px; }
+.multi-lista .quien { font-weight: 700; font-size: 17px; }
+.multi-lista .pts { font-weight: 800; font-size: 26px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.multi-botones { display: grid; gap: 10px; }
+
+/* ---------- Celular ---------- */
+.multi-yo {
+  position: fixed; left: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 61;
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px 5px 6px; border-radius: 999px;
+  color: #fff; font-weight: 700; font-size: 14px; box-shadow: 0 4px 12px rgba(0, 0, 0, .2); pointer-events: none;
+}
+.multi-yo b { width: 24px; height: 24px; border-radius: 8px; background: rgba(255, 255, 255, .25); display: grid; place-items: center; }
+.multi-capa-cel .reglas { margin: 10px 0 14px; }
+.multi-yo-grande { width: 56px; height: 56px; margin: 0 auto 6px; border-radius: 16px; color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 28px; }
+.multi-msg { margin: 6px 0 12px; font-size: 16px; line-height: 1.45; }
+.multi-grande { display: inline-block; font-size: 52px; font-weight: 800; color: var(--accent); line-height: 1.05; margin: 4px 0; }
+.multi-sub { margin: 0 0 6px; color: var(--muted); }
+.multi-puesto { margin: 4px 0 0; font-size: 20px; }
+.multi-listo { width: 100%; }
+
+/* ---------- Inicio con el mismo diseño que ¿Cuál es más corta? ---------- */
+.inicio-ruta {
+  max-width: 420px; padding: 22px 20px; border-radius: 26px; border: 0;
+  box-shadow: 0 12px 40px rgba(11, 37, 69, .16);
+  font-family: Poppins, var(--sans);
+}
+.inicio-ruta .etq {
+  display: inline-block; margin-bottom: 6px; padding: 2px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; color: #b9551a; background: #fdeee3; cursor: default;
+}
+.inicio-ruta h1 { margin: 0; font-size: 26px; line-height: 1.1; font-style: italic; font-weight: 800; color: #0B2545; letter-spacing: 0; }
+.inicio-ruta .pasos { list-style: none; padding: 0; margin: 16px 0 20px; text-align: left; display: grid; gap: 12px; font-size: 15px; }
+.inicio-ruta .pasos li { display: flex; gap: 12px; align-items: flex-start; line-height: 1.45; }
+.inicio-ruta .pasos li span {
+  flex: none; width: 30px; height: 30px; border-radius: 999px;
+  display: grid; place-items: center; background: #E8772E; color: #fff; font-weight: 700; font-size: 15px;
+}
+.inicio-ruta .multi-modos { margin: 0; }
+.inicio-ruta .multi-cuantos { color: #0B2545; }
+.inicio-ruta .multi-num button { border-radius: 14px; font-family: inherit; background: #F7F4F1; border-color: #ece6df; color: #0B2545; }
+.inicio-ruta .multi-num button[aria-pressed="true"] { background: #0B2545; border-color: #0B2545; color: #fff; }
+.inicio-ruta .btn {
+  width: 100%; min-height: 50px; padding: 12px 26px; border-radius: 999px;
+  font-family: inherit; font-size: 16px; font-weight: 600; color: #fff;
+}
+.inicio-ruta .multi-btn-cel { background: #E8772E; box-shadow: 0 6px 18px rgba(232, 119, 46, .32); margin: 0; }
+.inicio-ruta #btn-jugar { background: #0B2545; margin: 0 0 10px; }
+.inicio-ruta .multi-nota { font-size: 13px; }
+/* En el celular, la capa de espera muestra los mismos pasos */
+.multi-capa-cel .pasos { list-style: none; padding: 0; margin: 12px 0 14px; text-align: left; display: grid; gap: 10px; }
+.multi-capa-cel .pasos li { display: flex; gap: 10px; align-items: flex-start; line-height: 1.4; }
+.multi-capa-cel .pasos li span { flex: none; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; background: #E8772E; color: #fff; font-weight: 700; font-size: 14px; }
+/* Celular: misma letra y botones que ¿Cuál es más corta? */
+.multi-capa-cel .multi-panel { font-family: Poppins, var(--sans); max-width: 420px; border-radius: 26px; border: 0; box-shadow: 0 12px 40px rgba(11, 37, 69, .16); }
+.multi-capa-cel h2 { font-style: italic; font-weight: 800; color: #0B2545; font-size: 26px; }
+.multi-capa-cel .btn { font-family: inherit; border-radius: 999px; min-height: 50px; font-size: 16px; font-weight: 600; }
+.multi-capa-cel .multi-listo { background: #E8772E; color: #fff; box-shadow: 0 6px 18px rgba(232, 119, 46, .32); }
+.multi-capa-cel .multi-grande { font-style: italic; color: #E8772E; }
+
+/* ---------- Ranking: la misma tabla en todos los juegos ---------- */
+.ranking { margin-top: 18px; text-align: left; font-family: Poppins, system-ui, sans-serif; }
+.ranking:empty { display: none; }
+.ranking h3 { margin: 0 0 8px; text-align: center; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #6b7280; font-style: normal; }
+.ranking ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.ranking li {
+  display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 10px;
+  padding: 7px 12px; border-radius: 12px; background: #F7F4F1; font-size: 15px; color: #1d2433;
+}
+.ranking li .pos {
+  width: 24px; height: 24px; border-radius: 999px; display: grid; place-items: center;
+  font-weight: 700; font-size: 12px; background: #ece6df; color: #0B2545; font-family: inherit;
+}
+.ranking li:nth-child(1) .pos { background: #E8772E; color: #fff; }
+.ranking li:nth-child(2) .pos { background: #0B2545; color: #fff; }
+.ranking li:nth-child(3) .pos { background: #b08a5a; color: #fff; }
+.ranking li .nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ranking li .pts { margin: 0; font-weight: 700; color: #0B2545; font-variant-numeric: tabular-nums; font-family: inherit; }
+.ranking li.tuyo { background: #FAEAC8; font-weight: 600; box-shadow: inset 0 0 0 2px #E8772E; }
+
+/* ---------- Pantalla final con el mismo formato que ¿Cuál es más corta? ---------- */
+.fin-ruta {
+  max-width: 420px; padding: 22px 20px; border-radius: 26px; border: 0;
+  box-shadow: 0 12px 40px rgba(11, 37, 69, .16); font-family: Poppins, var(--sans); color: #1d2433;
+}
+.fin-ruta .etq { display: inline-block; margin-bottom: 6px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #b9551a; background: #fdeee3; }
+.fin-ruta .puntaje { font-size: 68px; font-weight: 800; font-style: italic; color: #0B2545; line-height: 1; margin: 10px 0 2px; font-variant-numeric: tabular-nums; }
+.fin-ruta .puntaje-txt { margin: 0; color: #6b7280; font-size: 14px; }
+.fin-ruta .record-nuevo { display: inline-block; background: #1f9d6b; color: #fff; font-weight: 700; padding: 5px 16px; border-radius: 999px; font-size: 15px; margin: 10px 0 2px; }
+.fin-ruta .record-ant { margin: 6px 0 0; font-size: 13px; color: #6b7280; }
+.fin-ruta .record-ant:empty { display: none; }
+.fin-ruta .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+.fin-ruta .stat { background: #F7F4F1; border-radius: 16px; padding: 10px 4px; }
+.fin-ruta .stat b { display: block; font-size: 20px; color: #0B2545; font-variant-numeric: tabular-nums; }
+.fin-ruta .stat small { display: block; font-size: 12px; color: #6b7280; line-height: 1.2; }
+.fin-ruta .dato { background: #FAEAC8; border-left: 5px solid #E8772E; border-radius: 16px; padding: 12px 14px; text-align: left; font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
+.fin-ruta .dato strong { display: block; color: #b9551a; font-style: italic; margin-bottom: 2px; }
+.fin-ruta .guardar { display: flex; gap: 8px; margin: 0 0 4px; }
+.fin-ruta .guardar input {
+  flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 10px 14px; border-radius: 999px;
+  border: 2px solid #ece6df; background: #F7F4F1; color: #1d2433;
+}
+.fin-ruta .guardar .btn { width: auto; min-height: 46px; padding: 10px 20px; border-radius: 999px; font-family: inherit; font-size: 16px; background: #0B2545; }
+.fin-ruta .botones { display: grid; gap: 10px; margin-top: 16px; }
+.fin-ruta .botones .btn { width: 100%; min-height: 50px; margin: 0; padding: 12px 26px; border-radius: 999px; font-family: inherit; font-size: 16px; font-weight: 600; }
+.fin-ruta .btn-naranjo { background: #E8772E; color: #fff; box-shadow: 0 6px 18px rgba(232, 119, 46, .32); }
+.fin-ruta .btn-claro { background: #fff; color: #0B2545; border: 2px solid #ece6df; }

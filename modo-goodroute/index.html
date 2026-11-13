@@ -1,9 +1,12 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Modo GoodRoute · GoodRoute</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <meta name="color-scheme" content="only light">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Poppins:ital,wght@1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Poppins:ital,wght@0,400;0,600;0,700;1,700;1,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="online.css?v=20261113c">
+<link rel="stylesheet" href="multi.css?v=20261113c">
 <style>
 /* Una columna de celular: cabecera, fila sobre el mapa, mapa, barra de tres botones; lo demás en hojas que suben. */
 :root {
@@ -26,6 +29,8 @@
   --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
   --marca-f: "Poppins", var(--sans);
+  /* nombres que usan online.css y multi.css (jugar con celulares) */
+  --accent: var(--navy); --accent-soft: var(--tu-soft); --muted: #6b6860; --surface: #ffffff;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -96,6 +101,17 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
   min-height: calc(1.4em + 20px); text-wrap: balance;
 }
 .portada-estado.listo { color: var(--navy); font-weight: 600; }
+/* Inicio y final con el mismo diseño que los otros juegos (estilos en multi.css) */
+.portada-ruta .portada-fondo { position: absolute; inset: 0; pointer-events: none; opacity: .38; filter: blur(1px); }
+.portada-ruta .portada-fondo svg { width: 100%; height: 100%; display: block; }
+.inicio-card, .fin-card {
+  position: relative; z-index: 1; width: 100%; max-width: 420px; max-height: 100%; overflow: auto;
+  background: #fff; text-align: center; touch-action: pan-y;
+}
+.inicio-card .ranking, .fin-card .ranking { font-family: Poppins, var(--sans); }
+#final { z-index: 20; }
+.mg-pts { font: 700 15px/1.2 var(--mono); color: var(--muted); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.mg-pts.gana { color: var(--ok); }
 .portada-jugar { font-size: 21px; padding: 16px 52px; border-radius: 14px; box-shadow: 0 10px 24px rgba(11, 37, 69, .25); flex: none; }
 
 .mg {
@@ -356,16 +372,22 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
 }
 </style>
 
-<section class="capa portada" id="inicio">
-  <div class="portada-tarjeta">
-    <img class="logo" id="logo" src="logo.gif" alt="GoodRoute">
-    <h1>Modo <span class="gr-txt gr-marca">GoodRoute</span></h1>
-    <p class="lead">Planifica el día de los técnicos.</p>
-    <div class="portada-vista" aria-hidden="true">
-      <svg id="mg-vista"></svg>
-      <p class="portada-estado" id="mg-vista-estado"></p>
-    </div>
-    <button class="btn btn-grande portada-jugar" id="btn-l5" type="button">Jugar</button>
+<!-- Inicio: mismo diseño que los otros juegos, con una planificación de muestra de fondo -->
+<section class="capa portada-ruta" id="inicio">
+  <div class="portada-fondo" aria-hidden="true">
+    <svg id="mg-vista" preserveAspectRatio="xMidYMid meet"></svg>
+    <p class="portada-estado" id="mg-vista-estado" hidden></p>
+  </div>
+  <div class="inicio-card inicio-ruta">
+    <span class="etq" id="logo">Varios técnicos</span>
+    <h1>Modo GoodRoute</h1>
+    <ol class="reglas pasos">
+      <li><span>1</span>Elige un técnico y toca sus órdenes en el mapa, en el orden en que las visitará.</li>
+      <li><span>2</span>Cumple las reglas del nivel: todas las órdenes asignadas, los horarios y el fin de la jornada.</li>
+      <li><span>3</span>Confirma y compara con GoodRoute. Menos viaje y más rapidez suman más puntos.</li>
+    </ol>
+    <button class="btn" id="btn-jugar" type="button">Jugar en esta pantalla</button>
+    <div class="ranking" id="ranking-inicio"></div>
   </div>
 </section>
 
@@ -393,7 +415,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
   </div>
 
   <div class="mg-mapa-caja">
-    <svg id="mg-mapa" role="img" aria-label="Mapa de la ciudad con técnicos y órdenes"></svg>
+    <svg id="mg-mapa" data-transmitir role="img" aria-label="Mapa de la ciudad con técnicos y órdenes"></svg>
   </div>
 
   <nav class="mg-barra" aria-label="Acciones del nivel">
@@ -435,6 +457,29 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
   </div>
 
   <div class="capa mg-capa" id="mg-capa" hidden><div class="tarjeta mg-tarjeta" id="mg-tarjeta"></div></div>
+</section>
+
+<!-- Final: mismo formato que los otros juegos -->
+<section class="capa" id="final" hidden>
+  <div class="fin-card fin-ruta">
+    <span class="etq">Modo GoodRoute</span>
+    <div class="puntaje" id="fin-puntos">0</div>
+    <p class="puntaje-txt">puntos</p>
+    <div class="record-nuevo" id="fin-record" hidden>¡Nuevo récord!</div>
+    <p class="record-ant" id="fin-record-ant"></p>
+    <div class="stats" id="fin-stats"></div>
+    <div class="dato"><strong>Dato GoodRoute</strong><span id="fin-dato"></span></div>
+    <form class="guardar" id="form-nombre">
+      <input id="nombre" maxlength="14" autocomplete="off" placeholder="Tu nombre" aria-label="Tu nombre" />
+      <button class="btn" type="submit">Guardar</button>
+    </form>
+    <div class="ranking" id="ranking-final"></div>
+    <div class="botones">
+      <button class="btn btn-naranjo" id="btn-otra" type="button">Jugar de nuevo</button>
+      <button class="btn btn-claro" id="btn-comparar" type="button">Ver comparación</button>
+      <button class="btn btn-claro" id="btn-otros" type="button">Otros juegos</button>
+    </div>
+  </div>
 </section>
 
 <script>
@@ -916,10 +961,15 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
   const tuyo = () => fase !== "vista" && !(fase === "resultado" && rutasTu == null);
   const palido = (hex) => { const n = parseInt(hex.slice(1), 16), m = (v) => Math.round(v + (255 - v) * 0.62); return `rgb(${m(n >> 16)}, ${m((n >> 8) & 255)}, ${m(n & 255)})`; };
 
+  // Semilla de la partida: cada nivel se genera con semilla + nivel, así en una partida con
+  // celulares (Math.random con la misma semilla en todos) todos reciben los mismos mapas.
+  let semillaPartida = 0;
   function iniciar() {
     $("inicio").hidden = true;
+    $("final").hidden = true;
     ui.raiz.hidden = false;
     idx = 0; resultados = [];
+    semillaPartida = Math.floor(Math.random() * 2147483647);
     prepararNivel();
   }
   function salir() {
@@ -927,8 +977,9 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     clearTimeout(refinarT);
     fase = "fuera";
     cerrarHoja();
-    ui.raiz.hidden = true; ui.capa.hidden = true; ui.trampa.hidden = true;
+    ui.raiz.hidden = true; ui.capa.hidden = true; ui.trampa.hidden = true; $("final").hidden = true;
     $("inicio").hidden = false;
+    pintarRanking($("ranking-inicio"), null);
     cicloVista();
   }
 
@@ -944,7 +995,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
 
   function prepararNivel() {
     const cfg = NIVELES[idx];
-    N = generarNivel(idx);
+    N = conSemilla(semillaPartida + idx * 7919, () => generarNivel(idx));
     busq = crearBusqueda(N, tiempoBusqueda(N));
     busq.paso(150);
     gr = foto(busq);
@@ -1114,7 +1165,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     if (fase !== "resultado" || turno !== "tu") return;
     clearTimeout(refinarT);
     const repetir = busq.terminado ? muestra(busq.historial, 36) : null;
-    const cerrar = () => { gr = foto(busq); anotarGr(); turno = "listo"; rutasGr = gr.rutas.map((x) => x.slice()); animar = true; pintar(); };
+    const cerrar = () => { gr = foto(busq); anotarGr(); puntuar(resultados[idx]); turno = "listo"; rutasGr = gr.rutas.map((x) => x.slice()); animar = true; pintar(); };
     turno = "buscando"; busqueda = { evals: 0, mejor: null };
     let k = 0, primero = true;
     const paso = () => {
@@ -1152,8 +1203,92 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
   }
   function terminar() {
     fase = "fin";
-    mostrarFinal();
+    mostrarPuntaje();
   }
+
+  // ---------- Puntaje ----------
+  // Por nivel terminado a mano (cumpliendo las reglas): 200 + hasta 500 por viaje (el de
+  // GoodRoute ÷ el tuyo) + hasta 300 por rapidez (≈10 s por orden). Resuelto por GoodRoute: 0.
+  const PUNTOS = { base: 200, viaje: 500, rapidez: 300, segundosPorOrden: 10 };
+  function puntuar(r) {
+    if (!r) return;
+    if (!r.completo) { r.puntos = 0; return; }
+    const viaje = Math.min(1, r.viajeGr / Math.max(r.viajeTu, 1e-9));
+    const rapidez = Math.max(0, 1 - r.manual / (N.ots.length * PUNTOS.segundosPorOrden));
+    r.puntos = Math.round(PUNTOS.base + PUNTOS.viaje * viaje + PUNTOS.rapidez * rapidez);
+  }
+  const puntosTotal = () => resultados.reduce((s, r) => s + ((r && r.puntos) || 0), 0);
+  // Para "Jugar con celulares" (multi.js): fase "final" = terminó; y su puntaje.
+  window.__estadoJuego = () => ({ fase: fase === "fin" ? "final" : fase, puntosTotal: puntosTotal() });
+
+  // ---------- Ranking (misma tabla que los otros juegos) ----------
+  const CLAVE_RANKING = "modo-goodroute.ranking";
+  const escapar = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  function leerRanking() { try { return JSON.parse(localStorage.getItem(CLAVE_RANKING)) || []; } catch { return []; } }
+  function agregarRanking(nombre, puntos) {
+    const r = { nombre: String(nombre || "").trim().slice(0, 14) || "Anónimo", puntos: Math.round(puntos), t: Date.now() };
+    try { localStorage.setItem(CLAVE_RANKING, JSON.stringify([...leerRanking(), r].sort((a, b) => b.puntos - a.puntos || a.t - b.t).slice(0, 10))); } catch { /* sin almacenamiento */ }
+    return r;
+  }
+  /** Top 5 en el inicio, top 10 al final. */
+  function pintarRanking(el, resaltado) {
+    const l = leerRanking().slice(0, el.id === "ranking-inicio" ? 5 : 10);
+    if (!l.length) { el.innerHTML = ""; return; }
+    el.innerHTML = "<h3>Ranking</h3><ol>" + l.map((r, i) =>
+      `<li class="${resaltado && r.t === resaltado.t ? "tuyo" : ""}"><span class="pos">${i + 1}</span>` +
+      `<span class="nombre">${escapar(r.nombre || "Anónimo")}</span><span class="pts">${Math.round(r.puntos).toLocaleString("es-CL")}</span></li>`).join("") + "</ol>";
+  }
+
+  // ---------- Pantalla final (mismo formato que los otros juegos) ----------
+  let registro = null;
+  function mostrarPuntaje() {
+    detener();
+    clearTimeout(rotarT);
+    cerrarTarjeta();
+    ui.trampa.hidden = true;
+    pintarPasos();
+    const fmt = (v) => Math.round(v).toLocaleString("es-CL");
+    const total = puntosTotal(), antes = (leerRanking()[0] || {}).puntos || 0, nuevo = total > antes;
+    $("fin-puntos").textContent = fmt(total);
+    $("fin-record").hidden = !nuevo;
+    $("fin-record-ant").textContent = nuevo ? (antes ? `Tu récord anterior era ${fmt(antes)}` : "") : `Tu récord: ${fmt(antes)}`;
+    const hechos = resultados.filter(Boolean), completos = hechos.filter((r) => r.completo);
+    const vTu = completos.reduce((s, r) => s + r.viajeTu, 0), vGr = completos.reduce((s, r) => s + r.viajeGr, 0);
+    const extra = completos.length && vGr > 0 ? Math.round((vTu / vGr - 1) * 100) : null;
+    const stats = [
+      [`${completos.length}/${NIVELES.length - 1}`, "niveles a mano"],
+      extra == null ? ["—", "viaje vs GoodRoute"] : extra > 0 ? [`+${extra}%`, "más viaje que GoodRoute"] : [extra === 0 ? "=" : `${extra}%`, "viaje vs GoodRoute"],
+      [tiempoTxt(hechos.reduce((s, r) => s + r.manual, 0)), "planificando"],
+    ];
+    $("fin-stats").innerHTML = stats.map(([v, l]) => `<div class="stat"><b>${v}</b><small>${l}</small></div>`).join("");
+    const totTu = hechos.reduce((s, r) => s + r.manual, 0), totGr = hechos.reduce((s, r) => s + r.gr, 0);
+    $("fin-dato").innerHTML = `Lo que a ti te tomó ${tiempoTxt(totTu)}, ${GR} lo resolvió en ${msTxt(totGr)}, cumpliendo todas las reglas a la vez.`;
+    registro = null;
+    $("form-nombre").hidden = total <= 0; $("nombre").value = "";
+    pintarRanking($("ranking-final"), null);
+    $("final").hidden = false;
+    $("final").firstElementChild.scrollTop = 0;
+  }
+  $("form-nombre").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (registro) return;
+    registro = agregarRanking($("nombre").value, puntosTotal());
+    $("form-nombre").hidden = true; $("nombre").blur();
+    pintarRanking($("ranking-final"), registro);
+  });
+  function jugarDeNuevo() {
+    clearTimeout(rotarT); cerrarTarjeta(); $("final").hidden = true;
+    idx = 0; resultados = [];
+    semillaPartida = Math.floor(Math.random() * 2147483647);
+    prepararNivel();
+  }
+  $("btn-otra").addEventListener("click", jugarDeNuevo);
+  $("btn-comparar").addEventListener("click", () => { $("final").hidden = true; mostrarFinal(); });
+  // "Otros juegos": vuelve a la biblioteca (dentro de ella, o a la página de inicio si se abrió suelto)
+  $("btn-otros").addEventListener("click", () => {
+    try { if (window.parent !== window && window.parent.document) { window.parent.location.hash = ""; return; } } catch { /* sigue abajo */ }
+    location.href = "../index.html";
+  });
 
   function activar() {
     if (fase !== "plan" && fase !== "agotado") return;
@@ -1223,7 +1358,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
       <p class="f-producto">Hoy la dispatcher considera todos estos objetivos a mano.<br>${GR} entrega la propuesta lista, en segundos.</p>
       <div class="acciones">
         <button class="btn" id="mg-otra" type="button">Jugar de nuevo</button>
-        <button class="btn btn-sec" id="mg-volver" type="button">Volver al inicio</button>
+        <button class="btn btn-sec" id="mg-volver" type="button">Volver al puntaje</button>
       </div>`);
     let actual = 0;
     const pestanas = ui.tarjeta.querySelector(".mg-graf-tabs");
@@ -1237,8 +1372,8 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     };
     pestanas.addEventListener("click", (e) => { const b = e.target.closest("[data-n]"); if (b) mostrar(Number(b.dataset.n), true); });
     mostrar(0);
-    $("mg-otra").addEventListener("click", () => { clearTimeout(rotarT); cerrarTarjeta(); idx = 0; resultados = []; prepararNivel(); });
-    $("mg-volver").addEventListener("click", () => { clearTimeout(rotarT); salir(); });
+    $("mg-otra").addEventListener("click", jugarDeNuevo);
+    $("mg-volver").addEventListener("click", () => { clearTimeout(rotarT); cerrarTarjeta(); $("final").hidden = false; });
   }
 
   const U = 10, M = 8, MT = 12, MB = 9, HW = 1.5;
@@ -1485,13 +1620,14 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     }
     const a = ahorro(r);
     const pct = (num, txt, gana) => `<div class="mg-pct"><b class="${gana ? "gana" : ""}">${num}</b><span>${txt}</span></div>`;
-    ui.turnoTxt.innerHTML = a == null
+    const pts = `<div class="mg-pts${r.puntos > 0 ? " gana" : ""}">+${(r.puntos || 0).toLocaleString("es-CL")} puntos en este nivel</div>`;
+    ui.turnoTxt.innerHTML = pts + (a == null
       ? pct(msTxt(r.gr), `tardó ${GR}<br>en resolverlo`)
       : a > 0
         ? pct(`${a}%`, `menos viaje<br>con ${GR}`)
         : a === 0
           ? pct("=", `mismo viaje<br>que ${GR}`, true)
-          : pct(`${-a}%`, `menos viaje en tu plan<br>que con ${GR}`, true);
+          : pct(`${-a}%`, `menos viaje en tu plan<br>que con ${GR}`, true));
   }
 
   function pintarElegido(ev) {
@@ -1584,7 +1720,8 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
   ui.terminar.addEventListener("click", () => { if (fase === "resultado") terminar(); });
   ui.trampa.addEventListener("click", () => { if (fase === "plan") activar(); });
   $("mg-salir").addEventListener("click", salir);
-  $("btn-l5").addEventListener("click", iniciar);
+  $("btn-jugar").addEventListener("click", iniciar);
+  pintarRanking($("ranking-inicio"), null);
   addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !ui.hoja.hidden) { cerrarHoja(); return; }
     if (ui.raiz.hidden || fase !== "plan") return;
@@ -1594,5 +1731,9 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
   });
 })();
 </script>
+<!-- Jugar con celulares (QR, de 1 a 6 jugadores) -->
+<script src="../firebase-config.js?v=20261113c"></script>
+<script src="online.js?v=20261113c"></script>
+<script src="multi.js?v=20261113c" data-juego="modo-goodroute" data-ranking="modo-goodroute.ranking"></script>
 
 </body></html>
