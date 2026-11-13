@@ -27,7 +27,9 @@ Los 5 están en un solo archivo, `minijuegos-de-ruta/index.html`. La biblioteca 
 
 Usa la misma conexión de Firebase que *Flota en Vivo* y *Duelo de Rutas* (`online.js`). Para probar sin Firebase, abre `minijuegos-de-ruta/index.html?juego=corta&prueba=1` y los enlaces de los QR en otras pestañas del mismo navegador.
 
-**Los otros 9 minijuegos están ocultos.** Siguen en sus carpetas, sin cambios, pero en `biblioteca/juegos.js` tienen `oculto: true`. Para volver a mostrar uno, borra ese `oculto: true` de su entrada.
+**Además se ven 3 de los minijuegos anteriores:** *Gánale al Chip · A pulso*, *Jornada Perfecta* y *Día Imprevisto*.
+
+**Los otros 6 están ocultos:** *Gánale al Chip*, *Reparto*, *Ruta en Relevo*, *Turno de Crisis*, *Flota en Vivo* y *Duelo de Rutas*. Siguen en sus carpetas, sin cambios, pero en `biblioteca/juegos.js` tienen `oculto: true`. Para volver a mostrar uno, borra ese `oculto: true` de su entrada.
 
 ## Cómo se usa
 

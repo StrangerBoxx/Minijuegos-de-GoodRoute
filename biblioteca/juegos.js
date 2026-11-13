@@ -69,7 +69,7 @@ window.CATALOGO = {
       muestra: "Ruta óptima vs. ruta a ojo", rondas: "3 rondas", duracion: "1,5 min",
     },
     {
-      oculto: true, carpeta: "ganale-al-chip-pulso", nombre: "Gánale al Chip · A pulso", tipo: "individual", control: "mouse",
+      carpeta: "ganale-al-chip-pulso", nombre: "Gánale al Chip · A pulso", tipo: "individual", control: "mouse",
       frase: "Lleva tú la camioneta por las calles hasta todos los clientes, antes que el chip y sin tocar los bordes.",
       muestra: "Ruta óptima vs. ruta a mano", rondas: "3 niveles", duracion: "1 min",
     },
@@ -79,7 +79,7 @@ window.CATALOGO = {
       muestra: "Orden de visitas", rondas: "3 niveles", duracion: "1 min",
     },
     {
-      oculto: true, carpeta: "jornada-perfecta", nombre: "Jornada Perfecta", tipo: "individual", control: "mouse",
+      carpeta: "jornada-perfecta", nombre: "Jornada Perfecta", tipo: "individual", control: "mouse",
       frase: "Arma el día de tu técnico: llega a la hora a cada cliente.",
       muestra: "Ventanas horarias", rondas: "3 días", duracion: "1 min",
     },
@@ -89,7 +89,7 @@ window.CATALOGO = {
       muestra: "Asignación y equilibrio de carga", rondas: "2 rondas", duracion: "1,5 min",
     },
     {
-      oculto: true, carpeta: "dia-imprevisto", nombre: "Día Imprevisto", tipo: "individual", control: "mouse",
+      carpeta: "dia-imprevisto", nombre: "Día Imprevisto", tipo: "individual", control: "mouse",
       frase: "El día ya está planificado. Cuando algo salga mal, decide rápido.",
       muestra: "Reprogramación durante el día", rondas: "4 imprevistos", duracion: "1 min",
     },
