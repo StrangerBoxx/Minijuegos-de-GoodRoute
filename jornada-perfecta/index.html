@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="online.css" />
+  <link rel="stylesheet" href="multi.css" />
 </head>
 <body>
   <!-- Barra superior: día, reloj y conteo -->
@@ -84,5 +86,9 @@
   <button class="btn-pantalla" id="btn-pantalla" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
 
   <script src="juego.js"></script>
+  <!-- Jugar con celulares (QR, de 1 a 6 jugadores) -->
+  <script src="../firebase-config.js"></script>
+  <script src="online.js"></script>
+  <script src="multi.js" data-juego="jornada-perfecta" data-ranking="jornada-perfecta.ranking"></script>
 </body>
 </html>

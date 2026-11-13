@@ -27,7 +27,7 @@ Los 5 están en un solo archivo, `minijuegos-de-ruta/index.html`. La biblioteca 
 
 Usa la misma conexión de Firebase que *Flota en Vivo* y *Duelo de Rutas* (`online.js`). Para probar sin Firebase, abre `minijuegos-de-ruta/index.html?juego=corta&prueba=1` y los enlaces de los QR en otras pestañas del mismo navegador.
 
-**Además se ven 3 de los minijuegos anteriores:** *Gánale al Chip · A pulso*, *Jornada Perfecta* y *Día Imprevisto*.
+**Además se ven 3 de los minijuegos anteriores:** *Gánale al Chip · A pulso*, *Jornada Perfecta* y *Día Imprevisto*. Los tres también se pueden jugar **con celulares, de 1 a 6 jugadores**, igual que los minijuegos de ruta: QR en orden, "¡Estoy listo!", la misma partida para todos, cuadros en vivo, podio y "Terminar partida" desde el computador. Esto lo agrega `multi.js` (con `multi.css`), que se suma a cada juego sin cambiar su lógica. En vivo, cada celular manda una imagen reducida de su pantalla unas 3 veces por segundo. En *Día Imprevisto*, el puntaje se calcula al final del día, así que su cuadro marca 0 hasta que termina.
 
 **Los otros 6 están ocultos:** *Gánale al Chip*, *Reparto*, *Ruta en Relevo*, *Turno de Crisis*, *Flota en Vivo* y *Duelo de Rutas*. Siguen en sus carpetas, sin cambios, pero en `biblioteca/juegos.js` tienen `oculto: true`. Para volver a mostrar uno, borra ese `oculto: true` de su entrada.
 

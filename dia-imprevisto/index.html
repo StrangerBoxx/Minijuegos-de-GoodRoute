@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="comun.css" />
   <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="online.css" />
+  <link rel="stylesheet" href="multi.css" />
 </head>
 <body>
   <header class="hud" id="hud" hidden>
@@ -94,5 +96,9 @@
 
   <script src="comun.js"></script>
   <script src="juego.js"></script>
+  <!-- Jugar con celulares (QR, de 1 a 6 jugadores) -->
+  <script src="../firebase-config.js"></script>
+  <script src="online.js"></script>
+  <script src="multi.js" data-juego="dia-imprevisto" data-ranking="dia-imprevisto.ranking"></script>
 </body>
 </html>

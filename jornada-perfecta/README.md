@@ -27,6 +27,18 @@ Son 3 días, con 4, 5 y 6 clientes. Una partida dura alrededor de un minuto.
 | Eficiencia en km | hasta 300 (km GoodRoute ÷ tus km × atendidos ÷ total) |
 | Igualar a GoodRoute | +200 |
 
+## Con celulares (de 1 a 6 jugadores)
+
+En la pantalla de inicio se elige cuántos juegan:
+- **Jugar:** 1 jugador, en esta pantalla, como siempre.
+- **Jugar con celulares:** de 1 a 6 jugadores.
+  1. Aparece un QR a la vez. Cada uno lo escanea y confirma "¡Estoy listo!" en su celular.
+  2. Cuando todos confirmaron, la partida empieza a la vez en todos, con los mismos desafíos.
+  3. La pantalla grande muestra un cuadro por jugador con su partida en vivo y, al final, el podio.
+  4. "Terminar partida", solo en el computador, corta el juego en todos los celulares.
+
+Lo agrega `multi.js` (con `multi.css` y `online.js`), sin cambiar `juego.js`. Necesita Firebase configurado (ver el README principal). Para probar sin Firebase, abre `index.html?prueba=1`.
+
 ## Correrlo
 
 Es HTML, CSS y JS sin dependencias. Abre `index.html` en el navegador, o publícalo en GitHub Pages.
