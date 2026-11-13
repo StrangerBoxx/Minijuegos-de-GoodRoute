@@ -2,9 +2,9 @@
 
 Minijuego del stand de Control Position para mostrar **GoodRoute**. Antes se llamaba *Gánale al Chip · A pulso*: es una versión de *Gánale al Chip* en que el jugador maneja la camioneta. La carpeta conserva el nombre `ganale-al-chip-pulso`.
 
-> Lleva tú la camioneta por las calles hasta todos los clientes, antes que el chip y sin tocar los bordes.
+> Lleva tú la camioneta por las calles hasta todos los clientes, antes que el optimizador y sin tocar los bordes.
 
-**Qué muestra del producto:** la ruta óptima contra la ruta hecha a mano. El jugador tiene que decidir el orden y además manejar bien; el chip solo planifica y nunca se equivoca.
+**Qué muestra del producto:** la ruta óptima contra la ruta hecha a mano. El jugador tiene que decidir el orden y además manejar bien; el optimizador solo planifica y nunca se equivoca.
 
 ## Cómo se juega
 
@@ -16,24 +16,24 @@ Minijuego del stand de Control Position para mostrar **GoodRoute**. Antes se lla
    - El reloj sigue corriendo.
 
    Cuando vas muy cerca del borde, aparece un anillo rojo.
-4. **El chip:** sale con unos segundos de desventaja y recorre la ruta óptima, en naranjo. Gana quien visite a todos primero. Si el chip llega antes, te quedan 10 s para terminar.
-   Si terminas antes que el chip, el resto de su recorrido se ve al doble de velocidad (×2), para que la espera sea más corta. El resultado no cambia.
-5. **Resultado:** compara tiempo, cuadras y choques, y muestra en naranjo el orden del chip.
+4. **El optimizador:** sale con unos segundos de desventaja y recorre la ruta óptima, en naranjo. Gana quien visite a todos primero. Si el optimizador llega antes, te quedan 10 s para terminar.
+   Si terminas antes que el optimizador, el resto de su recorrido se ve al doble de velocidad (×2), para que la espera sea más corta. El resultado no cambia.
+5. **Resultado:** compara tiempo, cuadras y choques, y muestra en naranjo el orden del optimizador.
 
 Son 4 niveles, y cada uno es más difícil:
 - Clientes: 3, 4, 5 y 6.
 - Más obras.
-- Un chip más rápido que sale antes.
+- Un optimizador más rápido que sale antes.
 - Calles más angostas, así que es más fácil chocar.
 
-**GoodRoute calcula de verdad:** la ruta del chip es el óptimo exacto (Held-Karp, ruta abierta). Tus cuadras se miden sobre el eje de la calle, así que el zigzag del pulso no cuenta.
+**GoodRoute calcula de verdad:** la ruta del optimizador es el óptimo exacto (Held-Karp, ruta abierta). Tus cuadras se miden sobre el eje de la calle, así que el zigzag del pulso no cuenta.
 
 ## Puntaje por nivel
 
 | Concepto | Puntos |
 |---|---|
-| Eficiencia en cuadras | hasta 500 (cuadras del chip ÷ tus cuadras × visitados ÷ total) |
-| Ganarle al chip | +400 |
+| Eficiencia en cuadras | hasta 500 (cuadras del optimizador ÷ tus cuadras × visitados ÷ total) |
+| Ganarle al optimizador | +400 |
 | Terminar sin choques | +100 |
 
 ## Con celulares (de 1 a 6 jugadores)
@@ -63,7 +63,7 @@ En el stand:
 Todo el balance está en `AJUSTES`, al comienzo de `juego.js`:
 - `anchoCalle`: el ancho de las calles. Más ancho es más fácil; conviene subirlo si el juego se usa en pantallas táctiles chicas.
 - `alChocar`: qué pasa al chocar. `"inicio"` vuelve a la base y borra los clientes; `"cliente"` vuelve al último cliente visitado.
-- Por nivel: clientes, obras, velocidad del chip y su desventaja en segundos.
+- Por nivel: clientes, obras, velocidad del optimizador y su desventaja en segundos.
 - `segundosExtra` y los puntajes.
 
 ## Archivos

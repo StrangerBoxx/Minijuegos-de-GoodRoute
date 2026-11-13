@@ -19,7 +19,7 @@ La biblioteca muestra 3 juegos, en orden alfabético:
 
 **La dificultad sube en cada nivel:**
 - **¿Cuál es más corta?:** cada ronda es un nivel. Suben los clientes (de 5 a 9) y las dos rutas se parecen cada vez más.
-- **Ruta a Mano:** 4 niveles. Suben los clientes y las obras, el chip va más rápido y sale antes, y las calles se angostan.
+- **Ruta a Mano:** 4 niveles. Suben los clientes y las obras, el optimizador va más rápido y sale antes, y las calles se angostan.
 - **Jornada Perfecta:** 4 días. Suben los clientes, los que tienen hora acordada y las obras, las horas quedan más justas y el reloj corre más rápido.
 
 Todo se ajusta en `AJUSTES`, al comienzo del código de cada juego.

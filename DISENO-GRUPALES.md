@@ -6,8 +6,8 @@ Este documento resume el análisis de los 5 juegos individuales y explica por qu
 
 | Juego | Qué decide el jugador | Mecánica | Contra GoodRoute |
 |---|---|---|---|
-| Gánale al Chip | Orden de visitas | Toca clientes en orden | Carrera contra el chip (Held-Karp) |
-| Gánale al Chip · A pulso | Orden y manejo | Arrastra la camioneta por las calles | Carrera contra el chip |
+| Gánale al Chip | Orden de visitas | Toca clientes en orden | Carrera contra el optimizador (Held-Karp) |
+| Gánale al Chip · A pulso | Orden y manejo | Arrastra la camioneta por las calles | Carrera contra el optimizador |
 | Jornada Perfecta | Orden con ventanas horarias | Toca clientes en orden | Compara con el óptimo |
 | Reparto | Qué técnico hace cada orden | Toca una orden y elige el técnico | Compara con el reparto óptimo |
 | Día Imprevisto | Qué hacer ante un imprevisto | Elige entre 3 opciones en 5 s | Día paralelo decidido por GoodRoute |
@@ -36,7 +36,7 @@ Se eligieron dos juegos que se complementan:
 
 | | Flota en Vivo | Duelo de Rutas |
 |---|---|---|
-| Relación entre jugadores | **Cooperativo**: todos contra el reloj y contra GoodRoute | **Competitivo**: todos contra todos, y el grupo contra el chip |
+| Relación entre jugadores | **Cooperativo**: todos contra el reloj y contra GoodRoute | **Competitivo**: todos contra todos, y el grupo contra el optimizador |
 | Pantalla | Un mapa compartido | Un tablero por jugador (pantalla dividida) |
 | Entrada | Arrastrar (multitáctil, un dedo por persona) | Tocar en el propio tablero |
 | Basado en | Reparto + Día Imprevisto | Gánale al Chip |
@@ -44,7 +44,7 @@ Se eligieron dos juegos que se complementan:
 
 **Cómo cuenta cada participación:**
 - **Flota en Vivo:** cada orden se acredita a quien la atendió. El final muestra el porcentaje de cada uno e insignias, para que todos tengan algo propio. Además, cada partida suma al contador del stand ("entre todos los equipos ya van N órdenes").
-- **Duelo de Rutas:** cada uno tiene su puntaje, su lugar en el podio y su nombre en el ranking. El resultado del grupo cuenta cuántas veces, entre todos, igualaron al chip.
+- **Duelo de Rutas:** cada uno tiene su puntaje, su lugar en el podio y su nombre en el ranking. El resultado del grupo cuenta cuántas veces, entre todos, igualaron al optimizador.
 
 **Cómo se identifica a cada jugador en una sola pantalla:**
 - **Flota en Vivo:** el arrastre empieza en la propia camioneta (o en la última orden de su cola), así que se sabe de quién es sin botones extra.
