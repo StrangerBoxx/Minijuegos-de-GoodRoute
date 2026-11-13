@@ -39,7 +39,7 @@
 .multi-listos i { width: 22px; height: 22px; border-radius: 7px; color: #fff; display: grid; place-items: center; font-style: normal; font-weight: 700; font-size: 12px; }
 
 /* ---------- Partida en vivo: un cuadro por jugador ---------- */
-.multi-vivo { position: fixed; inset: 0; z-index: 55; background: #e9e3dc; padding: 10px; }
+.multi-vivo { position: fixed; inset: 0; z-index: 55; background: #e9e3dc; padding: 10px 10px 44px; }
 .multi-cuadros { height: 100%; display: grid; gap: 10px; grid-template-columns: repeat(var(--n, 2), 1fr); }
 .multi-cuadros[data-n="1"] { grid-template-columns: minmax(0, 520px); justify-content: center; }
 .multi-cuadros[data-n="4"] { grid-template-columns: repeat(4, 1fr); }
@@ -59,7 +59,7 @@
   position: absolute; inset: 0; margin: 0; display: grid; place-items: center;
   background: rgba(251, 246, 246, .72); color: var(--ok); font-weight: 800; font-size: 26px;
 }
-.multi-terminar { position: fixed; right: 16px; bottom: 16px; z-index: 56; margin: 0; min-height: 40px; padding: 8px 18px; font-size: 15px; }
+.multi-terminar { position: fixed; right: 16px; bottom: 50px; z-index: 56; margin: 0; min-height: 40px; padding: 8px 18px; font-size: 15px; }
 
 /* ---------- Podio ---------- */
 .multi-lista { list-style: none; padding: 0; margin: 14px 0; display: grid; gap: 8px; text-align: left; }
@@ -199,3 +199,12 @@
 }
 .multi-nombre .btn { flex: none; width: auto; min-height: 46px; margin: 0; padding: 10px 20px; border-radius: 999px; background: #0B2545; color: #fff; font-family: inherit; font-size: 16px; }
 .multi-nombre-ok { margin: 10px 0 0; font-size: 16px; font-weight: 600; color: #1f9d6b; }
+
+.voto-barra { position: fixed; left: 0; right: 0; bottom: 0; z-index: 57; height: 34px; overflow: hidden; display: flex; align-items: center; background: #0B2545; pointer-events: none; }
+.voto-barra[hidden] { display: none; }
+.voto-pista { display: flex; flex: none; white-space: nowrap; animation: voto-avance 60s linear infinite; }
+.voto-pista span { padding: 0 18px; font: 600 15px/1 Poppins, system-ui, sans-serif; letter-spacing: .02em; color: rgba(250, 234, 200, .88); }
+.voto-pista b { font-style: italic; font-weight: 700; color: #E8772E; }
+.voto-pista i { font-style: normal; color: rgba(250, 234, 200, .35); }
+@keyframes voto-avance { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .voto-pista { animation: none; } }

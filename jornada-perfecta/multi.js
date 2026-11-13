@@ -65,6 +65,7 @@
     },
   }[JUEGO] || { titular: "", dato: "" };
   const SEGUNDOS_NOMBRE = 120;
+  const votoHTML = () => `<div class="voto-pista">${Array.from({ length: 2 }, () => Array.from({ length: 14 }, () => "<span>Vota <b>GoodRoute</b></span><i>·</i>").join("")).join("")}</div>`;
   const volverAlHub = () => {
     try { if (window.parent !== window && window.parent.document) { window.parent.location.hash = ""; return; } } catch { /* sigue abajo */ }
     location.href = "../index.html";
@@ -139,6 +140,7 @@
     const capaVivo = crear(`<section class="multi-vivo" hidden>
       <div class="multi-cuadros"></div>
       <button class="btn btn-secundario multi-terminar" type="button">Terminar partida</button>
+      <div class="voto-barra" aria-hidden="true">${votoHTML()}</div>
     </section>`);
     const capaPodio = crear(`<section class="multi-capa" hidden>
       <div class="multi-panel">
