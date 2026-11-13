@@ -214,12 +214,12 @@
       clearTimeout(autoInicio);
       semilla = Math.floor(Math.random() * 2 ** 31);
       estadoSala = "jugar";
-      jug.forEach((j) => { j.puntos = 0; j.listo = false; j.delegado = false; });
+      jug.forEach((j) => { j.puntos = 0; j.listo = false; j.delegado = false; j.etapa = ""; });
       capaSala.hidden = true; capaVivo.hidden = false;
       capaVivo.querySelector(".multi-cuadros").style.setProperty("--n", nJug);
       capaVivo.querySelector(".multi-cuadros").dataset.n = nJug;
       capaVivo.querySelector(".multi-cuadros").innerHTML = jug.map((_, p) => `<div class="multi-cuadro" data-p="${p}" style="--color:${JUGADORES[p].color}">
-        <div class="multi-cuadro-cab"><b>${p + 1}</b><span>${JUGADORES[p].nombre}</span><em class="multi-pts">0 pts</em></div>
+        <div class="multi-cuadro-cab"><b>${p + 1}</b><span>${JUGADORES[p].nombre}</span><i class="multi-nivel" hidden></i><em class="multi-pts">0 pts</em></div>
         <div class="multi-cuadro-cuerpo"><img alt="" hidden><div class="multi-dibujo" hidden></div><p class="multi-espera">Esperando su partida…</p><p class="multi-termino" hidden>✓ Terminó</p></div>
       </div>`).join("");
       // Tamaño real de cada recuadro (en px de pantalla): los celulares mandan imágenes de ese tamaño.
@@ -251,7 +251,7 @@
     function recibir(m) {
       const p = Number(m.p), j = jug[p];
       if (!j || estadoSala !== "jugar") return;
-      if (m.tipo === "puntos") j.puntos = Math.max(j.puntos, Math.round(m.puntos || 0));
+      if (m.tipo === "puntos") { j.puntos = Math.max(j.puntos, Math.round(m.puntos || 0)); if (typeof m.nivel === "string") j.etapa = m.nivel; }
       else if (m.tipo === "fin") { j.puntos = Math.max(0, Math.round(m.puntos || 0)); j.listo = true; j.delegado = !!m.delegado; }
       pintarVivo();
       if (jug.every((x) => x.listo || !x.conectado)) setTimeout(() => { if (estadoSala === "jugar") podio(); }, 1200);
@@ -263,6 +263,8 @@
         const c = capaVivo.querySelector(`.multi-cuadro[data-p="${p}"]`);
         if (!c) return;
         c.querySelector(".multi-pts").textContent = `${fmt(j.puntos)} pts`;
+        const nivel = c.querySelector(".multi-nivel");
+        nivel.textContent = j.etapa || ""; nivel.hidden = !j.etapa;
         c.querySelector(".multi-termino").hidden = !j.listo;
         c.querySelector(".multi-termino").textContent = j.delegado ? "✓ Delegado a GoodRoute" : "✓ Terminó";
         c.querySelector(".multi-espera").textContent = j.conectado ? "Esperando su partida…" : "Desconectado";
@@ -342,7 +344,7 @@
   function iniciarCelular() {
     const J = JUGADORES[YO];
     let conexion = null, ultimoVivo = null, empezo = false, terminado = false, cortada = false;
-    let envio = 0, envioImg = 0, ultimoPuntaje = -1, enVuelo = 0, ultimaImg = "", ladoImagen = AJUSTES.ladoImagen;
+    let envio = 0, envioImg = 0, ultimoPuntaje = -1, ultimoNivel = null, enVuelo = 0, ultimaImg = "", ladoImagen = AJUSTES.ladoImagen;
 
     // Distintivo con el color del jugador, siempre visible.
     document.body.append(crear(`<div class="multi-yo" style="background:${J.color}"><b>${YO + 1}</b>${J.nombre}</div>`));
@@ -519,7 +521,8 @@
       // en línea no debe pasar (hay momentos en que solo se mira): se avisa que hay actividad.
       document.dispatchEvent(new KeyboardEvent("keydown"));
       const pts = puntosJuego();
-      if (pts !== ultimoPuntaje) { ultimoPuntaje = pts; conexion.enviar({ tipo: "puntos", puntos: pts }); }
+      const nv = String(estado().nivel || "");
+      if (pts !== ultimoPuntaje || nv !== ultimoNivel) { ultimoPuntaje = pts; ultimoNivel = nv; conexion.enviar({ tipo: "puntos", puntos: pts, nivel: nv }); }
       if (estado().fase === "final") terminar(false);
     }
 

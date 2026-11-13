@@ -4,8 +4,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Poppins:ital,wght@0,400;0,600;0,700;1,700;1,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="online.css?v=20261114d">
-<link rel="stylesheet" href="multi.css?v=20261114d">
+<link rel="stylesheet" href="online.css?v=20261114f">
+<link rel="stylesheet" href="multi.css?v=20261114f">
 <style>
 /* Una columna de celular: cabecera, fila sobre el mapa, mapa, barra de tres botones; lo demás en hojas que suben. */
 :root {
@@ -1240,7 +1240,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     },
   };
   // Para "Jugar con celulares" (multi.js): fase "final" = terminó; y su puntaje.
-  window.__estadoJuego = () => ({ fase: fase === "fin" ? "final" : fase, puntosTotal: puntosTotal(), delegado: fase === "fin" && !!resultados[idx] && !resultados[idx].completo });
+  window.__estadoJuego = () => ({ fase: fase === "fin" ? "final" : fase, puntosTotal: puntosTotal(), delegado: fase === "fin" && !!resultados[idx] && !resultados[idx].completo, nivel: NIVELES[idx] ? (NIVELES[idx].secreto ? "Nivel secreto" : `Nivel ${idx + 1} de ${NIVELES.length - 1}`) : "" });
 
   // ---------- Ranking (misma tabla que los otros juegos) ----------
   const CLAVE_RANKING = "modo-goodroute.ranking";
@@ -1754,8 +1754,8 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
 })();
 </script>
 <!-- Jugar con celulares (QR, de 1 a 6 jugadores) -->
-<script src="../firebase-config.js?v=20261114d"></script>
-<script src="online.js?v=20261114d"></script>
-<script src="multi.js?v=20261114d" data-juego="modo-goodroute" data-ranking="modo-goodroute.ranking"></script>
+<script src="../firebase-config.js?v=20261114f"></script>
+<script src="online.js?v=20261114f"></script>
+<script src="multi.js?v=20261114f" data-juego="modo-goodroute" data-ranking="modo-goodroute.ranking"></script>
 
 </body></html>
