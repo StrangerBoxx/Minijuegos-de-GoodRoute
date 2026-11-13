@@ -259,7 +259,7 @@
                    (completo && !yo.choques ? AJUSTES.bonoSinChoques : 0);
     puntosTotal += puntos;
 
-    ui.resTitulo.textContent = gano ? "¡Le ganaste al chip!" : completo ? "Ganó el chip" : "Se acabó el tiempo";
+    ui.resTitulo.textContent = gano ? "¡Le ganaste al optimizador!" : completo ? "Ganó el optimizador" : "Se acabó el tiempo";
     ui.rTiTu.textContent = completo ? segs(yo.fin) : `${yo.visitados.length}/${n} clientes`;
     ui.rTiGr.textContent = segs(chip.fin);
     ui.rCuTu.textContent = Math.round(yo.cuadras);
@@ -271,11 +271,11 @@
     if (!completo) detalle = `Te faltaron ${n - yo.visitados.length} ${n - yo.visitados.length === 1 ? "cliente" : "clientes"}. `;
     else if (extra <= 2) detalle = "Elegiste el orden óptimo. ";
     else detalle = `Tu recorrido fue ${extra}% más largo. `;
-    detalle += `El chip calculó su ruta en ${calculo}; los números naranjos muestran su orden.`;
+    detalle += `El optimizador calculó su ruta en ${calculo}; los números naranjos muestran su orden.`;
     ui.resDetalle.textContent = detalle;
     ui.resPuntos.textContent = puntos;
     ui.btnSiguiente.textContent = nivelIdx < AJUSTES.niveles.length - 1 ? "Siguiente nivel" : "Ver puntaje";
-    ui.hudAyuda.textContent = "Naranjo: la ruta del chip";
+    ui.hudAyuda.textContent = "Naranjo: la ruta del optimizador";
     mostrar(ui.resultado);
   }
 
@@ -291,9 +291,9 @@
     ui.finPuntos.textContent = puntosTotal;
     const total = AJUSTES.niveles.length;
     ui.finMensaje.textContent =
-      victorias === total ? "Le ganaste al chip en todos los niveles. ¡Pulso de cirujano y ojo de despachador!" :
-      victorias > 0 ? `Le ganaste al chip en ${victorias} de ${total} niveles.` :
-      "Manejar y planificar a la vez es difícil. El chip solo planifica, y no se equivoca.";
+      victorias === total ? "Le ganaste al optimizador en todos los niveles. ¡Pulso de cirujano y ojo de despachador!" :
+      victorias > 0 ? `Le ganaste al optimizador en ${victorias} de ${total} niveles.` :
+      "Manejar y planificar a la vez es difícil. El optimizador solo planifica, y no se equivoca.";
     registro = null; ui.form.hidden = false; ui.nombre.value = "";
     ranking.pintar(ui.rankingFinal, null);
     mostrar(ui.final);
@@ -485,14 +485,14 @@
       // El resultado no cambia: los tiempos se comparan en el tiempo del juego.
       const esperando = yo.fin != null && tCarrera < chip.fin;
       tCarrera += dt * (esperando ? AJUSTES.aceleracionEspera : 1);
-      if (esperando) ui.hudAyuda.textContent = `¡Terminaste! El chip termina su ruta (×${AJUSTES.aceleracionEspera})`;
+      if (esperando) ui.hudAyuda.textContent = `¡Terminaste! El optimizador termina su ruta (×${AJUSTES.aceleracionEspera})`;
       if (avisoHasta && ahora > avisoHasta) { ui.aviso.hidden = true; avisoHasta = 0; }
       const chipLlego = tCarrera >= chip.fin;
       if (yo.fin == null && chipLlego) {
         const queda = chip.fin + AJUSTES.segundosExtra - tCarrera;
         ui.hudCentro.textContent = `+${Math.max(0, Math.ceil(queda))} s`;
         ui.hudCentro.classList.add("urgente");
-        ui.hudAyuda.textContent = "¡El chip ya llegó! Termina antes de que se acabe el tiempo";
+        ui.hudAyuda.textContent = "¡El optimizador ya llegó! Termina antes de que se acabe el tiempo";
         if (queda <= 0 && finCarrera == null) finCarrera = ahora;
       } else ui.hudCentro.textContent = segs(yo.fin ?? tCarrera);
       actualizarHud();

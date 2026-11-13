@@ -19,7 +19,7 @@
     <div class="hud-centro" id="hud-centro">0,0 s</div>
     <div class="hud-derecha">
       <span class="chip-dato chip-tu">Tú <b id="hud-tu">0/4</b></span>
-      <span class="chip-dato chip-gr">Chip <b id="hud-chip">0/4</b></span>
+      <span class="chip-dato chip-gr">Optimizador <b id="hud-chip">0/4</b></span>
       <span class="chip-dato chip-choques">Choques <b id="hud-choques">0</b></span>
     </div>
   </header>
@@ -36,7 +36,7 @@
       <ol class="reglas pasos">
         <li><span>1</span>Agarra la camioneta en la base y arrástrala por las calles hasta todos los clientes.</li>
         <li><span>2</span>Si tocas una manzana, una obra o el borde del mapa, chocas y vuelves a la base.</li>
-        <li><span>3</span>El chip va por la ruta óptima y nunca choca. Gana quien visite a todos primero.</li>
+        <li><span>3</span>El optimizador va por la ruta óptima y nunca choca. Gana quien visite a todos primero.</li>
       </ol>
       <button class="btn" id="btn-jugar">Jugar en esta pantalla</button>
       <div class="ranking" id="ranking-inicio"></div>
@@ -51,7 +51,7 @@
     <div class="tarjeta tarjeta-resultado">
       <h2 id="res-titulo"></h2>
       <table class="comparacion">
-        <thead><tr><th></th><th class="col-tu">Tú</th><th class="col-gr">Chip</th></tr></thead>
+        <thead><tr><th></th><th class="col-tu">Tú</th><th class="col-gr">Optimizador</th></tr></thead>
         <tbody>
           <tr><td>Tiempo</td><td id="r-ti-tu"></td><td id="r-ti-gr"></td></tr>
           <tr><td>Cuadras</td><td id="r-cu-tu"></td><td id="r-cu-gr"></td></tr>
@@ -74,7 +74,7 @@
         <button class="btn" type="submit">Guardar</button>
       </form>
       <div class="ranking" id="ranking-final"></div>
-      <p class="cta">El chip no maneja: planifica. GoodRoute arma la ruta óptima de cada técnico en milisegundos, sin choques ni vueltas de más.</p>
+      <p class="cta">El optimizador no maneja: planifica. GoodRoute arma la ruta óptima de cada técnico en milisegundos, sin choques ni vueltas de más.</p>
       <button class="btn btn-secundario" id="btn-otra">Jugar otra vez</button>
     </div>
   </section>
