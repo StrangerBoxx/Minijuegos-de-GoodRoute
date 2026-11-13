@@ -50,6 +50,11 @@ window.CATALOGO = {
       muestra: "Ventanas horarias", duracion: "1,5 min", rondas: "4 días",
     },
     {
+      carpeta: "modo-goodroute", nombre: "Modo GoodRoute", tipo: "individual", control: "mouse",
+      frase: "Reparte las órdenes entre los técnicos y arma el día de cada uno.",
+      muestra: "Varios técnicos", duracion: "Sin tiempo", rondas: "5 niveles",
+    },
+    {
       carpeta: "ganale-al-chip-pulso", nombre: "Ruta a Mano", tipo: "individual", control: "mouse",
       frase: "Maneja la camioneta por las calles y visita a todos antes que el optimizador.",
       muestra: "Ruta óptima", duracion: "1,5 min", rondas: "4 niveles",

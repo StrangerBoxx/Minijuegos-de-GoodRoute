@@ -1,0 +1,1598 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Modo GoodRoute · GoodRoute</title>
+<meta name="color-scheme" content="only light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Poppins:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+/* Una columna de celular: cabecera, fila sobre el mapa, mapa, barra de tres botones; lo demás en hojas que suben. */
+:root {
+  color-scheme: only light;
+  --bg: #FBF6F6;
+  --surface: #ffffff;
+  --border: #ece4e4;
+  --text: #1c1a1b;
+  --muted: #6b6860;
+  --tu: #033E84;
+  --tu-soft: #e3ebf5;
+  --gr: #e07419;
+  --gr-soft: #fce6d6;
+  --ok: #27945c;
+  --ok-soft: #dcf1e5;
+  --marca: #c2264b;
+  --marca-soft: #f8dde3;
+  --navy: #0b2545;
+  --apagado: #cfc8c8;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --marca-f: "Poppins", var(--sans);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; overflow: hidden; color-scheme: only light; }
+body {
+  margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans);
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+}
+button { font-family: inherit; touch-action: manipulation; }
+button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
+
+.btn {
+  font-size: 17px; font-weight: 600; padding: 13px 22px; border-radius: 12px; border: 0;
+  background: var(--navy); color: #fff; cursor: pointer;
+}
+.btn:disabled { background: var(--apagado); cursor: default; }
+.btn-sec { background: var(--surface); color: var(--navy); border: 1.5px solid var(--navy); }
+.btn-grande { font-size: 19px; padding: 15px 34px; }
+.btn-ic { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.gr-marca { font-family: var(--marca-f); font-weight: 700; font-style: italic; letter-spacing: -0.01em; text-transform: none; }
+.gr-txt { color: var(--gr); }
+.gr-ic { width: 22px; height: 22px; flex: none; }
+.btn-ic .gr-ic { width: 20px; height: 20px; }
+.eyebrow { margin: 0 0 6px; color: var(--gr); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+.lead { font-size: 16px; color: var(--muted); margin: 0 0 16px; line-height: 1.45; text-wrap: pretty; }
+.acciones { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+.capa {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(3px);
+}
+.tarjeta {
+  position: relative; width: 100%; max-width: 520px; max-height: 100%; overflow: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(28, 20, 20, .16);
+  padding: 34px 22px 22px; text-align: left; touch-action: pan-y;
+}
+.tarjeta::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 10px;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .92) 0 18px, transparent 18px 34px) center / 100% 1.5px no-repeat, var(--navy);
+}
+.tarjeta h2 { font-size: 26px; margin: 0 0 8px; color: var(--navy); line-height: 1.15; text-wrap: balance; }
+
+.portada { background: radial-gradient(900px 520px at 88% -8%, #fde5cf 0%, rgba(253, 229, 207, 0) 62%), radial-gradient(800px 560px at -8% 108%, #dbe6f5 0%, rgba(219, 230, 245, 0) 60%), var(--bg); backdrop-filter: none; }
+.portada-tarjeta {
+  position: relative; width: 100%; max-width: 520px; max-height: 100%; overflow: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
+  box-shadow: 0 18px 50px rgba(11, 37, 69, .12); padding: 30px 18px 22px;
+}
+.portada-tarjeta::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 8px; border-radius: 24px 24px 0 0;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .9) 0 18px, transparent 18px 34px) center / 100% 1.5px no-repeat, var(--navy);
+}
+.portada .logo { height: 30px; max-width: 100%; margin-top: 4px; }
+.portada h1 { font-size: clamp(34px, 10vw, 50px); line-height: 1; margin: 0; letter-spacing: -.03em; color: var(--navy); text-wrap: balance; }
+.portada .lead { margin: 0; }
+.portada-vista { width: min(100%, 420px, 46vh); max-width: 100%; flex: none; border-radius: 18px; overflow: hidden; background: var(--bg); border: 1px solid var(--border); }
+.portada-vista > svg { width: 100%; height: auto; aspect-ratio: 116 / 121; display: block; }
+.portada-vista > svg.buscando path[stroke-width="1.5"] { opacity: .55; }
+.portada-estado {
+  margin: 0; padding: 9px 12px 11px; border-top: 1px solid var(--border); background: var(--surface);
+  font: 500 12px/1.4 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums;
+  min-height: calc(1.4em + 20px); text-wrap: balance;
+}
+.portada-estado.listo { color: var(--navy); font-weight: 600; }
+.portada-jugar { font-size: 21px; padding: 16px 52px; border-radius: 14px; box-shadow: 0 10px 24px rgba(11, 37, 69, .25); flex: none; }
+
+.mg {
+  position: fixed; inset: 0; z-index: 12;
+  display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto;
+  max-width: 560px; margin: 0 auto; background: var(--bg);
+}
+.mg-cab {
+  position: relative; display: flex; align-items: center; gap: 10px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 15px;
+  background: var(--surface);
+}
+.mg-cab::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .92) 0 18px, transparent 18px 34px) center / 100% 1.5px no-repeat, var(--navy);
+}
+.mg-tit { flex: 1; min-width: 0; display: grid; gap: 5px; }
+.mg-tit b { font-size: 16px; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mg-pasos { display: flex; gap: 4px; }
+.mg-pasos i { width: 20px; height: 5px; border-radius: 3px; background: var(--border); }
+.mg-pasos i.hecho { background: var(--navy); }
+.mg-pasos i.gr, .mg-pasos i.actual { background: var(--gr); }
+.mg-pasos i.secreto { width: 9px; border-radius: 50%; }
+.mg-reloj {
+  font: 600 19px var(--mono); font-variant-numeric: tabular-nums;
+  padding: 5px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); min-width: 74px; text-align: center;
+}
+.mg-reloj.urgente { color: var(--marca); border-color: var(--marca); }
+.mg-reloj.congelado { color: var(--gr); border-color: var(--gr); }
+
+.mg-ic-btn {
+  display: grid; place-items: center; flex: none; width: 46px; height: 46px; padding: 0;
+  border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); color: var(--navy); cursor: pointer;
+}
+.mg-ic-btn svg { width: 22px; height: 22px; }
+.mg-ic-btn:disabled { color: var(--apagado); cursor: default; }
+.mg-salir { border-color: transparent; background: none; width: 38px; }
+
+.mg-sobre { padding: 10px 12px 4px; min-height: 66px; display: flex; align-items: center; }
+.mg-edicion { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; width: 100%; }
+.mg-elegido { flex: 1; min-width: 0; display: grid; grid-template-columns: 12px minmax(0, 1fr); column-gap: 8px; align-items: center; animation: mg-aparecer .25s ease-out; }
+.mg-elegido:empty { animation: none; }
+.mg-elegido i { width: 12px; height: 12px; border-radius: 3px; background: var(--c); }
+.mg-elegido b { font-size: 17px; line-height: 1.15; color: var(--c); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mg-elegido span { grid-column: 2; font-size: 13px; line-height: 1.3; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mg-elegido span b { font: 600 13px var(--mono); color: var(--text); }
+.mg-elegido span.mal, .mg-elegido span.mal b { color: var(--marca); }
+.mg-trampa {
+  flex: 1 0 100%; justify-content: center; display: flex; align-items: center; gap: 8px; min-width: 0;
+  font: 700 16px var(--sans); color: #fff; cursor: pointer;
+  padding: 6px 14px; height: 42px; border-radius: 12px; border: 0; background: var(--navy);
+  box-shadow: 0 6px 16px rgba(11, 37, 69, .25); animation: mg-aparecer .35s ease-out;
+}
+.mg-trampa span { text-align: left; line-height: 1.05; }
+.mg-trampa small { display: block; font-size: 10px; font-weight: 600; opacity: .8; letter-spacing: .06em; text-transform: uppercase; }
+@keyframes mg-aparecer { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.mg-turno { display: flex; align-items: center; gap: 12px; width: 100%; animation: mg-aparecer .35s ease-out; }
+.mg-turno-txt { flex: 1; min-width: 0; display: grid; }
+.mg-turno-txt small { font-size: 13px; color: var(--muted); font-weight: 600; }
+.mg-turno-txt .gr-marca { font-size: 25px; line-height: 1.05; color: var(--gr); }
+.mg-turno-txt .mg-buscando { font: 500 11px/1.35 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.mg-pct { display: flex; align-items: baseline; gap: 10px; }
+.mg-pct b { font: 600 34px/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--navy); }
+.mg-pct b.gana { color: var(--ok); }
+.mg-pct span { font-size: 13px; line-height: 1.3; color: var(--muted); }
+.mg-turno-btns { display: flex; gap: 6px; flex: none; }
+.mg-chip {
+  font: 600 14px var(--sans); padding: 0 14px; height: 40px; border-radius: 10px; cursor: pointer;
+  background: var(--surface); color: var(--navy); border: 1.5px solid var(--navy);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.mg-chip svg { width: 16px; height: 16px; }
+
+.mg-mapa-caja { min-height: 0; display: flex; padding: 4px 12px; }
+.mg-mapa-caja svg { width: 100%; height: 100%; display: block; }
+.mg-mapa-caja .ot, .mg-mapa-caja .base { cursor: pointer; }
+.mg-traza { stroke-dasharray: 1; stroke-dashoffset: 1; animation: mg-trazar .7s ease-out forwards; }
+@keyframes mg-trazar { to { stroke-dashoffset: 0; } }
+.mg-cae { animation: mg-caer .45s cubic-bezier(.2, 1.6, .4, 1) both; transform-box: fill-box; transform-origin: center; }
+@keyframes mg-caer { from { transform: scale(1.9); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.mg-barra {
+  display: grid; grid-template-columns: 64px 64px minmax(0, 1fr); gap: 10px;
+  padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface); border-top: 1px solid var(--border);
+}
+.mg-accion {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 10px;
+  height: 58px; padding: 0 14px; border-radius: 14px; cursor: pointer;
+  border: 1.5px solid var(--border); background: var(--bg); color: var(--navy);
+  font: 700 18px var(--sans);
+}
+.mg-accion svg { width: 28px; height: 28px; flex: none; }
+.mg-accion.ok { border-color: var(--ok); }
+.mg-accion.mal { border-color: var(--marca); }
+.mg-insignia {
+  position: absolute; top: -7px; right: -7px; min-width: 24px; height: 24px; padding: 0 6px;
+  display: grid; place-items: center; border-radius: 999px; border: 2px solid var(--surface);
+  font: 700 13px/1 var(--mono); color: #fff; background: var(--muted);
+}
+.mg-insignia.ok { background: var(--ok); }
+.mg-insignia.mal { background: var(--marca); }
+.mg-insignia.pulso { animation: mg-pulso .6s ease-out; }
+@keyframes mg-pulso { 0% { transform: scale(1.5); } 100% { transform: none; } }
+.mg-confirmar { background: var(--navy); border-color: var(--navy); color: #fff; }
+.mg-confirmar:disabled { background: var(--apagado); border-color: var(--apagado); color: #fff; cursor: default; }
+.mg-confirmar.mg-calle { overflow: hidden; isolation: isolate; }
+.mg-confirmar.mg-calle::before {
+  content: ""; position: absolute; z-index: -1; left: 0; right: 0; bottom: 7px; height: 2px;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .6) 0 14px, transparent 14px 26px);
+  animation: mg-carril .7s linear infinite;
+}
+@keyframes mg-carril { from { background-position: 0 0; } to { background-position: -26px 0; } }
+
+.mg-hoja {
+  position: absolute; inset: 0; z-index: 14; display: flex; align-items: flex-end;
+  background: rgba(11, 37, 69, .28);
+}
+.mg-hoja-card {
+  width: 100%; max-height: 82%; display: flex; flex-direction: column;
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  box-shadow: 0 -12px 40px rgba(11, 37, 69, .18);
+  animation: mg-subir .28s cubic-bezier(.2, .8, .2, 1);
+}
+@keyframes mg-subir { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.mg-hoja-cab { display: flex; align-items: center; gap: 10px; padding: 14px 14px 10px 20px; border-bottom: 1px solid var(--border); }
+.mg-hoja-cab h3 { flex: 1; margin: 0; font-size: 19px; color: var(--navy); }
+.mg-hoja-cuerpo { overflow: auto; padding: 16px 18px calc(20px + env(safe-area-inset-bottom, 0px)); touch-action: pan-y; display: grid; gap: 16px; }
+.mg-hoja-cuerpo > section { display: grid; gap: 14px; }
+.mg-ayuda { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.45; }
+.mg-ayuda:empty { display: none; }
+
+.mg-reglas { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.mg-reglas li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 16px; line-height: 1.35; }
+.mg-reglas .ic {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 15px; font-weight: 700; background: var(--bg); color: var(--muted); border: 2px solid var(--border);
+}
+.mg-reglas li.ok .ic { background: var(--ok); border-color: var(--ok); color: #fff; }
+.mg-reglas li.mal .ic { background: var(--marca-soft); border-color: var(--marca); color: var(--marca); }
+.mg-reglas .det { font: 500 13px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.mg-reglas li.mal .det { color: var(--marca); }
+.mg-nuevo { font: 700 10px/1 var(--sans); text-transform: uppercase; letter-spacing: .08em; color: #9a4a08; background: var(--gr-soft); padding: 3px 6px; border-radius: 999px; white-space: nowrap; }
+
+.mg-leyenda { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--muted); padding-top: 14px; border-top: 1px solid var(--border); }
+.mg-leyenda h4 { flex: 1 0 100%; margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--navy); }
+.mg-leyenda > span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.lg-av, .lg-sentido { width: 24px; height: 8px; flex: none; }
+.lg-av { border-radius: 2px; background: #d9d1d1; }
+.lg-hoy, .lg-espera { width: 13px; height: 13px; border-radius: 50%; background: #fff; border: 1.5px solid var(--marca); }
+.lg-espera { border: 1.5px dashed #9a968c; }
+.lg-obra { width: 9px; height: 15px; border-radius: 2px; background: repeating-linear-gradient(135deg, #e07419 0 2px, #fff 2px 4px); border: 1px solid #c4560b; }
+.lg-hora { font: 600 11px/1.3 var(--mono); font-style: normal; color: #fff; background: var(--tu); border-radius: 999px; padding: 1px 7px; }
+.lg-hora.lg-tarde { background: var(--marca); }
+.lg-veh { display: inline-flex; gap: 2px; }
+.lg-veh i { width: 6px; height: 6px; border-radius: 50%; background: var(--text); opacity: .7; }
+
+.mg-tecs { display: grid; gap: 10px; }
+.mg-tec {
+  display: grid; gap: 8px; text-align: left; width: 100%;
+  padding: 10px 12px 12px; border-radius: 14px; cursor: pointer;
+  background: var(--bg); border: 1.5px solid var(--border); color: var(--text); font: inherit;
+}
+.mg-tec[aria-pressed="true"] { border-color: var(--c); box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 25%, transparent); background: var(--surface); }
+.mg-tec-cab { display: flex; align-items: center; gap: 8px; font-size: 14px; min-width: 0; }
+.mg-tec-cab b { font-size: 17px; }
+.mg-tec-cab .tipo { color: var(--muted); font-size: 12px; }
+.mg-tec-cab .datos { margin-left: auto; font: 500 13px var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; }
+.mg-tec-cab .datos .mal { color: var(--marca); font-weight: 600; }
+.mg-punto { width: 14px; height: 14px; border-radius: 4px; background: var(--c); flex: none; }
+.mg-linea { position: relative; display: block; height: 24px; border-radius: 6px; background: var(--surface); overflow: hidden; }
+.mg-tec[aria-pressed="true"] .mg-linea { background: #f3eeee; }
+.mg-seg { position: absolute; top: 0; bottom: 0; }
+.mg-seg.viaje { top: 11px; bottom: 11px; background: var(--c); opacity: .4; }
+.mg-seg.espera { background: var(--c); opacity: .14; }
+.mg-seg.servicio {
+  background: var(--c); border-radius: 4px; color: #fff; font: 600 11px var(--mono); font-style: normal;
+  display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: inset -1px 0 0 rgba(255,255,255,.6);
+}
+.mg-seg.servicio.tarde { box-shadow: inset 0 0 0 2px var(--marca); }
+.mg-linea.palida .mg-seg.servicio { color: var(--text); }
+.mg-fin-jornada { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--text); opacity: .45; }
+.mg-exceso { position: absolute; top: 0; bottom: 0; right: 0; background: repeating-linear-gradient(135deg, rgba(194,38,75,.18) 0 4px, transparent 4px 8px); }
+
+.mg-res { display: grid; gap: 16px; }
+.mg-res-bloque h3 { margin: 0 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--navy); }
+.mg-res-bloque.gr h3 { color: var(--gr); }
+.mg-res table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.mg-res th, .mg-res td { padding: 9px 6px; border-bottom: 1px solid var(--border); text-align: right; }
+.mg-res th:first-child { text-align: left; padding-left: 0; }
+.mg-res tbody th { font-size: 14px; font-weight: 500; color: var(--muted); }
+.mg-res td { font: 600 14px var(--mono); color: var(--text); white-space: nowrap; }
+.mg-res .mg-res-bloque.gr td { background: color-mix(in srgb, var(--gr-soft) 55%, transparent); }
+.mg-res tr:last-child th, .mg-res tr:last-child td { border-bottom: 0; }
+.mg-res .dif { color: var(--ok); font-weight: 700; margin-left: 6px; font-size: 12px; }
+.mg-res .mg-sub { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+.mg-res .mg-buscando { margin: 0; font: 500 13px/1.4 var(--mono); color: var(--muted); }
+.mg-res-nota { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+
+.mg-capa { z-index: 16; }
+.mg-intro-bloque { margin: 0 0 16px; }
+.mg-intro-bloque h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--navy); }
+.mg-intro-bloque p { margin: 0; font-size: 15px; line-height: 1.45; }
+.mg-intro-reglas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mg-intro-reglas li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 16px; line-height: 1.35; }
+.mg-intro-reglas li::before { content: ""; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; border: 2px solid var(--navy); }
+.mg-intro-tecs { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 15px; }
+.mg-intro-tecs span { display: inline-flex; align-items: center; gap: 6px; }
+.mg-intro-tecs i { width: 12px; height: 12px; border-radius: 3px; background: var(--c); }
+.mg-intro-tecs small { color: var(--muted); font-size: 13px; }
+.mg-tarjeta .acciones .btn { flex: 1; }
+
+.mg-graf-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.mg-graf-tab {
+  position: relative; flex: 1 1 88px; overflow: hidden; cursor: pointer;
+  font: 600 13px var(--sans); padding: 8px 8px 10px; border-radius: 10px;
+  background: var(--bg); color: var(--muted); border: 1.5px solid var(--border);
+}
+.mg-graf-tab[aria-selected="true"] { color: var(--navy); border-color: var(--navy); background: var(--surface); }
+.mg-graf-tab[aria-selected="true"]::after { content: ""; position: absolute; left: 0; bottom: 0; height: 3px; background: var(--navy); animation: mg-avance 5s linear forwards; }
+.mg-graf-tabs.detenido .mg-graf-tab::after { display: none; }
+@keyframes mg-avance { from { width: 0; } to { width: 100%; } }
+.mg-graf { animation: mg-subir .35s ease-out; }
+.mg-graf-exp { margin: 0 0 12px; font-size: 15px; line-height: 1.45; text-wrap: pretty; }
+.mg-graf-tot { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 0 0 10px; }
+.mg-graf-tot div { display: flex; flex-direction: column; }
+.mg-graf-tot b { font: 600 22px/1.15 var(--mono); font-variant-numeric: tabular-nums; }
+.mg-graf-tot div:first-child b { color: var(--tu); }
+.mg-graf-tot div:nth-child(2) b { color: var(--gr); }
+.mg-graf-tot span { font-size: 13px; color: var(--muted); }
+.mg-barras { display: grid; gap: 10px; margin: 6px 0 16px; }
+.mg-barra-nivel { display: grid; gap: 3px; }
+.mg-barra-nivel > span { font-size: 13px; font-weight: 600; }
+.mg-barra-fila { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; font-size: 12px; }
+.mg-barra-fila .pista { height: 10px; border-radius: 5px; background: var(--bg); overflow: hidden; }
+.mg-barra-fila .pista i { display: block; height: 100%; border-radius: 5px; min-width: 3px; }
+.mg-barra-fila.tu .pista i { background: var(--tu); }
+.mg-barra-fila.tu.incompleto .pista i { background: repeating-linear-gradient(135deg, var(--tu) 0 5px, #6d8fbf 5px 10px); }
+.mg-barra-fila.gr .pista i { background: var(--gr); }
+.mg-barra-fila b { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; min-width: 84px; font-size: 12px; }
+.mg-barra-fila .sin { grid-column: 1 / -1; font-size: 12px; color: var(--muted); font-style: italic; }
+.mg-pitch { margin: 20px 0 10px; font-size: clamp(20px, 5.4vw, 26px); line-height: 1.2; color: var(--navy); text-wrap: balance; }
+.f-producto { font-size: 15px; line-height: 1.5; margin: 0 0 6px; padding: 12px 14px; border-radius: 12px; background: var(--tu-soft); color: var(--tu); }
+
+@media (min-width: 561px) {
+  .mg { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+}
+@media (max-height: 640px) {
+  .mg-sobre { min-height: 56px; padding-top: 6px; }
+  .mg-accion { height: 50px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mg-traza { animation: none; stroke-dashoffset: 0; }
+  .mg-cae, .mg-trampa, .mg-turno, .mg-hoja-card, .mg-graf, .mg-insignia.pulso { animation: none; }
+  .mg-confirmar.mg-calle::before { animation: none; }
+  .mg-graf-tab[aria-selected="true"]::after { animation: none; width: 100%; }
+}
+</style>
+
+<section class="capa portada" id="inicio">
+  <div class="portada-tarjeta">
+    <img class="logo" id="logo" src="logo.gif" alt="GoodRoute">
+    <h1>Modo <span class="gr-txt gr-marca">GoodRoute</span></h1>
+    <p class="lead">Planifica el día de los técnicos.</p>
+    <div class="portada-vista" aria-hidden="true">
+      <svg id="mg-vista"></svg>
+      <p class="portada-estado" id="mg-vista-estado"></p>
+    </div>
+    <button class="btn btn-grande portada-jugar" id="btn-l5" type="button">Jugar</button>
+  </div>
+</section>
+
+<section class="mg" id="mg" hidden aria-label="Modo GoodRoute">
+  <header class="mg-cab">
+    <button class="mg-ic-btn mg-salir" id="mg-salir" type="button" aria-label="Volver al inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="mg-tit"><b id="mg-titulo"></b><div class="mg-pasos" id="mg-pasos" aria-hidden="true"></div></div>
+    <div class="mg-reloj" id="mg-reloj">0:00</div>
+  </header>
+
+  <div class="mg-sobre">
+    <div class="mg-edicion" id="mg-edicion">
+      <div class="mg-elegido" id="mg-elegido" aria-live="polite"></div>
+      <button class="mg-ic-btn" id="mg-deshacer" type="button" aria-label="Deshacer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+      <button class="mg-ic-btn" id="mg-borrar" type="button" aria-label="Borrar todo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg></button>
+      <button class="mg-trampa" id="mg-trampa" type="button" hidden><svg class="gr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 19c0-5 4-5 7-7s7-2 7-7"/><circle cx="5" cy="19" r="2.1" fill="currentColor" stroke="none"/><circle cx="19" cy="5" r="2.1" fill="currentColor" stroke="none"/></svg><span><small>Resolver con</small><b class="gr-marca">GoodRoute</b></span></button>
+    </div>
+    <div class="mg-turno" id="mg-turno" hidden>
+      <div class="mg-turno-txt" id="mg-turno-txt"></div>
+      <div class="mg-turno-btns">
+        <button class="mg-chip" id="mg-terminar" type="button" hidden>Terminar</button>
+        <button class="mg-chip" id="mg-stats" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 13V8M8 13V3M13 13V6"/></svg>Stats</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mg-mapa-caja">
+    <svg id="mg-mapa" role="img" aria-label="Mapa de la ciudad con técnicos y órdenes"></svg>
+  </div>
+
+  <nav class="mg-barra" aria-label="Acciones del nivel">
+    <button class="mg-accion" id="mg-btn-reglas" type="button" aria-label="Reglas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5c2.8-1.2 5.6-1 9 1 3.4-2 6.2-2.2 9-1v13c-2.8-1.2-5.6-1-9 1-3.4-2-6.2-2.2-9-1z"/><path d="M12 6.5v13"/></svg><span class="mg-insignia" id="mg-ins-reglas" hidden></span></button>
+    <button class="mg-accion" id="mg-btn-tecs" type="button" aria-label="Técnicos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span class="mg-insignia mal" id="mg-ins-tecs" hidden></span></button>
+    <button class="mg-accion mg-confirmar" id="mg-confirmar" type="button" aria-label="Confirmar" disabled><svg id="mg-conf-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L19.5 7"/></svg><span id="mg-conf-txt" hidden></span></button>
+  </nav>
+
+  <div class="mg-hoja" id="mg-hoja" hidden>
+    <div class="mg-hoja-card" role="dialog" aria-modal="true" aria-labelledby="mg-hoja-tit">
+      <header class="mg-hoja-cab">
+        <h3 id="mg-hoja-tit"></h3>
+        <button class="mg-ic-btn" id="mg-hoja-cerrar" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </header>
+      <div class="mg-hoja-cuerpo">
+        <section data-s="reglas">
+          <ul class="mg-reglas" id="mg-reglas"></ul>
+          <div class="mg-leyenda">
+            <h4>Mapa</h4>
+            <span><svg class="lg-sentido" viewBox="0 0 18 6" aria-hidden="true"><rect width="18" height="6" rx="2" fill="#d9d1d1"/><path d="M6 1.5 L8 3 L6 4.5 M10 1.5 L12 3 L10 4.5" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>Un sentido</span>
+            <span><i class="lg-av"></i>Doble sentido</span>
+            <span><i class="lg-obra"></i>Cortada</span>
+            <span id="lg-hora"><i class="lg-hora">9:30</i>Hora acordada</span>
+            <span id="lg-tarde"><i class="lg-hora lg-tarde">9:30</i>Llega tarde</span>
+            <span id="lg-hoy"><i class="lg-hoy"></i>Vence hoy</span>
+            <span id="lg-espera"><i class="lg-espera"></i>Puede esperar</span>
+            <span><i class="lg-veh"><i></i><i></i></i>40 min por vehículo</span>
+          </div>
+        </section>
+        <section data-s="tecs">
+          <p class="mg-ayuda" id="mg-ayuda"></p>
+          <div class="mg-tecs" id="mg-tecs"></div>
+        </section>
+        <section data-s="stats">
+          <div class="mg-res" id="mg-res"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="capa mg-capa" id="mg-capa" hidden><div class="tarjeta mg-tarjeta" id="mg-tarjeta"></div></div>
+</section>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const P = { cols: 10, filas: 10, minCuadra: 6, unSentido: 0.55, minVeh: 40, reserva: 20, fin: 660, topes: { interno: 5, externo: 3 } };
+  const PERSONAS = [
+    { nombre: "Ana", color: "#0e7c86", tipo: "interno" },
+    { nombre: "Pedro", color: "#8a3ea8", tipo: "interno" },
+    { nombre: "Luis", color: "#4a7d1c", tipo: "interno" },
+    { nombre: "Marta", color: "#a8326e", tipo: "interno" },
+  ];
+  const EXTERNO = { nombre: "Jorge", color: "#5b6472", tipo: "externo" };
+  const NIVELES = [
+    { titulo: "Un técnico", lead: "Gana la ruta con menos viaje.", internos: 1, externos: 0, ots: 5, conHora: 0, obras: 2, manzanas: 2, veh: [1], hoy: null, reglas: ["todas", "jornada"] },
+    { titulo: "Dos técnicos", internos: 2, externos: 0, ots: 6, conHora: 2, obras: 3, manzanas: 2, veh: [1, 2], hoy: null, reglas: ["todas", "tarde", "jornada"] },
+    { titulo: "Día completo", internos: 2, externos: 1, ots: 12, conHora: 3, obras: 5, manzanas: 3, veh: [1, 2, 3], hoy: null, reglas: ["todas", "tarde", "jornada", "externos"], ayuda: true, ayudaSiempre: true },
+    { titulo: "Día cargado", internos: 3, externos: 1, ots: 16, conHora: 4, obras: 6, manzanas: 3, veh: [1, 2, 3], hoy: null, reglas: ["todas", "tarde", "jornada", "topes", "externos"], ayuda: true, ayudaSiempre: true },
+    { titulo: "Día al límite", lead: "No todo cabe hoy. Las órdenes que vencen hoy van sí o sí; las demás pueden esperar.", internos: 4, externos: 1, ots: 26, conHora: 6, obras: 7, manzanas: 4, veh: [1, 2, 3], hoy: 21, reglas: ["hoy", "tarde", "jornada", "topes", "externos"], ayuda: true, ayudaSiempre: true },
+  ];
+  NIVELES.push({ ...NIVELES[NIVELES.length - 1], lead: null, titulo: "Contra el reloj", secreto: true });
+  const RITMO_SECRETO = 0.7;
+  const AYUDA_SEGUNDOS = 60, AYUDA_DESHACER = 3;
+
+  const ui = {
+    raiz: $("mg"), titulo: $("mg-titulo"), pasos: $("mg-pasos"), reloj: $("mg-reloj"),
+    mapa: $("mg-mapa"), tecs: $("mg-tecs"), ayuda: $("mg-ayuda"),
+    reglas: $("mg-reglas"), lgHora: $("lg-hora"), lgHoy: $("lg-hoy"), lgEspera: $("lg-espera"), res: $("mg-res"),
+    deshacer: $("mg-deshacer"), borrar: $("mg-borrar"), terminar: $("mg-terminar"), confirmar: $("mg-confirmar"),
+    confIc: $("mg-conf-ic"), confTxt: $("mg-conf-txt"), trampa: $("mg-trampa"),
+    edicion: $("mg-edicion"), elegido: $("mg-elegido"), turno: $("mg-turno"), turnoTxt: $("mg-turno-txt"), stats: $("mg-stats"),
+    btnReglas: $("mg-btn-reglas"), btnTecs: $("mg-btn-tecs"), insReglas: $("mg-ins-reglas"), insTecs: $("mg-ins-tecs"),
+    hoja: $("mg-hoja"), hojaTit: $("mg-hoja-tit"), hojaCerrar: $("mg-hoja-cerrar"),
+    capa: $("mg-capa"), tarjeta: $("mg-tarjeta"),
+  };
+
+  const azar = (n) => Math.floor(Math.random() * n);
+  const barajar = (a) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = azar(i + 1); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+  const dist = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  const tope = (tec) => (tec.ausente ? 0 : P.topes[tec.tipo]);
+  const num = (n) => Math.round(n).toLocaleString("es-CL");
+  const hhmm = (m) => { const v = Math.round(480 + m); return `${Math.floor(v / 60)}:${String(v % 60).padStart(2, "0")}`; };
+  const reloj = (s) => { const t = Math.max(0, Math.ceil(s)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
+  const tiempoTxt = (s) => { const t = Math.round(s); return t < 60 ? `${t} s` : `${Math.floor(t / 60)} min ${String(t % 60).padStart(2, "0")} s`; };
+  const msTxt = (ms) => (ms < 10 ? "menos de 0,01 s" : (ms / 1000).toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " s");
+  const minTxt = (m) => (m >= 60 ? `${Math.floor(m / 60)} h ${String(Math.round(m % 60)).padStart(2, "0")} min` : `${Math.round(m)} min`);
+  const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
+  const reducido = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const PATRONES = [
+    [[0, 0, 1, 1]],
+    [[0, 0, 0.55, 1], [0.55, 0, 0.45, 1]],
+    [[0, 0, 1, 0.5], [0, 0.5, 1, 0.5]],
+    [[0, 0, 0.5, 0.5], [0.5, 0, 0.5, 0.5], [0, 0.5, 1, 0.5]],
+    [[0, 0, 0.4, 1], [0.4, 0, 0.6, 0.55], [0.4, 0.55, 0.6, 0.45]],
+    [[0, 0, 0.5, 1], [0.5, 0, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]],
+  ];
+  const FORMAS = [[2, 2], [2, 1], [1, 2], [3, 1], [1, 3], [2, 2]];
+
+  function crearCiudad(cfg) {
+    const C = P.cols + 1, F = P.filas + 1, total = C * F;
+    const nodo = (x, y) => y * C + x;
+    const clave = (a, b) => (a < b ? a + "-" + b : b + "-" + a);
+    const sentidos = (largo) => {
+      let previo = Math.random() < 0.5 ? 1 : -1;
+      return Array.from({ length: largo + 1 }, (_, k) => {
+        if (k === 0 || k === largo || Math.random() >= P.unSentido) return 0;
+        previo = Math.random() < 0.75 ? -previo : previo;
+        return previo;
+      });
+    };
+    const sx = sentidos(P.filas), sy = sentidos(P.cols), giro = Math.random() < 0.5 ? 1 : -1;
+    sx[0] = giro; sx[P.filas] = -giro; sy[P.cols] = giro; sy[0] = -giro;
+    const cerradas = new Set(), interiores = new Set(), ocupadas = new Set(), obras = [], grandes = [];
+    const permitido = (a, b) => {
+      const ya = Math.floor(a / C), yb = Math.floor(b / C);
+      if (ya === yb) return !sx[ya] || Math.sign(b - a) === sx[ya];
+      return !sy[a % C] || Math.sign(yb - ya) === sy[a % C];
+    };
+    const abierta = (a, b) => !cerradas.has(clave(a, b));
+    const vecinos = (n, entrantes) => {
+      const x = n % C, y = Math.floor(n / C), out = [];
+      if (x > 0) out.push(n - 1);
+      if (x < C - 1) out.push(n + 1);
+      if (y > 0) out.push(n - C);
+      if (y < F - 1) out.push(n + C);
+      return out.filter((v) => abierta(n, v) && (entrantes ? permitido(v, n) : permitido(n, v)));
+    };
+    const alcanza = (inicio, entrantes) => {
+      const visto = new Uint8Array(total), cola = [inicio];
+      visto[inicio] = 1;
+      for (let i = 0; i < cola.length; i++) for (const v of vecinos(cola[i], entrantes)) if (!visto[v]) { visto[v] = 1; cola.push(v); }
+      for (let n = 0; n < total; n++) if (!interiores.has(n) && !visto[n]) return false;
+      return true;
+    };
+    const conectada = () => {
+      let inicio = 0;
+      while (interiores.has(inicio)) inicio++;
+      return alcanza(inicio, false) && alcanza(inicio, true);
+    };
+    for (let intento = 0; grandes.length < cfg.manzanas && intento < 200; intento++) {
+      const [w, h] = FORMAS[azar(FORMAS.length)];
+      const x = azar(P.cols - w + 1), y = azar(P.filas - h + 1);
+      const celdas = [];
+      for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) celdas.push((y + j) * P.cols + x + i);
+      if (celdas.some((k) => ocupadas.has(k))) continue;
+      const aristas = [], internos = [];
+      for (let i = 1; i < w; i++) for (let j = 0; j < h; j++) aristas.push(clave(nodo(x + i, y + j), nodo(x + i, y + j + 1)));
+      for (let j = 1; j < h; j++) for (let i = 0; i < w; i++) aristas.push(clave(nodo(x + i, y + j), nodo(x + i + 1, y + j)));
+      for (let i = 1; i < w; i++) for (let j = 1; j < h; j++) internos.push(nodo(x + i, y + j));
+      aristas.forEach((a) => cerradas.add(a));
+      internos.forEach((n) => interiores.add(n));
+      if (!conectada()) { aristas.forEach((a) => cerradas.delete(a)); internos.forEach((n) => interiores.delete(n)); continue; }
+      celdas.forEach((k) => ocupadas.add(k));
+      const parque = !grandes.some((g) => g.tipo === "parque") || Math.random() < 0.4;
+      const arboles = [];
+      if (parque) for (let k = 0; k < w * h * 5; k++) arboles.push([0.12 + Math.random() * 0.76, 0.12 + Math.random() * 0.76, 0.7 + Math.random() * 0.6]);
+      grandes.push({ x, y, w, h, tipo: parque ? "parque" : "edificio", arboles });
+    }
+    for (let intento = 0; obras.length < cfg.obras && intento < 400; intento++) {
+      const n = azar(total);
+      if (interiores.has(n)) continue;
+      const vs = vecinos(n).filter((v) => !interiores.has(v));
+      if (!vs.length) continue;
+      const v = vs[azar(vs.length)], k = clave(n, v);
+      cerradas.add(k);
+      if (!conectada()) { cerradas.delete(k); continue; }
+      obras.push([n, v]);
+    }
+    const bloques = [];
+    for (let k = 0; k < P.cols * P.filas; k++) {
+      if (ocupadas.has(k)) continue;
+      bloques.push({ c: k % P.cols, f: Math.floor(k / P.cols), piezas: PATRONES[azar(PATRONES.length)].map((r) => ({ r, tono: azar(3) })) });
+    }
+    const dijkstra = (s) => {
+      const d = new Array(total).fill(Infinity), prev = new Int16Array(total).fill(-1), hecho = new Uint8Array(total);
+      d[s] = 0;
+      for (;;) {
+        let u = -1;
+        for (let n = 0; n < total; n++) if (!hecho[n] && d[n] < Infinity && (u < 0 || d[n] < d[u])) u = n;
+        if (u < 0) break;
+        hecho[u] = 1;
+        for (const v of vecinos(u)) {
+          const nd = d[u] + P.minCuadra;
+          if (nd < d[v]) { d[v] = nd; prev[v] = u; }
+        }
+      }
+      return { d, prev };
+    };
+    return { C, nodo, sx, sy, abierta, interiores, obras, grandes, bloques, dijkstra };
+  }
+
+  function generar(cfg) {
+    const ciudad = crearCiudad(cfg);
+    const puntos = [];
+    for (let x = 0; x <= P.cols; x++) for (let y = 0; y <= P.filas; y++) if (!ciudad.interiores.has(ciudad.nodo(x, y))) puntos.push({ x, y });
+    const libres = barajar(puntos);
+    const personas = PERSONAS.slice(0, cfg.internos).concat(cfg.externos ? [EXTERNO] : []);
+    const tecs = [];
+    for (const p of personas) {
+      let k = libres.findIndex((q) => tecs.every((t) => dist(t.pos, q) >= 6));
+      if (k < 0) k = 0;
+      tecs.push({ ...p, pos: libres.splice(k, 1)[0], ausente: false });
+    }
+    const ots = [];
+    for (let i = 0; i < cfg.ots; i++) {
+      let k = libres.findIndex((q) => ots.every((o) => dist(o.pos, q) >= 2) && tecs.every((t) => dist(t.pos, q) >= 2));
+      if (k < 0) k = libres.findIndex((q) => tecs.every((t) => dist(t.pos, q) >= 1));
+      if (k < 0) k = 0;
+      const r = Math.random();
+      const veh = cfg.veh.length === 1 ? cfg.veh[0] : r < 0.45 ? 1 : r < 0.8 ? 2 : 3;
+      ots.push({ id: i + 1, pos: libres.splice(k, 1)[0], veh, hora: null, hoy: true });
+    }
+    barajar([...ots.keys()]).slice(0, cfg.conHora).forEach((i) => { ots[i].hora = 60 + 30 * azar(16); });
+    if (cfg.hoy != null) { const hoy = new Set(barajar([...ots.keys()]).slice(0, cfg.hoy)); ots.forEach((o, i) => { o.hoy = hoy.has(i); }); }
+    ots.forEach((o) => { o.dur = o.veh * P.minVeh + (o.hora != null ? P.reserva : 0); });
+    const pts = [...tecs.map((t) => t.pos), ...ots.map((o) => o.pos)];
+    tecs.forEach((t, k) => { t.p = k; });
+    ots.forEach((o, i) => { o.p = tecs.length + i; });
+    const arboles = pts.map((q) => ciudad.dijkstra(ciudad.nodo(q.x, q.y)));
+    const D = arboles.map((a) => pts.map((q) => a.d[ciudad.nodo(q.x, q.y)]));
+    return { cfg, tecs, ots, ciudad, pts, arboles, D };
+  }
+
+  function camino(N, a, b) {
+    const { prev } = N.arboles[a], c = N.ciudad;
+    const ini = c.nodo(N.pts[a].x, N.pts[a].y), out = [];
+    for (let n = c.nodo(N.pts[b].x, N.pts[b].y); n !== ini && n !== -1; n = prev[n]) out.push(n);
+    out.push(ini);
+    return out.reverse();
+  }
+
+  function simular(N, t, ruta) {
+    const tec = N.tecs[t];
+    let tiempo = 0, p = tec.p, viaje = 0, tarde = 0, atraso = 0;
+    const visitas = [];
+    for (const i of ruta) {
+      const o = N.ots[i];
+      const d = N.D[p][o.p];
+      const llegada = tiempo + d;
+      let inicio = llegada, a = 0;
+      if (o.hora != null) { if (llegada > o.hora) a = llegada - o.hora; else inicio = o.hora; }
+      const fin = inicio + o.dur;
+      visitas.push({ i, salida: tiempo, llegada, inicio, fin, atraso: a });
+      if (a > 0) { tarde++; atraso += a; }
+      viaje += d; tiempo = fin; p = o.p;
+    }
+    return { visitas, viaje, fin: tiempo, tarde, atraso, n: ruta.length, excede: tiempo > P.fin };
+  }
+
+  const MODELO = { metrosPorMin: 500, costoExterno: 20000, omitir: 10000000, omitirOpcional: 1000000, span: 50, lambda: 0.1, msPorOt: 200, msMin: 1000, msMax: 6000 };
+
+  function costo(N, rutas) {
+    const asign = new Set(rutas.flat());
+    let hoyFuera = 0, optFuera = 0, ext = 0, viaje = 0, finMax = 0, obj = 0;
+    N.ots.forEach((o, i) => {
+      if (asign.has(i)) return;
+      if (o.hoy) { hoyFuera++; obj += MODELO.omitir; } else { optFuera++; obj += MODELO.omitirOpcional; }
+    });
+    rutas.forEach((r, t) => {
+      if (!r.length) return;
+      const s = simular(N, t, r);
+      viaje += s.viaje; finMax = Math.max(finMax, s.fin);
+      obj += MODELO.metrosPorMin * s.viaje + s.fin;
+      if (N.tecs[t].tipo === "externo") { ext += r.length; obj += MODELO.costoExterno * r.length; }
+    });
+    return [hoyFuera, ext, optFuera, viaje, finMax, obj + MODELO.span * finMax];
+  }
+  const menor = (a, b) => a[5] < b[5] - 1e-6;
+  const tiempoBusqueda = (N) => Math.min(MODELO.msMax, Math.max(MODELO.msMin, N.ots.length * MODELO.msPorOt));
+
+  function crearBusqueda(N, limiteMs, maxExt = Infinity) {
+    const T = N.tecs.length, NP = N.pts.length, n = N.ots.length;
+    const omitir = N.ots.map((o) => (o.hoy ? MODELO.omitir : MODELO.omitirOpcional));
+    const extra = N.tecs.map((tec) => (tec.tipo === "externo" ? MODELO.costoExterno : 0));
+    const arco = (t, a, b) => MODELO.metrosPorMin * N.D[a][b] + extra[t];
+    const pen = new Float64Array(NP * NP);
+    const B = { ms: 0, evals: 0, terminado: false, mejor: null, historial: [], maxExt };
+    let rutas = null, info = null, fuera = 0, ext = 0, estrategia = 0, mejorObj = Infinity;
+
+    function evaluarRuta(t, r) {
+      B.evals++;
+      if (N.tecs[t].ausente && r.length) return null;
+      if (r.length > tope(N.tecs[t])) return null;
+      if (!r.length) return { costo: 0, pen: 0, fin: 0 };
+      const s = simular(N, t, r);
+      if (s.tarde || s.excede) return null;
+      let a = N.tecs[t].p, c = 0, p = 0;
+      for (const i of r) {
+        const b = N.ots[i].p, ca = arco(t, a, b);
+        c += ca; p += MODELO.lambda * pen[a * NP + b] * ca; a = b;
+      }
+      return { costo: c + s.fin, pen: p, fin: s.fin };
+    }
+    const finMax = (inf) => inf.reduce((m, x) => Math.max(m, x.fin), 0);
+    const real = () => info.reduce((s, x) => s + x.costo, 0) + MODELO.span * finMax(info) + fuera;
+    const aumentado = (inf, f) => inf.reduce((s, x) => s + x.costo + x.pen, 0) + MODELO.span * finMax(inf) + f;
+    const extDe = (t, r) => (extra[t] ? r.length : 0);
+
+    function guardarMejor() {
+      const o = real();
+      if (o < mejorObj - 1e-6) { mejorObj = o; B.mejor = { rutas: rutas.map((r) => r.slice()), c: costo(N, rutas) }; }
+    }
+    function probar(cambios, dFuera) {
+      const nuevo = info.slice();
+      let nExt = ext;
+      for (const [t, r] of cambios) {
+        const x = evaluarRuta(t, r);
+        if (!x) return false;
+        nuevo[t] = x; nExt += extDe(t, r) - extDe(t, rutas[t]);
+      }
+      if (nExt > B.maxExt) return false;
+      if (aumentado(nuevo, fuera + dFuera) >= aumentado(info, fuera) - 1e-6) return false;
+      for (const [t, r] of cambios) rutas[t] = r;
+      info = nuevo; fuera += dFuera; ext = nExt;
+      guardarMejor();
+      return true;
+    }
+
+    function inicial(tipo) {
+      rutas = N.tecs.map(() => []);
+      const libres = new Set(N.ots.keys());
+      let nExt = 0;
+      const cabe = (t, r) => evaluarRuta(t, r) && nExt + extDe(t, r) - extDe(t, rutas[t]) <= B.maxExt;
+      if (tipo === 0) {
+        for (let t = 0; t < T; t++) {
+          for (;;) {
+            const desde = rutas[t].length ? N.ots[rutas[t][rutas[t].length - 1]].p : N.tecs[t].p;
+            const orden = [...libres].sort((x, y) => arco(t, desde, N.ots[x].p) - arco(t, desde, N.ots[y].p));
+            const i = orden.find((x) => cabe(t, [...rutas[t], x]));
+            if (i == null) break;
+            nExt += extDe(t, [0]); rutas[t].push(i); libres.delete(i);
+          }
+        }
+      } else {
+        for (;;) {
+          let mejor = null;
+          for (const i of libres) for (let t = 0; t < T; t++) {
+            const antes = evaluarRuta(t, rutas[t]);
+            for (let y = 0; y <= rutas[t].length; y++) {
+              const r = rutas[t].slice(); r.splice(y, 0, i);
+              if (nExt + extDe(t, r) - extDe(t, rutas[t]) > B.maxExt) continue;
+              const x = evaluarRuta(t, r);
+              if (x && (!mejor || x.costo - antes.costo < mejor.d)) mejor = { d: x.costo - antes.costo, t, r, i };
+            }
+          }
+          if (!mejor) break;
+          nExt += extDe(mejor.t, mejor.r) - extDe(mejor.t, rutas[mejor.t]);
+          rutas[mejor.t] = mejor.r; libres.delete(mejor.i);
+        }
+      }
+      info = rutas.map((r, t) => evaluarRuta(t, r));
+      fuera = [...libres].reduce((s, i) => s + omitir[i], 0);
+      ext = rutas.reduce((s, r, t) => s + extDe(t, r), 0);
+      pen.fill(0);
+      guardarMejor();
+    }
+
+    function vecindario() {
+      const donde = (i) => rutas.findIndex((r) => r.includes(i));
+      for (let i = 0; i < n; i++) {
+        const t = donde(i), x = t >= 0 ? rutas[t].indexOf(i) : -1;
+        const sin = t >= 0 ? rutas[t].filter((v) => v !== i) : null;
+        for (let u = 0; u < T; u++) {
+          const base = u === t ? sin : rutas[u];
+          for (let y = 0; y <= base.length; y++) {
+            if (u === t && y === x) continue;
+            const r = base.slice(); r.splice(y, 0, i);
+            if (probar(u === t ? [[u, r]] : t >= 0 ? [[t, sin], [u, r]] : [[u, r]], t >= 0 ? 0 : -omitir[i])) return true;
+          }
+        }
+        if (t >= 0 && !N.ots[i].hoy && probar([[t, sin]], omitir[i])) return true;
+        if (t < 0) {
+          for (let u = 0; u < T; u++) for (let y = 0; y < rutas[u].length; y++) {
+            const j = rutas[u][y], r = rutas[u].slice(); r[y] = i;
+            if (probar([[u, r]], omitir[j] - omitir[i])) return true;
+          }
+        }
+      }
+      for (let t = 0; t < T; t++) for (let u = t; u < T; u++) {
+        for (let x = 0; x < rutas[t].length; x++) for (let y = u === t ? x + 1 : 0; y < rutas[u].length; y++) {
+          if (u === t) {
+            const r = rutas[t].slice(); [r[x], r[y]] = [r[y], r[x]];
+            if (probar([[t, r]], 0)) return true;
+          } else {
+            const a = rutas[t].slice(), b = rutas[u].slice(); [a[x], b[y]] = [b[y], a[x]];
+            if (probar([[t, a], [u, b]], 0)) return true;
+          }
+        }
+        if (u !== t) {
+          for (let x = 0; x <= rutas[t].length; x++) for (let y = 0; y <= rutas[u].length; y++) {
+            if ((x === rutas[t].length && y === rutas[u].length) || (x === 0 && y === 0)) continue;
+            const a = [...rutas[t].slice(0, x), ...rutas[u].slice(y)], b = [...rutas[u].slice(0, y), ...rutas[t].slice(x)];
+            if (probar([[t, a], [u, b]], 0)) return true;
+          }
+        }
+      }
+      for (let t = 0; t < T; t++) {
+        const r0 = rutas[t];
+        for (let x = 0; x < r0.length - 1; x++) for (let y = x + 1; y < r0.length; y++) {
+          const r = [...r0.slice(0, x), ...r0.slice(x, y + 1).reverse(), ...r0.slice(y + 1)];
+          if (probar([[t, r]], 0)) return true;
+        }
+        for (let largo = 2; largo <= 3; largo++) for (let x = 0; x + largo <= r0.length; x++) {
+          const seg = r0.slice(x, x + largo), sin = [...r0.slice(0, x), ...r0.slice(x + largo)];
+          for (let u = 0; u < T; u++) {
+            const base = u === t ? sin : rutas[u];
+            for (let y = 0; y <= base.length; y++) {
+              if (u === t && y === x) continue;
+              const r = [...base.slice(0, y), ...seg, ...base.slice(y)];
+              if (probar(u === t ? [[t, r]] : [[t, sin], [u, r]], 0)) return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    function penalizar() {
+      let maxU = -1;
+      const arcos = [];
+      rutas.forEach((r, t) => {
+        let a = N.tecs[t].p;
+        for (const i of r) {
+          const b = N.ots[i].p, u = arco(t, a, b) / (1 + pen[a * NP + b]);
+          arcos.push([a * NP + b, u]); if (u > maxU) maxU = u; a = b;
+        }
+      });
+      for (const [k, u] of arcos) if (u >= maxU - 1e-9) pen[k]++;
+      info = rutas.map((r, t) => evaluarRuta(t, r));
+    }
+
+    B.paso = (ms) => {
+      const t0 = performance.now(), fin = t0 + ms;
+      const usado = () => B.ms + performance.now() - t0;
+      while (!B.terminado && performance.now() < fin) {
+        if (!rutas) inicial(estrategia);
+        let local = true;
+        while (performance.now() < fin) if (!vecindario()) { local = false; break; }
+        if (local) break;
+        B.historial.push({ rutas: rutas.map((r) => r.slice()), c: costo(N, rutas), evals: B.evals });
+        if (B.historial.length > 600) B.historial = B.historial.filter((_, k) => k % 2);
+        penalizar();
+        if (estrategia === 0 && usado() >= limiteMs / 2) { estrategia = 1; rutas = null; }
+        if (usado() >= limiteMs) B.terminado = true;
+      }
+      B.ms += performance.now() - t0;
+      if (B.ms >= limiteMs) B.terminado = true;
+      return B.terminado;
+    };
+    return B;
+  }
+
+  function resolver(N, presupuesto, maxExt) {
+    const b = crearBusqueda(N, presupuesto, maxExt);
+    while (!b.terminado) b.paso(presupuesto);
+    return { rutas: b.mejor.rutas, c: b.mejor.c, ms: b.ms, evals: b.evals, busqueda: b };
+  }
+  const foto = (b) => ({ rutas: b.mejor.rutas.map((r) => r.slice()), c: b.mejor.c, ms: b.ms, evals: b.evals });
+  function medidas(N, rs) {
+    const fines = rs.map((r, t) => (r.length ? simular(N, t, r).fin : null)).filter((f) => f != null);
+    return { fin: fines.length ? Math.max(...fines) : null, dif: fines.length > 1 ? Math.max(...fines) - Math.min(...fines) : 0 };
+  }
+
+  function evaluar(N, rutas, externosMax) {
+    const sims = rutas.map((r, t) => simular(N, t, r));
+    const asign = new Set(rutas.flat());
+    const totalHoy = N.ots.filter((o) => o.hoy).length;
+    const hoyOk = N.ots.filter((o, i) => o.hoy && asign.has(i)).length;
+    const atrasos = sims.reduce((s, x) => s + x.tarde, 0);
+    const exceden = sims.filter((s) => s.excede).length;
+    const sobreTope = N.tecs.filter((tec, t) => rutas[t].length > tope(tec)).length;
+    const ext = N.tecs.reduce((s, tec, t) => s + (tec.tipo === "externo" ? rutas[t].length : 0), 0);
+    const D = {
+      todas: { texto: "Todas asignadas", ok: asign.size === N.ots.length, det: `${asign.size}/${N.ots.length}` },
+      hoy: { texto: "Las que vencen hoy, asignadas", ok: hoyOk === totalHoy, det: `${hoyOk}/${totalHoy}` },
+      tarde: { texto: "Llegar a la hora acordada", ok: atrasos === 0, det: atrasos ? plural(atrasos, "atraso", "atrasos") : "" },
+      jornada: { texto: `Terminar antes de las ${hhmm(P.fin)}`, ok: exceden === 0, det: exceden ? plural(exceden, "se pasa", "se pasan") : "" },
+      topes: { texto: `Tope: ${P.topes.interno} por interno, ${P.topes.externo} externo`, ok: sobreTope === 0, det: sobreTope ? `${sobreTope} sobre el tope` : "" },
+      externos: { texto: externosMax ? `Externo: máx. ${plural(externosMax, "orden", "órdenes")}` : "Sin externo", ok: ext <= externosMax, det: `${ext}/${externosMax}` },
+    };
+    const reglas = N.cfg.reglas.map((id) => ({ id, ...D[id] }));
+    return { reglas, sims, ok: reglas.every((r) => r.ok), ext, viaje: sims.reduce((s, x) => s + x.viaje, 0) };
+  }
+
+  function generarNivel(k) {
+    const cfg = NIVELES[k];
+    let respaldo = null;
+    for (let intento = 0; intento < 60; intento++) {
+      const N = generar(cfg);
+      const g = resolver(N, 40);
+      if (g.c[0] > 0) continue;
+      respaldo = N;
+      if (cfg.externos && g.c[1] < 1) continue;
+      if (k === 1 && g.rutas.some((r) => r.length !== 3)) continue;
+      return N;
+    }
+    return respaldo || generar(cfg);
+  }
+
+  function cuadras(N, rs) {
+    let total = 0;
+    rs.forEach((r, t) => {
+      let p = N.tecs[t].p;
+      for (const i of r) { total += camino(N, p, N.ots[i].p).length - 1; p = N.ots[i].p; }
+    });
+    return total;
+  }
+
+  const GR = `<span class="gr-marca">GoodRoute</span>`;
+  const ICONO = `<svg class="gr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 19c0-5 4-5 7-7s7-2 7-7"/><circle cx="5" cy="19" r="2.1" fill="currentColor" stroke="none"/><circle cx="19" cy="5" r="2.1" fill="currentColor" stroke="none"/></svg>`;
+  let idx = 0, N = null, gr = null, rutas = [], historia = [], sel = 0, fase = "fuera";
+  let t0 = 0, transcurrido = 0, intervalo = null, resultados = [], rutasTu = null, animar = false;
+  let elegido = false, limite = null, deshaceres = 0, nuevosTecs = new Set(), nuevasReglas = new Set(), entrada = false;
+  let rutasGr = null, turno = null, turnoT = null, busqueda = null, rotarT = null, refinarT = null, busq = null;
+  const oculto = (t) => fase === "intro" && nuevosTecs.has(t);
+  const comparando = () => fase === "resultado" && rutasTu != null;
+  const tuyo = () => fase !== "vista" && !(fase === "resultado" && rutasTu == null);
+  const palido = (hex) => { const n = parseInt(hex.slice(1), 16), m = (v) => Math.round(v + (255 - v) * 0.62); return `rgb(${m(n >> 16)}, ${m((n >> 8) & 255)}, ${m(n & 255)})`; };
+
+  function iniciar() {
+    $("inicio").hidden = true;
+    ui.raiz.hidden = false;
+    idx = 0; resultados = [];
+    prepararNivel();
+  }
+  function salir() {
+    detener();
+    clearTimeout(refinarT);
+    fase = "fuera";
+    cerrarHoja();
+    ui.raiz.hidden = true; ui.capa.hidden = true; ui.trampa.hidden = true;
+    $("inicio").hidden = false;
+    cicloVista();
+  }
+
+  function novedades(k) {
+    if (!k || NIVELES[k].secreto) return { tecs: new Set(), reglas: new Set() };
+    const prev = NIVELES[k - 1];
+    const antes = new Set(PERSONAS.slice(0, prev.internos).map((p) => p.nombre).concat(prev.externos ? [EXTERNO.nombre] : []));
+    return {
+      tecs: new Set(N.tecs.map((t, i) => (antes.has(t.nombre) ? -1 : i)).filter((i) => i >= 0)),
+      reglas: new Set(NIVELES[k].reglas.filter((r) => !prev.reglas.includes(r))),
+    };
+  }
+
+  function prepararNivel() {
+    const cfg = NIVELES[idx];
+    N = generarNivel(idx);
+    busq = crearBusqueda(N, tiempoBusqueda(N));
+    busq.paso(150);
+    gr = foto(busq);
+    N.extMax = gr.c[1];
+    busq.maxExt = N.extMax;
+    clearTimeout(refinarT);
+    refinarT = setTimeout(refinar, 200);
+    detener();
+    rutas = N.tecs.map(() => []); historia = []; sel = 0; rutasTu = null; rutasGr = null; turno = null; deshaceres = 0; reglasPrevias = {}; elegido = false;
+    ({ tecs: nuevosTecs, reglas: nuevasReglas } = novedades(idx));
+    limite = cfg.secreto ? Math.max(20, Math.round((resultados[idx - 1] ? resultados[idx - 1].manual : 90) * RITMO_SECRETO)) : null;
+    transcurrido = 0; fase = "intro";
+    ui.titulo.textContent = cfg.secreto ? `Nivel secreto · ${cfg.titulo}` : `Nivel ${idx + 1} · ${cfg.titulo}`;
+    ui.trampa.hidden = true;
+    ui.lgHora.hidden = $("lg-tarde").hidden = !cfg.conHora;
+    ui.lgHoy.hidden = ui.lgEspera.hidden = cfg.hoy == null;
+    ui.reloj.className = "mg-reloj";
+    ui.reloj.textContent = limite ? reloj(limite) : "0:00";
+    pintarPasos();
+    pintar();
+    const lead = cfg.secreto ? `Mismas reglas. Tienes <b>${reloj(limite)}</b>.` : cfg.lead || "";
+    const multi = N.tecs.length > 1;
+    const comoJugar = multi
+      ? "Elige un técnico tocando su cuadro en el mapa o con el botón de técnicos, y toca sus órdenes en el orden en que las visitará. Tocar una orden asignada la quita."
+      : "Toca las órdenes en el orden en que el técnico las visitará. Tocar una orden asignada la quita.";
+    const reglasNivel = evaluar(N, rutas, N.extMax).reglas
+      .map((r) => `<li><span>${r.texto}${nuevasReglas.has(r.id) ? ' <span class="mg-nuevo">nueva</span>' : ""}</span></li>`).join("");
+    const equipo = N.tecs
+      .map((tec, t) => `<span style="--c:${tec.color}"><i></i>${tec.nombre} <small>(${tec.tipo})</small>${nuevosTecs.has(t) ? ' <span class="mg-nuevo">nuevo</span>' : ""}</span>`).join("");
+    tarjeta(`
+      <p class="eyebrow">${cfg.secreto ? "Nivel secreto" : `Nivel ${idx + 1} de ${NIVELES.length - 1}`}</p>
+      <h2>${cfg.titulo}</h2>
+      ${lead ? `<p class="lead">${lead}</p>` : ""}
+      <div class="mg-intro-bloque"><h3>Reglas para confirmar</h3><ul class="mg-intro-reglas">${reglasNivel}</ul></div>
+      <div class="mg-intro-bloque"><h3>${multi ? "Técnicos" : "Técnico"}</h3><div class="mg-intro-tecs">${equipo}</div></div>
+      <div class="mg-intro-bloque"><h3>Cómo se juega</h3><p>${comoJugar}</p></div>
+      <div class="acciones"><button class="btn btn-grande" id="mg-planificar" type="button">Planificar</button></div>`);
+    $("mg-planificar").addEventListener("click", planificar);
+  }
+
+  function abrirHoja(s) {
+    if (ui.raiz.hidden || !ui.capa.hidden) return;
+    const titulos = {
+      reglas: "Reglas",
+      tecs: N.tecs.length === 1 ? "Técnico" : "Técnicos",
+      stats: "Tu plan y el de GoodRoute",
+    };
+    ui.hojaTit.textContent = titulos[s];
+    ui.hoja.querySelectorAll("[data-s]").forEach((sec) => { sec.hidden = sec.dataset.s !== s; });
+    ui.hoja.dataset.s = s;
+    ui.hoja.hidden = false;
+    ui.hoja.querySelector(".mg-hoja-cuerpo").scrollTop = 0;
+  }
+  function cerrarHoja() { ui.hoja.hidden = true; delete ui.hoja.dataset.s; }
+
+  function tarjeta(html) { cerrarHoja(); ui.tarjeta.innerHTML = html; ui.capa.hidden = false; ui.tarjeta.scrollTop = 0; }
+  function cerrarTarjeta() { ui.capa.hidden = true; }
+
+  function pintarPasos() {
+    const n = idx === NIVELES.length - 1 || resultados[NIVELES.length - 1] ? NIVELES.length : NIVELES.length - 1;
+    ui.pasos.innerHTML = NIVELES.slice(0, n).map((cfg, k) => {
+      const r = resultados[k];
+      const cl = [k === idx && fase !== "fin" ? "actual" : r ? (r.completo ? "hecho" : "gr") : "", cfg.secreto ? "secreto" : ""].filter(Boolean).join(" ");
+      return `<i class="${cl}"></i>`;
+    }).join("");
+  }
+
+  function planificar() {
+    cerrarTarjeta();
+    fase = "plan";
+    entrada = nuevosTecs.size > 0 || nuevasReglas.size > 0;
+    t0 = performance.now() - transcurrido * 1000;
+    detener();
+    intervalo = setInterval(tic, 100);
+    tic();
+    if (NIVELES[idx].ayudaSiempre) ui.trampa.hidden = false;
+    pintar();
+  }
+  function refinar() {
+    if ((fase !== "intro" && fase !== "plan") || busq.terminado) return;
+    busq.paso(30);
+    gr = foto(busq);
+    refinarT = setTimeout(refinar, 40);
+  }
+  function detener() { if (intervalo) clearInterval(intervalo); intervalo = null; clearTimeout(turnoT); clearTimeout(rotarT); }
+
+  function ofrecerAyuda() {
+    if (NIVELES[idx].ayuda && fase === "plan" && ui.trampa.hidden) ui.trampa.hidden = false;
+  }
+  function contarDeshacer() {
+    deshaceres++;
+    if (deshaceres > AYUDA_DESHACER) ofrecerAyuda();
+  }
+
+  function tic() {
+    if (fase !== "plan") return;
+    transcurrido = (performance.now() - t0) / 1000;
+    if (limite) {
+      const resta = limite - transcurrido;
+      ui.reloj.textContent = reloj(resta);
+      ui.reloj.classList.toggle("urgente", resta <= 10);
+      if (resta <= 0) { agotado(); return; }
+    } else ui.reloj.textContent = reloj(transcurrido);
+    if (transcurrido >= AYUDA_SEGUNDOS) ofrecerAyuda();
+  }
+
+  function agotado() {
+    detener();
+    fase = "agotado";
+    ui.reloj.textContent = "0:00";
+    ui.trampa.hidden = true;
+    tarjeta(`
+      <p class="eyebrow">Nivel secreto</p>
+      <h2>Se acabó el tiempo</h2>
+      <div class="acciones">
+        <button class="btn btn-grande btn-ic" id="mg-activar2" type="button">${ICONO}<span>Resolver con <span class="gr-marca">GoodRoute</span></span></button>
+        <button class="btn btn-sec" id="mg-reintentar" type="button">Reintentar</button>
+      </div>`);
+    $("mg-activar2").addEventListener("click", () => { cerrarTarjeta(); activar(); });
+    $("mg-reintentar").addEventListener("click", () => { rutas = N.tecs.map(() => []); historia = []; transcurrido = 0; ui.reloj.className = "mg-reloj"; planificar(); });
+  }
+
+  function tocarOt(i) {
+    if (fase !== "plan") return;
+    const t = rutas.findIndex((r) => r.includes(i));
+    historia.push(rutas.map((r) => r.slice()));
+    if (t >= 0) { rutas[t] = rutas[t].filter((x) => x !== i); contarDeshacer(); }
+    else { rutas[sel].push(i); elegido = true; }
+    pintar();
+  }
+  function elegirTec(t) {
+    if (N.tecs[t].ausente || oculto(t)) return;
+    sel = t;
+    if (fase !== "plan") return;
+    elegido = true;
+    pintar();
+  }
+
+  function confirmar() {
+    if (fase === "resultado") { siguiente(); return; }
+    if (fase !== "plan") return;
+    const ev = evaluar(N, rutas, N.extMax);
+    if (!ev.ok) return;
+    detener();
+    fase = "resultado";
+    ui.trampa.hidden = true;
+    rutasTu = rutas.map((x) => x.slice());
+    rutasGr = null; turno = "tu";
+    const m = medidas(N, rutas);
+    resultados[idx] = { completo: true, manual: transcurrido, viajeTu: ev.viaje, cuadrasTu: cuadras(N, rutas), finTu: m.fin, difTu: m.dif };
+    anotarGr();
+    pintarPasos();
+    pintar();
+    turnoT = setTimeout(turnoGr, reducido() ? 300 : 1200);
+  }
+
+  function anotarGr() {
+    const m = medidas(N, gr.rutas);
+    Object.assign(resultados[idx], { gr: gr.ms, viajeGr: gr.c[3], cuadrasGr: cuadras(N, gr.rutas), finGr: m.fin, difGr: m.dif });
+  }
+  function muestra(lista, k) {
+    if (lista.length <= k) return lista.slice();
+    return Array.from({ length: k }, (_, j) => lista[Math.round((j * (lista.length - 1)) / (k - 1))]);
+  }
+
+  function turnoGr() {
+    if (fase !== "resultado" || turno !== "tu") return;
+    clearTimeout(refinarT);
+    const repetir = busq.terminado ? muestra(busq.historial, 36) : null;
+    const cerrar = () => { gr = foto(busq); anotarGr(); turno = "listo"; rutasGr = gr.rutas.map((x) => x.slice()); animar = true; pintar(); };
+    turno = "buscando"; busqueda = { evals: 0, mejor: null };
+    let k = 0, primero = true;
+    const paso = () => {
+      if (fase !== "resultado" || turno !== "buscando") return;
+      let v;
+      if (repetir) {
+        if (k >= repetir.length) { cerrar(); return; }
+        v = repetir[k++];
+        if (!busqueda.mejor || menor(v.c, busqueda.mejor)) busqueda.mejor = v.c;
+        busqueda.evals = v.evals;
+      } else {
+        busq.paso(45);
+        if (busq.terminado) { cerrar(); return; }
+        v = busq.historial[busq.historial.length - 1] || busq.mejor;
+        busqueda.mejor = busq.mejor.c; busqueda.evals = busq.evals;
+      }
+      if (!reducido()) rutasGr = v.rutas;
+      if (primero) { primero = false; pintar(); } else { pintarMapa(); ui.raiz.querySelectorAll(".mg-buscando").forEach((e) => { e.textContent = textoBusqueda(); }); }
+      turnoT = setTimeout(paso, repetir ? 55 + 130 * Math.pow(k / repetir.length, 2.2) : 0);
+    };
+    paso();
+  }
+  const textoBusqueda = () => `${num(busqueda.evals)} opciones revisadas · mejor: termina ${busqueda.mejor ? hhmm(busqueda.mejor[4]) : "—"}, ${busqueda.mejor ? minTxt(busqueda.mejor[3]) : "—"} de viaje`;
+
+  function textoSiguiente() {
+    const r = resultados[idx];
+    if (!r || !r.completo || NIVELES[idx].secreto) return "Ver resumen";
+    return NIVELES[idx + 1].secreto ? "Nivel secreto" : "Siguiente nivel";
+  }
+  function siguiente() {
+    const r = resultados[idx];
+    if (!r.completo || NIVELES[idx].secreto) { terminar(); return; }
+    idx++;
+    prepararNivel();
+  }
+  function terminar() {
+    fase = "fin";
+    mostrarFinal();
+  }
+
+  function activar() {
+    if (fase !== "plan" && fase !== "agotado") return;
+    detener();
+    rutasTu = rutas.map((x) => x.slice());
+    const asignadas = new Set(rutasTu.flat()).size;
+    const m = medidas(N, rutasTu);
+    resultados[idx] = {
+      completo: false, manual: transcurrido, asignadas,
+      viajeTu: asignadas ? evaluar(N, rutasTu, N.extMax).viaje : null,
+      cuadrasTu: asignadas ? cuadras(N, rutasTu) : null, finTu: m.fin, difTu: m.dif,
+    };
+    anotarGr();
+    fase = "resultado"; turno = "tu"; rutasGr = null;
+    ui.trampa.hidden = true;
+    ui.reloj.classList.remove("urgente");
+    ui.reloj.classList.add("congelado");
+    pintarPasos();
+    pintar();
+    turnoT = setTimeout(turnoGr, reducido() ? 300 : 900);
+  }
+
+  function mostrarFinal() {
+    detener();
+    ui.trampa.hidden = true;
+    pintarPasos();
+    const hechos = resultados.map((r, k) => r && { r, cfg: NIVELES[k], k }).filter(Boolean);
+    const cuadrasTxt = (n) => plural(Math.round(n), "cuadra", "cuadras");
+    const promedio = (f) => (v, k) => f(v / k);
+    const aspectos = [
+      { titulo: "Planificación", explica: "Cuánto se tardó en planificar el día.", tu: (r) => r.manual, gr: (r) => r.gr / 1000, txtTu: (r) => tiempoTxt(r.manual) + (r.completo ? "" : " ✕"), txtGr: (r) => msTxt(r.gr), totTu: tiempoTxt, totGr: (v) => msTxt(v * 1000), todos: true },
+      { titulo: "Viaje", explica: "Tiempo total de viaje entre órdenes, acorde al plan.", tu: (r) => (r.completo ? r.viajeTu : null), gr: (r) => r.viajeGr, txtTu: (r) => minTxt(r.viajeTu), txtGr: (r) => minTxt(r.viajeGr), totTu: minTxt, totGr: minTxt },
+      { titulo: "Distancia", explica: "Cuadras totales recorridas, acorde al plan.", tu: (r) => (r.completo ? r.cuadrasTu : null), gr: (r) => r.cuadrasGr, txtTu: (r) => cuadrasTxt(r.cuadrasTu), txtGr: (r) => cuadrasTxt(r.cuadrasGr), totTu: cuadrasTxt, totGr: cuadrasTxt },
+      { titulo: "Término", explica: "Hora a la que termina el último técnico, acorde al plan.", tu: (r) => (r.completo ? r.finTu : null), gr: (r) => r.finGr, txtTu: (r) => hhmm(r.finTu), txtGr: (r) => hhmm(r.finGr), totTu: promedio(hhmm), totGr: promedio(hhmm), media: true },
+      { titulo: "Reparto", explica: "Qué tan antes termina el primer técnico en terminar que el último.", tu: (r) => (r.completo ? r.difTu : null), gr: (r) => r.difGr, txtTu: (r) => minTxt(r.difTu), txtGr: (r) => minTxt(r.difGr), totTu: promedio(minTxt), totGr: promedio(minTxt), media: true, varios: true },
+    ];
+    const graficos = aspectos.map((a, n) => {
+      const aplica = (cfg) => !a.varios || cfg.internos + cfg.externos > 1;
+      const max = Math.max(1e-9, ...hechos.filter(({ cfg }) => aplica(cfg)).flatMap(({ r }) => [a.tu(r) || 0, a.gr(r)]));
+      const cuentan = hechos.filter(({ r, cfg }) => aplica(cfg) && (a.todos || r.completo));
+      const sumTu = cuentan.reduce((x, { r }) => x + a.tu(r), 0), sumGr = cuentan.reduce((x, { r }) => x + a.gr(r), 0);
+      const tot = cuentan.length
+        ? `<div><b>${a.totTu(sumTu, cuentan.length)}</b><span>Tú, ${a.media ? "promedio" : "total"}</span></div><div><b>${a.totGr(sumGr, cuentan.length)}</b><span>${GR}, ${a.media ? "promedio" : "total"}</span></div>`
+        : "";
+      const aplicables = hechos.filter(({ cfg }) => aplica(cfg)).length;
+      const explica = a.explica + (!a.todos && cuentan.length < aplicables ? (cuentan.length ? "" : " No terminaste ningún nivel a mano.") : "");
+      const filas = hechos.map(({ r, cfg, k }) => {
+        const nombre = `${cfg.secreto ? "Secreto" : k + 1} · ${cfg.titulo}`, vTu = a.tu(r);
+        if (!aplica(cfg)) return `<div class="mg-barra-nivel"><span>${nombre}</span><div class="mg-barra-fila"><span class="sin">un solo técnico: no aplica</span></div></div>`;
+        const barra = (v) => `<div class="pista"><i style="width:${Math.max(0.6, (v / max) * 100)}%"></i></div>`;
+        const tu = vTu == null
+          ? `<div class="mg-barra-fila tu"><span class="sin">sin terminar</span></div>`
+          : `<div class="mg-barra-fila tu${r.completo ? "" : " incompleto"}" title="${nombre} · Tú: ${a.txtTu(r)}">${barra(vTu)}<b>${a.txtTu(r)}</b></div>`;
+        return `<div class="mg-barra-nivel"><span>${nombre}</span>${tu}
+          <div class="mg-barra-fila gr" title="${nombre} · GoodRoute: ${a.txtGr(r)}">${barra(a.gr(r))}<b>${a.txtGr(r)}</b></div></div>`;
+      }).join("");
+      return `<div class="mg-graf" role="tabpanel" id="mg-graf-${n}" aria-labelledby="mg-graf-tab-${n}"${n ? " hidden" : ""}>
+        <p class="mg-graf-exp">${explica}</p>
+        ${tot ? `<div class="mg-graf-tot">${tot}</div>` : ""}
+        <div class="mg-barras">${filas}</div></div>`;
+    }).join("");
+    const totTu = hechos.reduce((x, { r }) => x + r.manual, 0), totGr = hechos.reduce((x, { r }) => x + r.gr, 0);
+    tarjeta(`
+      <div class="mg-graf-tabs" role="tablist">${aspectos.map((a, n) => `<button class="mg-graf-tab" type="button" role="tab" id="mg-graf-tab-${n}" aria-controls="mg-graf-${n}" aria-selected="${!n}" data-n="${n}">${a.titulo}</button>`).join("")}</div>
+      ${graficos}
+      <h2 class="mg-pitch">Lo que a ti te tomó ${tiempoTxt(totTu)}, ${GR} lo resolvió en ${msTxt(totGr)}, cumpliendo todas las reglas a la vez.</h2>
+      <p class="f-producto">Hoy la dispatcher considera todos estos objetivos a mano.<br>${GR} entrega la propuesta lista, en segundos.</p>
+      <div class="acciones">
+        <button class="btn" id="mg-otra" type="button">Jugar de nuevo</button>
+        <button class="btn btn-sec" id="mg-volver" type="button">Volver al inicio</button>
+      </div>`);
+    let actual = 0;
+    const pestanas = ui.tarjeta.querySelector(".mg-graf-tabs");
+    const mostrar = (n, elegido) => {
+      actual = n;
+      ui.tarjeta.querySelectorAll(".mg-graf-tab").forEach((b) => b.setAttribute("aria-selected", String(Number(b.dataset.n) === n)));
+      ui.tarjeta.querySelectorAll(".mg-graf").forEach((g, k) => { g.hidden = k !== n; });
+      clearTimeout(rotarT);
+      if (elegido) pestanas.classList.add("detenido");
+      else rotarT = setTimeout(() => mostrar((actual + 1) % aspectos.length), 5000);
+    };
+    pestanas.addEventListener("click", (e) => { const b = e.target.closest("[data-n]"); if (b) mostrar(Number(b.dataset.n), true); });
+    mostrar(0);
+    $("mg-otra").addEventListener("click", () => { clearTimeout(rotarT); cerrarTarjeta(); idx = 0; resultados = []; prepararNivel(); });
+    $("mg-volver").addEventListener("click", () => { clearTimeout(rotarT); salir(); });
+  }
+
+  const U = 10, M = 8, MT = 12, MB = 9, HW = 1.5;
+  const X = (x) => M + x * U, Y = (y) => MT + y * U;
+  const TONOS = ["#e9dfdf", "#e2d6d6", "#ece5e2"];
+  function svgMapa() {
+    const c = N.ciudad;
+    const W = M * 2 + P.cols * U, H = MT + MB + P.filas * U;
+    const nx = (n) => X(n % c.C), ny = (n) => Y(Math.floor(n / c.C));
+    const s = [];
+    s.push(`<defs><pattern id="mg-rayas" width="1.6" height="1.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.6" height="1.6" fill="#ffffff"/><rect width=".8" height="1.6" fill="#e07419"/></pattern></defs>`);
+    s.push(`<rect x="0" y="0" width="${W}" height="${H}" rx="4" fill="#FBF6F6"/>`);
+    s.push(`<rect x="${X(0) - HW}" y="${Y(0) - HW}" width="${P.cols * U + 2 * HW}" height="${P.filas * U + 2 * HW}" rx="2.2" fill="#d9d1d1"/>`);
+    for (const b of c.bloques) {
+      const x0 = X(b.c) + HW, x1 = X(b.c + 1) - HW, y0 = Y(b.f) + HW, y1 = Y(b.f + 1) - HW;
+      s.push(`<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx=".9" fill="#f6f2f1"/>`);
+      const pad = 0.65, iw = x1 - x0 - 2 * pad, ih = y1 - y0 - 2 * pad;
+      for (const pz of b.piezas) {
+        const [a, bb, w, h] = pz.r;
+        s.push(`<rect x="${x0 + pad + a * iw + 0.2}" y="${y0 + pad + bb * ih + 0.2}" width="${w * iw - 0.4}" height="${h * ih - 0.4}" rx=".35" fill="${TONOS[pz.tono]}"/>`);
+      }
+    }
+    for (const g of c.grandes) {
+      const x0 = X(g.x) + HW, x1 = X(g.x + g.w) - HW, y0 = Y(g.y) + HW, y1 = Y(g.y + g.h) - HW;
+      if (g.tipo === "parque") {
+        s.push(`<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx="1.4" fill="#dce8d2"/>`);
+        s.push(`<path d="M${x0 + 1} ${(y0 + y1) / 2} H${x1 - 1} M${(x0 + x1) / 2} ${y0 + 1} V${y1 - 1}" stroke="#f3efe6" stroke-width=".7" fill="none"/>`);
+        for (const [a, bb, r] of g.arboles) s.push(`<circle cx="${x0 + a * (x1 - x0)}" cy="${y0 + bb * (y1 - y0)}" r="${r}" fill="#b7cfa6"/>`);
+      } else {
+        s.push(`<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx="1.2" fill="#f6f2f1"/>`);
+        s.push(`<rect x="${x0 + 0.9}" y="${y0 + 0.9}" width="${x1 - x0 - 1.8}" height="${y1 - y0 - 1.8}" rx=".8" fill="#ddd0d0"/>`);
+        s.push(`<rect x="${x0 + 2.2}" y="${y0 + 2.2}" width="${x1 - x0 - 4.4}" height="${y1 - y0 - 4.4}" rx=".6" fill="none" stroke="#f6f2f1" stroke-width=".45"/>`);
+      }
+    }
+    const flechas = [];
+    for (let y = 0; y <= P.filas; y++) if (c.sx[y]) for (let x = 0; x < P.cols; x++) if (c.abierta(c.nodo(x, y), c.nodo(x + 1, y))) flechas.push([X(x + 0.5), Y(y), c.sx[y] > 0 ? 0 : 180]);
+    for (let x = 0; x <= P.cols; x++) if (c.sy[x]) for (let y = 0; y < P.filas; y++) if (c.abierta(c.nodo(x, y), c.nodo(x, y + 1))) flechas.push([X(x), Y(y + 0.5), c.sy[x] > 0 ? 90 : 270]);
+    s.push(`<g fill="none" stroke="#ffffff" stroke-width=".55" stroke-linecap="round" stroke-linejoin="round">${flechas.map(([x, y, a]) => `<path d="M-1.6 -.75 L-.6 0 L-1.6 .75 M.4 -.75 L1.4 0 L.4 .75" transform="translate(${x} ${y}) rotate(${a})"/>`).join("")}</g>`);
+    for (const [a, b] of c.obras) {
+      const ax = nx(a), ay = ny(a), bx = nx(b), by = ny(b), mx = (ax + bx) / 2, my = (ay + by) / 2;
+      const horiz = ay === by;
+      s.push(`<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#e07419" stroke-width="${2 * HW}" opacity=".16"/>`);
+      s.push(horiz
+        ? `<rect x="${mx - 0.75}" y="${my - HW - 0.3}" width="1.5" height="${2 * HW + 0.6}" rx=".3" fill="url(#mg-rayas)" stroke="#c4560b" stroke-width=".2"/>`
+        : `<rect x="${mx - HW - 0.3}" y="${my - 0.75}" width="${2 * HW + 0.6}" height="1.5" rx=".3" fill="url(#mg-rayas)" stroke="#c4560b" stroke-width=".2"/>`);
+    }
+    const T = N.tecs.length, comp = comparando();
+    const trazo = (rs, ancho, casco, tono, extra) => rs.forEach((r, t) => {
+      const off = (t - (T - 1) / 2) * 0.5, col = tono(N.tecs[t].color);
+      let p = N.tecs[t].p;
+      r.forEach((i, k) => {
+        const d = camino(N, p, N.ots[i].p).map((n, j) => `${j ? "L" : "M"}${nx(n) + off} ${ny(n) + off}`).join(" ");
+        p = N.ots[i].p;
+        const a = extra(k);
+        s.push(`<path d="${d}" fill="none" stroke="#ffffff" stroke-width="${ancho + casco}" stroke-linejoin="round" stroke-linecap="butt"${a}/>`);
+        s.push(`<path d="${d}" fill="none" stroke="${col}" stroke-width="${ancho}" stroke-linejoin="round" stroke-linecap="round"${a}/>`);
+      });
+    });
+    const anim = (k) => (animar ? ` pathLength="1" class="mg-traza" style="animation-delay:${k * 90}ms"` : "");
+    const sinAnim = () => "";
+    if (comp) {
+      trazo(rutasTu, 2.8, 0.8, palido, sinAnim);
+      if (rutasGr) trazo(rutasGr, 1.2, 0.7, (c) => c, turno === "buscando" ? () => ' opacity=".6"' : anim);
+    } else if (tuyo()) trazo(rutas, 2.8, 0.8, palido, sinAnim);
+    else trazo(rutas, 1.5, 0.9, (c) => c, anim);
+    N.tecs.forEach((tec, t) => {
+      if (oculto(t)) return;
+      const x = X(tec.pos.x), y = Y(tec.pos.y), act = t === sel && (fase === "plan" || fase === "intro");
+      s.push(`<g class="base${entrada && nuevosTecs.has(t) ? " mg-cae" : ""}" data-t="${t}" opacity="${tec.ausente ? 0.3 : 1}">
+        ${act ? `<rect x="${x - 5.6}" y="${y - 5.6}" width="11.2" height="11.2" rx="2.6" fill="none" stroke="${tec.color}" stroke-width=".9" opacity=".6"/>` : ""}
+        <rect x="${x - 4}" y="${y - 4}" width="8" height="8" rx="1.8" fill="${tec.color}" stroke="#fff" stroke-width=".6"${tec.tipo === "externo" ? ' stroke-dasharray="1.4 1"' : ""}/>
+        <text x="${x}" y="${y + 1.5}" text-anchor="middle" font-size="4.4" font-weight="700" fill="#fff" font-family="IBM Plex Sans, sans-serif">${tec.nombre[0]}</text></g>`);
+    });
+    const dueno = new Map(), tardes = new Set();
+    (comp ? rutasGr || rutasTu : rutas).forEach((r, t) => simular(N, t, r).visitas.forEach((v) => { if (v.atraso > 0) tardes.add(v.i); }));
+    (comp ? rutasGr || rutasTu : rutas).forEach((r, t) => r.forEach((i) => dueno.set(i, t)));
+    N.ots.forEach((o, i) => {
+      const x = X(o.pos.x), y = Y(o.pos.y), t = dueno.get(i);
+      const asignada = t != null;
+      const claro = asignada && (comp ? !rutasGr : tuyo());
+      const col = asignada ? (claro ? palido(N.tecs[t].color) : N.tecs[t].color) : "#ffffff";
+      const tarde = tardes.has(i);
+      const borde = tarde ? "#c2264b" : asignada ? col : o.hoy ? (N.cfg.hoy != null ? "#c2264b" : "#1c1a1b") : "#9a968c";
+      const dash = !o.hoy && !asignada ? ' stroke-dasharray="1.2 .9"' : "";
+      const g = [`<g class="ot${animar && asignada ? " mg-cae" : ""}" data-i="${i}"${animar && asignada ? ` style="animation-delay:${(i % 12) * 30}ms"` : ""}>`];
+      g.push(`<circle cx="${x}" cy="${y}" r="5.4" fill="transparent"/>`);
+      g.push(`<circle class="ot-c" cx="${x}" cy="${y}" r="3.5" fill="${col}" stroke="${borde}" stroke-width="${tarde ? 1.1 : !asignada && o.hoy && N.cfg.hoy != null ? 0.8 : 0.6}"${dash}/>`);
+      g.push(`<text x="${x}" y="${y + 1.25}" text-anchor="middle" font-size="3.3" font-weight="700" fill="${asignada && !claro ? "#fff" : o.hoy || claro ? "#1c1a1b" : "#6b6860"}" font-family="IBM Plex Mono, monospace">${o.id}</text>`);
+      for (let v = 0; v < o.veh; v++) g.push(`<circle cx="${x - (o.veh - 1) * 0.9 + v * 1.8}" cy="${y + 5}" r=".62" fill="#1c1a1b" opacity=".7"/>`);
+      if (o.hora != null) {
+        const tx = hhmm(o.hora);
+        g.push(`<rect x="${x - 4.6}" y="${y - 9.4}" width="9.2" height="3.9" rx="1.9" fill="${tarde ? "#c2264b" : "#033E84"}"/><text x="${x}" y="${y - 6.55}" text-anchor="middle" font-size="2.7" font-weight="600" fill="#fff" font-family="IBM Plex Mono, monospace">${tx}</text>`);
+      }
+      g.push("</g>");
+      s.push(g.join(""));
+    });
+    return { vb: `0 0 ${W} ${H}`, html: s.join("") };
+  }
+  function pintarMapa() { const r = svgMapa(); ui.mapa.setAttribute("viewBox", r.vb); ui.mapa.innerHTML = r.html; }
+
+  const vistaSvg = $("mg-vista"), vistaEstado = $("mg-vista-estado");
+  let vistaT = null, VISTA = null;
+  function conSemilla(semilla, fn) {
+    const original = Math.random;
+    let a = semilla >>> 0;
+    Math.random = () => {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    try { return fn(); } finally { Math.random = original; }
+  }
+  function prepararVista() {
+    const Nv = conSemilla(20261106, () => generar({ ...NIVELES[3], internos: 3, externos: 0, ots: 12 }));
+    const r = conSemilla(7, () => resolver(Nv, 200));
+    const variantes = muestra(r.busqueda.historial, 47).concat([{ rutas: r.rutas, c: r.c }]);
+    VISTA = { N: Nv, variantes };
+  }
+  function dibujarVista(Nv, rv, anim) {
+    const g = { N, rutas, fase, sel, animar };
+    N = Nv; rutas = rv || Nv.tecs.map(() => []); fase = "vista"; sel = -1; animar = anim;
+    const r = svgMapa();
+    ({ N, rutas, fase, sel, animar } = g);
+    vistaSvg.setAttribute("viewBox", r.vb);
+    vistaSvg.innerHTML = r.html;
+  }
+  function estadoVista(texto, listo) {
+    vistaEstado.textContent = texto;
+    vistaEstado.classList.toggle("listo", listo);
+  }
+  function cicloVista() {
+    clearTimeout(vistaT);
+    if ($("inicio").hidden || document.hidden) { vistaT = setTimeout(cicloVista, 1200); return; }
+    if (!VISTA) prepararVista();
+    const { N: Nv, variantes } = VISTA, total = variantes.length, final = variantes[total - 1];
+    const listo = `Mejor de ${total} soluciones revisadas · ${minTxt(final.c[3])} de viaje`;
+    if (reducido()) { vistaSvg.classList.remove("buscando"); dibujarVista(Nv, final.rutas, false); estadoVista(listo, true); return; }
+    dibujarVista(Nv, null, false);
+    estadoVista("Buscando el mejor plan…", false);
+    let k = 0, mejor = null;
+    const paso = () => {
+      if ($("inicio").hidden || document.hidden) { vistaT = setTimeout(cicloVista, 1200); return; }
+      const v = variantes[k], ultimo = k === total - 1;
+      if (!mejor || menor(v.c, mejor.c)) mejor = v;
+      vistaSvg.classList.toggle("buscando", !ultimo);
+      dibujarVista(Nv, v.rutas, ultimo);
+      estadoVista(ultimo ? listo : `Solución ${k + 1} de ${total} · mejor: ${minTxt(mejor.c[3])} de viaje`, ultimo);
+      k++;
+      vistaT = ultimo ? setTimeout(cicloVista, 5200) : setTimeout(paso, 55 + 130 * Math.pow(k / total, 2.2));
+    };
+    vistaT = setTimeout(paso, 900);
+  }
+  cicloVista();
+
+  function pintarTecs(ev) {
+    const simsGr = comparando() && turno === "listo" ? rutasGr.map((r, t) => simular(N, t, r)) : null;
+    const escala = Math.max(P.fin, ...ev.sims.map((s) => s.fin), ...(simsGr || []).map((s) => s.fin)) * 1.02;
+    const pct = (m) => (m / escala) * 100;
+    const topes = N.cfg.reglas.includes("topes");
+    ui.tecs.innerHTML = N.tecs.map((tec, t) => {
+      if (oculto(t)) return "";
+      const s = ev.sims[t], sg = simsGr && simsGr[t], tp = tope(tec), sobre = topes && rutas[t].length > tp, nuevo = nuevosTecs.has(t);
+      const linea = (sim, color) => `<span class="mg-linea${color ? " palida" : ""}"${color ? ` style="--c:${color}"` : ""}>${sim.visitas.map((v) => {
+        const o = N.ots[v.i];
+        return `<i class="mg-seg viaje" style="left:${pct(v.salida)}%;width:${pct(v.llegada - v.salida)}%"></i>` +
+          (v.inicio > v.llegada ? `<i class="mg-seg espera" style="left:${pct(v.llegada)}%;width:${pct(v.inicio - v.llegada)}%"></i>` : "") +
+          `<i class="mg-seg servicio${v.atraso > 0 ? " tarde" : ""}" style="left:${pct(v.inicio)}%;width:${pct(v.fin - v.inicio)}%">${o.id}</i>`;
+      }).join("")}<i class="mg-fin-jornada" style="left:${pct(P.fin)}%"></i>${sim.fin > P.fin ? `<i class="mg-exceso" style="left:${pct(P.fin)}%"></i>` : ""}</span>`;
+      const fin = (sim) => (sim.n ? hhmm(sim.fin) : "libre");
+      const datos = sg
+        ? `${rutas[t].length} → ${rutasGr[t].length} · fin ${fin(s)} → ${fin(sg)}`
+        : `<span class="${sobre ? "mal" : ""}">${rutas[t].length}${topes ? `/${tp}` : ""}</span> · <span class="${s.excede ? "mal" : ""}">${s.n ? "fin " + hhmm(s.fin) : "libre"}</span>`;
+      return `<button class="mg-tec${entrada && nuevo ? " entra" : ""}" type="button" data-t="${t}" style="--c:${tec.color}" aria-pressed="${t === sel && fase === "plan"}">
+        <span class="mg-tec-cab"><span class="mg-punto"></span><b>${tec.nombre}</b><span class="tipo">${tec.tipo}</span>${nuevo ? '<span class="mg-nuevo">nuevo</span>' : ""}<span class="datos">${datos}</span></span>
+        ${sg ? linea(s, palido(tec.color)) + linea(sg) : linea(s, tuyo() ? palido(tec.color) : null)}
+      </button>`;
+    }).join("");
+  }
+
+  let reglasPrevias = {};
+  function pintarReglas(ev) {
+    const algo = rutas.flat().length > 0;
+    const previas = reglasPrevias;
+    reglasPrevias = {};
+    ui.reglas.innerHTML = ev.reglas.filter((r) => !(fase === "intro" && nuevasReglas.has(r.id))).map((r) => {
+      reglasPrevias[r.id] = r.ok;
+      const estado = !algo ? "" : r.ok ? "ok" : "mal";
+      const cambio = algo && r.id in previas && previas[r.id] !== r.ok && r.ok;
+      const nueva = nuevasReglas.has(r.id);
+      const cl = [estado, cambio ? "nueva" : "", entrada && nueva ? "entra" : ""].filter(Boolean).join(" ");
+      return `<li class="${cl}"><span class="ic">${estado === "ok" ? "✓" : estado === "mal" ? "✕" : "·"}</span><span>${r.texto}${nueva ? ' <span class="mg-nuevo">nueva</span>' : ""}</span><span class="det">${r.det}</span></li>`;
+    }).join("");
+  }
+
+  const REPARTO = `Reparto<small class="mg-sub">entre el primero y el último en terminar</small>`;
+  function pintarResultado() {
+    const r = resultados[idx];
+    if (fase !== "resultado" || !r) { ui.res.hidden = true; ui.res.innerHTML = ""; return; }
+    const cuadrasTxt = (n) => plural(n, "cuadra", "cuadras");
+    const fila = (et, txt, extra = "") => `<tr><th scope="row">${et}</th><td>${txt}${extra}</td></tr>`;
+    const tabla = (titulo, clase, filas) => `<div class="mg-res-bloque ${clase}"><h3>${titulo}</h3><table><tbody>${filas.join("")}</tbody></table></div>`;
+    const dif = (a, b, fmt) => (r.completo && a != null && b < a - 0.5 ? `<span class="dif">−${fmt(a - b)}</span>` : "");
+    const tu = tabla(r.completo ? "Tu plan" : "Tu plan · sin terminar", "tu", [
+      fila("Planificación", `${tiempoTxt(r.manual)}${r.completo ? "" : " ✕"}`),
+      ...(r.completo ? [] : [fila("Asignadas", `${r.asignadas} de ${N.ots.length}`)]),
+      fila("Viaje", r.viajeTu != null ? minTxt(r.viajeTu) : "—"),
+      fila("Distancia", r.cuadrasTu != null ? cuadrasTxt(r.cuadrasTu) : "—"),
+      fila("Termina el último", r.finTu != null ? hhmm(r.finTu) : "—"),
+      fila(REPARTO, r.finTu != null ? minTxt(r.difTu) : "—"),
+    ]);
+    let suyo = "";
+    if (turno === "buscando") suyo = `<div class="mg-res-bloque gr"><h3>Turno de ${GR}</h3><p class="mg-buscando">${textoBusqueda()}</p></div>`;
+    else if (turno === "listo") suyo = tabla(GR, "gr", [
+      fila("Planificación", msTxt(r.gr)),
+      fila("Viaje", minTxt(r.viajeGr), dif(r.viajeTu, r.viajeGr, minTxt)),
+      fila("Distancia", cuadrasTxt(r.cuadrasGr), dif(r.cuadrasTu, r.cuadrasGr, (n) => String(Math.round(n)))),
+      fila("Termina el último", hhmm(r.finGr), dif(r.finTu, r.finGr, minTxt)),
+      fila(REPARTO, minTxt(r.difGr), dif(r.difTu, r.difGr, minTxt)),
+    ]);
+    const a = turno === "listo" ? ahorro(r) : null;
+    const nota = a == null ? "" : a > 0
+      ? `<p class="mg-res-nota">Con ${GR} los técnicos viajan <b>${a}%</b> menos que con tu plan.</p>`
+      : a === 0
+        ? `<p class="mg-res-nota">Tu plan viaja lo mismo que el de ${GR}.</p>`
+        : `<p class="mg-res-nota">Tu plan viaja <b>${-a}%</b> menos que el de ${GR}.</p>`;
+    ui.res.hidden = false;
+    ui.res.innerHTML = suyo + tu + nota;
+  }
+
+  const ahorro = (r) => (r && r.completo && r.viajeTu > 0 ? Math.round((100 * (r.viajeTu - r.viajeGr)) / r.viajeTu) : null);
+
+  function pintarTurno() {
+    const enRes = fase === "resultado";
+    ui.edicion.hidden = enRes;
+    ui.turno.hidden = !enRes;
+    if (!enRes) return;
+    const r = resultados[idx];
+    ui.terminar.hidden = !(turno === "listo" && r && r.completo && NIVELES[idx + 1] && NIVELES[idx + 1].secreto);
+    if (turno !== "listo") {
+      ui.turnoTxt.innerHTML = `<small>Turno de</small>${GR}<span class="mg-buscando">${turno === "buscando" ? textoBusqueda() : "Revisando tu plan…"}</span>`;
+      return;
+    }
+    const a = ahorro(r);
+    const pct = (num, txt, gana) => `<div class="mg-pct"><b class="${gana ? "gana" : ""}">${num}</b><span>${txt}</span></div>`;
+    ui.turnoTxt.innerHTML = a == null
+      ? pct(msTxt(r.gr), `tardó ${GR}<br>en resolverlo`)
+      : a > 0
+        ? pct(`${a}%`, `menos viaje<br>con ${GR}`)
+        : a === 0
+          ? pct("=", `mismo viaje<br>que ${GR}`, true)
+          : pct(`${-a}%`, `menos viaje en tu plan<br>que con ${GR}`, true);
+  }
+
+  function pintarElegido(ev) {
+    const tec = fase === "plan" && elegido ? N.tecs[sel] : null;
+    if (!tec) { ui.elegido.innerHTML = ""; return; }
+    const s = ev.sims[sel];
+    ui.elegido.style.setProperty("--c", tec.color);
+    ui.elegido.innerHTML = s.n
+      ? `<i></i><b>${tec.nombre}</b><span>Primera orden a las <b>${hhmm(s.visitas[0].inicio)}</b></span><span class="${s.excede ? "mal" : ""}">Se desocupa a las <b>${hhmm(s.fin)}</b></span>`
+      : `<i></i><b>${tec.nombre}</b><span>Sin órdenes asignadas</span>`;
+  }
+
+  function pintarBarra(ev) {
+    const enPlan = fase === "plan", enRes = fase === "resultado";
+    const algo = rutas.flat().length > 0;
+    const fallan = ev.reglas.filter((x) => !x.ok).length;
+    const reglasOk = enRes || (algo && !fallan);
+    const reglasMal = !enRes && algo && fallan > 0;
+    ui.insReglas.hidden = !(reglasOk || reglasMal);
+    ui.insReglas.className = `mg-insignia ${reglasOk ? "ok" : "mal"}`;
+    ui.insReglas.textContent = reglasOk ? "✓" : String(fallan);
+    ui.btnReglas.classList.toggle("ok", reglasOk);
+    ui.btnReglas.classList.toggle("mal", reglasMal);
+    ui.btnReglas.setAttribute("aria-label", reglasOk ? "Reglas: todas se cumplen" : reglasMal ? `Reglas: ${plural(fallan, "no se cumple", "no se cumplen")}` : "Reglas");
+
+    const topes = N.cfg.reglas.includes("topes");
+    const sobre = N.tecs.filter((tec, t) => (topes && rutas[t].length > tope(tec)) || ev.sims[t].excede).length;
+    const antes = Number(ui.insTecs.textContent) || 0;
+    ui.insTecs.hidden = !(enPlan && sobre > 0);
+    ui.insTecs.textContent = sobre > 0 ? String(sobre) : "";
+    ui.insTecs.classList.remove("pulso");
+    if (sobre > antes) { void ui.insTecs.offsetWidth; ui.insTecs.classList.add("pulso"); }
+    ui.btnTecs.classList.toggle("mal", enPlan && sobre > 0);
+    const elegido = enPlan && N.tecs.length > 1 ? N.tecs[sel] : null;
+    ui.btnTecs.style.color = elegido ? elegido.color : "";
+    ui.btnTecs.setAttribute("aria-label", `Técnicos${elegido ? `, eligiendo órdenes para ${elegido.nombre}` : ""}${enPlan && sobre ? `, ${plural(sobre, "sobre su capacidad", "sobre su capacidad")}` : ""}`);
+
+    const texto = enRes ? textoSiguiente() : "";
+    ui.confIc.toggleAttribute("hidden", enRes);
+    ui.confTxt.hidden = !enRes;
+    ui.confTxt.textContent = texto;
+    ui.confirmar.setAttribute("aria-label", enRes ? texto : "Confirmar");
+    ui.confirmar.classList.toggle("mg-calle", enRes && turno === "listo" && texto === "Ver resumen");
+    ui.confirmar.disabled = enRes ? turno !== "listo" : !(enPlan && ev.ok);
+  }
+
+  function pintar() {
+    if (!N) return;
+    const ev = evaluar(N, rutas, N.extMax);
+    pintarMapa();
+    animar = false;
+    pintarTecs(ev);
+    pintarReglas(ev);
+    pintarResultado();
+    pintarTurno();
+    pintarElegido(ev);
+    pintarBarra(ev);
+    entrada = false;
+    const enPlan = fase === "plan", enRes = fase === "resultado";
+    const multi = N.tecs.filter((tec, t) => !tec.ausente && !oculto(t)).length > 1;
+    ui.ayuda.textContent = enRes
+      ? (turno === "listo" ? "Cada técnico muestra dos líneas: arriba tu plan, abajo el de GoodRoute." : "")
+      : multi ? "Toca un técnico para elegirlo y luego toca sus órdenes en el mapa, en orden de visita." : "Toca las órdenes en el mapa en orden de visita. Tocar una asignada la quita.";
+    ui.deshacer.disabled = !(enPlan && historia.length);
+    ui.borrar.disabled = !(enPlan && rutas.flat().length);
+    if (enPlan && ev.reglas[0].ok && !ev.ok) ofrecerAyuda();
+  }
+
+  ui.mapa.addEventListener("click", (e) => {
+    const ot = e.target.closest("[data-i]");
+    if (ot) { tocarOt(Number(ot.dataset.i)); return; }
+    const b = e.target.closest("[data-t]");
+    if (b) elegirTec(Number(b.dataset.t));
+  });
+  ui.tecs.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-t]");
+    if (!b) return;
+    const t = Number(b.dataset.t);
+    elegirTec(t);
+    if (fase === "plan" && sel === t) cerrarHoja();
+  });
+  ui.btnReglas.addEventListener("click", () => abrirHoja("reglas"));
+  ui.btnTecs.addEventListener("click", () => abrirHoja("tecs"));
+  ui.stats.addEventListener("click", () => abrirHoja("stats"));
+  ui.hojaCerrar.addEventListener("click", cerrarHoja);
+  ui.hoja.addEventListener("click", (e) => { if (e.target === ui.hoja) cerrarHoja(); });
+  ui.deshacer.addEventListener("click", () => { if (fase === "plan" && historia.length) { rutas = historia.pop(); contarDeshacer(); pintar(); } });
+  ui.borrar.addEventListener("click", () => { if (fase === "plan" && rutas.flat().length) { historia.push(rutas.map((r) => r.slice())); rutas = N.tecs.map(() => []); contarDeshacer(); pintar(); } });
+  ui.confirmar.addEventListener("click", () => { cerrarHoja(); confirmar(); });
+  ui.terminar.addEventListener("click", () => { if (fase === "resultado") terminar(); });
+  ui.trampa.addEventListener("click", () => { if (fase === "plan") activar(); });
+  $("mg-salir").addEventListener("click", salir);
+  $("btn-l5").addEventListener("click", iniciar);
+  addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !ui.hoja.hidden) { cerrarHoja(); return; }
+    if (ui.raiz.hidden || fase !== "plan") return;
+    const k = Number(e.key);
+    if (k >= 1 && k <= N.tecs.length) elegirTec(k - 1);
+    if (e.key === "Backspace" || (e.key === "z" && (e.ctrlKey || e.metaKey))) { e.preventDefault(); ui.deshacer.click(); }
+  });
+})();
+</script>
+
+</body></html>

@@ -7,12 +7,13 @@ Biblioteca de minijuegos del stand de Control Position. Cada juego muestra una p
 
 ## Juegos
 
-La biblioteca muestra 3 juegos, en orden alfabético:
+La biblioteca muestra 4 juegos, en orden alfabético:
 
 | Juego | Qué muestra | Duración | Carpeta |
 |---|---|---|---|
 | ¿Cuál es más corta? | Ojo de optimizador | 40 s | `minijuegos-de-ruta/` (`?juego=corta`) |
 | Jornada Perfecta | Ventanas horarias | 1,5 min · 4 días | `jornada-perfecta/` |
+| Modo GoodRoute | Varios técnicos | Sin tiempo · 5 niveles | `modo-goodroute/` |
 | Ruta a Mano | Ruta óptima | 1,5 min · 4 niveles | `ganale-al-chip-pulso/` |
 
 **Minijuegos de ruta ocultos.** `minijuegos-de-ruta/index.html` es un solo archivo con 5 minijuegos. Además de *¿Cuál es más corta?*, tiene *Carril libre*, *Desvío*, *Despacho relámpago* y *Memoriza la ruta*, que están ocultos en la biblioteca (`oculto: true` en `biblioteca/juegos.js`). Para mostrar uno, borra ese `oculto: true`.
@@ -20,6 +21,7 @@ La biblioteca muestra 3 juegos, en orden alfabético:
 **La dificultad sube en cada nivel:**
 - **¿Cuál es más corta?:** cada ronda es un nivel. Suben los clientes (de 5 a 9) y las dos rutas se parecen cada vez más.
 - **Ruta a Mano:** 4 niveles. Suben los clientes y las obras, el optimizador va más rápido y sale antes, y las calles se angostan.
+- **Modo GoodRoute:** 5 niveles, de un técnico a un día al límite con varios técnicos, externos y órdenes que vencen hoy, más un nivel secreto contra el reloj. No tiene ranking ni juego con celulares.
 - **Jornada Perfecta:** 4 días. Suben los clientes, los que tienen hora acordada y las obras, las horas quedan más justas y el reloj corre más rápido.
 
 Todo se ajusta en `AJUSTES`, al comienzo del código de cada juego.
