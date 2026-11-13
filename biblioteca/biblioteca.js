@@ -19,7 +19,7 @@
     // navegador no deja ver los toques dentro del juego y queda desactivado.
     volverTrasInactividadMs: 120000,
     ocultarControlesMs: 2500,
-    version: "20261114f",
+    version: "20261114g",
     claveFiltro: "biblioteca.filtro",
     claveControl: "biblioteca.control",
   };

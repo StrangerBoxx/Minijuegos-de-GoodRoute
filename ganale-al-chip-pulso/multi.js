@@ -95,6 +95,8 @@
     const btnJugar = $("btn-jugar");
     if (!btnJugar) return;
     let nJug = 1, sala = null, estadoSala = "", jug = [], preparados = {}, autoInicio = 0, semilla = 0;
+    let vivoJuego = null, forzando = false, forzarT = 0;
+    const SEGUNDOS_FORZAR = 30;
 
     // ---------- En la tarjeta de inicio: cuántos juegan y cómo ----------
     const bloque = crear(`<div class="multi-modos">
@@ -226,7 +228,11 @@
       const cuerpo = capaVivo.querySelector(".multi-cuadro-cuerpo");
       const escala = Math.min(window.devicePixelRatio || 1, 1.5);
       const lado = cuerpo ? Math.round(Math.max(cuerpo.clientWidth, cuerpo.clientHeight) * escala) : AJUSTES.ladoImagen;
-      sala.publicar("vivo", { fase: "jugar", semilla, lado: Math.max(AJUSTES.ladoMin, Math.min(AJUSTES.ladoMax, lado)) });
+      vivoJuego = { fase: "jugar", semilla, lado: Math.max(AJUSTES.ladoMin, Math.min(AJUSTES.ladoMax, lado)) };
+      forzando = false; clearTimeout(forzarT);
+      const btnTerminar = capaVivo.querySelector(".multi-terminar");
+      btnTerminar.disabled = false; btnTerminar.textContent = "Terminar partida";
+      sala.publicar("vivo", vivoJuego);
       pintarVivo();
     }
 
@@ -275,14 +281,27 @@
     let cierrePodio = 0;
     function pintarPodio(o, nombres) {
       const quien = (p) => nombres[p] || JUGADORES[p].nombre;
-      capaPodio.querySelector(".multi-podio-titulo").textContent = o.length > 1 ? `¡Gana ${quien(o[0].p)}!` : "¡Terminó!";
+      capaPodio.querySelector(".multi-podio-titulo").textContent = o.length > 1 && o[0].puntos > 0 ? `¡Gana ${quien(o[0].p)}!` : "¡Terminó!";
       capaPodio.querySelector(".multi-lista").innerHTML = o.map((j, k) => `<li class="${k === 0 ? "primero" : ""}">
         <span class="pos">${k + 1}º</span><span class="num" style="background:${JUGADORES[j.p].color}">${j.p + 1}</span>
         <span class="quien">${esc(quien(j.p))}</span><span class="pts">${fmt(j.puntos)}</span></li>`).join("");
     }
 
+    function terminarPartida() {
+      if (estadoSala !== "jugar") return;
+      const faltan = jug.some((j) => j.conectado && !j.listo);
+      if (typeof window.__forzarFin !== "function" || !faltan || !vivoJuego) { podio(); return; }
+      if (forzando) return;
+      forzando = true;
+      const btnTerminar = capaVivo.querySelector(".multi-terminar");
+      btnTerminar.disabled = true; btnTerminar.textContent = "Resolviendo con GoodRoute…";
+      sala.publicar("vivo", { ...vivoJuego, forzar: true });
+      forzarT = setTimeout(podio, SEGUNDOS_FORZAR * 1000);
+    }
+
     function podio() {
       if (estadoSala !== "jugar") return;
+      clearTimeout(forzarT);
       estadoSala = "podio";
       const o = jug.map((j, p) => ({ ...j, p })).sort((a, b) => b.puntos - a.puntos || a.p - b.p);
       const ganador = o[0] && o[0].puntos > 0 ? o[0] : null;
@@ -321,7 +340,8 @@
     }
 
     function cerrar() {
-      clearTimeout(autoInicio); clearTimeout(cierrePodio);
+      clearTimeout(autoInicio); clearTimeout(cierrePodio); clearTimeout(forzarT);
+      forzando = false;
       if (sala) sala.cerrar();
       sala = null; estadoSala = "";
       capaSala.hidden = true; capaVivo.hidden = true; capaPodio.hidden = true;
@@ -331,7 +351,7 @@
     btnCel.addEventListener("click", abrirSala);
     btnEmpezar.addEventListener("click", () => { if (estadoSala === "sala" && todosListos()) empezar(); });
     capaSala.querySelector(".multi-volver").addEventListener("click", () => { cerrar(); $("inicio").hidden = false; pintarNumeros(); });
-    capaVivo.querySelector(".multi-terminar").addEventListener("click", podio);
+    capaVivo.querySelector(".multi-terminar").addEventListener("click", terminarPartida);
     capaPodio.querySelector(".multi-otra").addEventListener("click", () => { cerrar(); $("inicio").hidden = false; pintarNumeros(); });
     capaPodio.querySelector(".multi-hub").addEventListener("click", () => { cerrar(); volverAlHub(); });
 
@@ -382,6 +402,7 @@
         const antes = ultimoVivo; ultimoVivo = v;
         if (v.fase === "jugar" && Number(v.lado) > 0) ladoImagen = Math.max(AJUSTES.ladoMin, Math.min(AJUSTES.ladoMax, Number(v.lado)));
         if (v.fase === "jugar" && (!antes || antes.fase !== "jugar")) cuentaRegresiva(v.semilla);
+        if (v.fase === "jugar" && v.forzar && empezo && !terminado) { try { if (window.__forzarFin) window.__forzarFin(); } catch { /* el juego sigue */ } }
         if (v.fase === "podio") { if (!terminado) cortar(); puesto(v.podio, v); }
       });
     }

@@ -4,8 +4,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Poppins:ital,wght@0,400;0,600;0,700;1,700;1,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="online.css?v=20261114f">
-<link rel="stylesheet" href="multi.css?v=20261114f">
+<link rel="stylesheet" href="online.css?v=20261114g">
+<link rel="stylesheet" href="multi.css?v=20261114g">
 <style>
 /* Una columna de celular: cabecera, fila sobre el mapa, mapa, barra de tres botones; lo demás en hojas que suben. */
 :root {
@@ -953,6 +953,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
   const ICONO = `<svg class="gr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 19c0-5 4-5 7-7s7-2 7-7"/><circle cx="5" cy="19" r="2.1" fill="currentColor" stroke="none"/><circle cx="19" cy="5" r="2.1" fill="currentColor" stroke="none"/></svg>`;
   let idx = 0, N = null, gr = null, rutas = [], historia = [], sel = 0, fase = "fuera";
   let t0 = 0, transcurrido = 0, intervalo = null, resultados = [], rutasTu = null, animar = false;
+  let forzado = false;
   let elegido = false, limite = null, deshaceres = 0, nuevosTecs = new Set(), nuevasReglas = new Set(), entrada = false;
   let rutasGr = null, turno = null, turnoT = null, busqueda = null, rotarT = null, refinarT = null, busq = null;
   const oculto = (t) => fase === "intro" && nuevosTecs.has(t);
@@ -997,6 +998,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
 
   let serieNivel = 0;       // cambia con cada nivel (para la transmisión)
   function prepararNivel() {
+    if (idx === 0) forzado = false;
     serieNivel++;
     const cfg = NIVELES[idx];
     N = conSemilla(semillaPartida + idx * 7919, () => generarNivel(idx));
@@ -1169,7 +1171,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     if (fase !== "resultado" || turno !== "tu") return;
     clearTimeout(refinarT);
     const repetir = busq.terminado ? muestra(busq.historial, 36) : null;
-    const cerrar = () => { gr = foto(busq); anotarGr(); puntuar(resultados[idx]); turno = "listo"; rutasGr = gr.rutas.map((x) => x.slice()); animar = true; pintar(); };
+    const cerrar = () => { gr = foto(busq); anotarGr(); puntuar(resultados[idx]); turno = "listo"; rutasGr = gr.rutas.map((x) => x.slice()); animar = true; pintar(); if (forzado) cerrarForzado(); };
     turno = "buscando"; busqueda = { evals: 0, mejor: null };
     let k = 0, primero = true;
     const paso = () => {
@@ -1240,6 +1242,16 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     },
   };
   // Para "Jugar con celulares" (multi.js): fase "final" = terminó; y su puntaje.
+  function cerrarForzado() {
+    setTimeout(() => { if (fase === "resultado") terminar(); }, reducido() ? 300 : 1500);
+  }
+  window.__forzarFin = () => {
+    if (fase === "fin" || fase === "fuera" || fase === "vista" || forzado) return;
+    forzado = true;
+    if (fase === "intro") planificar();
+    if (fase === "plan" || fase === "agotado") { cerrarTarjeta(); activar(); return; }
+    if (fase === "resultado" && turno === "listo") cerrarForzado();
+  };
   window.__estadoJuego = () => ({ fase: fase === "fin" ? "final" : fase, puntosTotal: puntosTotal(), delegado: fase === "fin" && !!resultados[idx] && !resultados[idx].completo, nivel: NIVELES[idx] ? (NIVELES[idx].secreto ? "Nivel secreto" : `Nivel ${idx + 1} de ${NIVELES.length - 1}`) : "" });
 
   // ---------- Ranking (misma tabla que los otros juegos) ----------
@@ -1754,8 +1766,8 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
 })();
 </script>
 <!-- Jugar con celulares (QR, de 1 a 6 jugadores) -->
-<script src="../firebase-config.js?v=20261114f"></script>
-<script src="online.js?v=20261114f"></script>
-<script src="multi.js?v=20261114f" data-juego="modo-goodroute" data-ranking="modo-goodroute.ranking"></script>
+<script src="../firebase-config.js?v=20261114g"></script>
+<script src="online.js?v=20261114g"></script>
+<script src="multi.js?v=20261114g" data-juego="modo-goodroute" data-ranking="modo-goodroute.ranking"></script>
 
 </body></html>
