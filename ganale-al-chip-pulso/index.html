@@ -65,17 +65,24 @@
   </section>
 
   <section class="capa" id="final" hidden>
-    <div class="tarjeta">
-      <p class="eyebrow">Puntaje final</p>
-      <div class="puntaje-final" id="fin-puntos">0</div>
-      <p class="lead" id="fin-mensaje"></p>
+    <!-- Mismo formato que el final de ¿Cuál es más corta? (estilos en multi.css) -->
+    <div class="tarjeta fin-ruta">
+      <span class="etq">Ruta a Mano</span>
+      <div class="puntaje" id="fin-puntos">0</div>
+      <p class="puntaje-txt">puntos</p>
+      <div class="record-nuevo" id="fin-record" hidden>¡Nuevo récord!</div>
+      <p class="record-ant" id="fin-record-ant"></p>
+      <div class="stats" id="fin-stats"></div>
+      <div class="dato"><strong>Dato GoodRoute</strong><span>El optimizador no maneja: planifica. GoodRoute arma la ruta óptima de cada técnico en milisegundos, sin choques ni vueltas de más.</span></div>
       <form class="guardar" id="form-nombre">
         <input id="nombre" maxlength="14" autocomplete="off" placeholder="Tu nombre" aria-label="Tu nombre" />
         <button class="btn" type="submit">Guardar</button>
       </form>
       <div class="ranking" id="ranking-final"></div>
-      <p class="cta">El optimizador no maneja: planifica. GoodRoute arma la ruta óptima de cada técnico en milisegundos, sin choques ni vueltas de más.</p>
-      <button class="btn btn-secundario" id="btn-otra">Jugar otra vez</button>
+      <div class="botones">
+        <button class="btn btn-naranjo" id="btn-otra" type="button">Jugar de nuevo</button>
+        <button class="btn btn-claro" id="btn-otros" type="button">Otros juegos</button>
+      </div>
     </div>
   </section>
 

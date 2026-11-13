@@ -47,7 +47,7 @@
     resultado: $("resultado"), resTitulo: $("res-titulo"), resDetalle: $("res-detalle"), resPuntos: $("res-puntos"),
     rTiTu: $("r-ti-tu"), rTiGr: $("r-ti-gr"), rCuTu: $("r-cu-tu"), rCuGr: $("r-cu-gr"), rChTu: $("r-ch-tu"),
     btnSiguiente: $("btn-siguiente"),
-    final: $("final"), finPuntos: $("fin-puntos"), finMensaje: $("fin-mensaje"), form: $("form-nombre"), nombre: $("nombre"),
+    final: $("final"), finPuntos: $("fin-puntos"), finRecord: $("fin-record"), finRecordAnt: $("fin-record-ant"), finStats: $("fin-stats"), form: $("form-nombre"), nombre: $("nombre"),
     rankingInicio: $("ranking-inicio"), rankingFinal: $("ranking-final"),
   };
   const vista = new C.Vista($("mapa"));
@@ -57,7 +57,7 @@
 
   // ---------- Estado ----------
   let fase = "inicio";            // inicio | cuenta | carrera | resultado | final
-  let nivelIdx = 0, puntosTotal = 0, victorias = 0;
+  let nivelIdx = 0, puntosTotal = 0, victorias = 0, choquesTotal = 0, clientesTotal = 0;
   let mapa = null, base = 0, clientes = [];
   let chip = null;                // { orden, cuadras, tramos, llegadas[], fin, ms }
   let yo = null;                  // camioneta del jugador (posición en coordenadas de grilla)
@@ -204,7 +204,7 @@
     tCarrera = 0; finCarrera = null;
   }
 
-  function nuevaPartida() { nivelIdx = 0; puntosTotal = 0; victorias = 0; empezarNivel(); }
+  function nuevaPartida() { nivelIdx = 0; puntosTotal = 0; victorias = 0; choquesTotal = 0; clientesTotal = 0; empezarNivel(); }
 
   function empezarNivel() {
     const n = nivel();
@@ -254,6 +254,7 @@
     const n = clientes.length, completo = yo.fin != null;
     const gano = completo && yo.fin < chip.fin;
     if (gano) victorias++;
+    choquesTotal += yo.choques; clientesTotal += yo.visitados.length;
     const eficiencia = yo.cuadras > 0 ? Math.min(1, chip.cuadras / yo.cuadras) * (yo.visitados.length / n) : 0;
     const puntos = Math.round(AJUSTES.puntosEficiencia * eficiencia) + (gano ? AJUSTES.puntosVictoria : 0) +
                    (completo && !yo.choques ? AJUSTES.bonoSinChoques : 0);
@@ -284,16 +285,32 @@
     else terminarPartida();
   }
 
+
+  /** Pantalla final (mismo formato que ¿Cuál es más corta?): récord anterior y 3 datos. */
+  function pintarFinal(puntos, antes, stats) {
+    const fmt = (v) => Math.round(v).toLocaleString("es-CL");
+    const nuevo = puntos > antes;
+    ui.finPuntos.textContent = fmt(puntos);
+    ui.finRecord.hidden = !nuevo;
+    ui.finRecordAnt.textContent = nuevo ? (antes ? `Tu récord anterior era ${fmt(antes)}` : "") : `Tu récord: ${fmt(antes)}`;
+    ui.finStats.innerHTML = stats.map(([v, l]) => `<div class="stat"><b>${v}</b><small>${l}</small></div>`).join("");
+  }
+  // "Otros juegos": vuelve a la biblioteca (dentro de ella, o a la página de inicio si se abrió suelto)
+  $("btn-otros").addEventListener("click", () => {
+    try { if (window.parent !== window && window.parent.document) { window.parent.location.hash = ""; return; } } catch { /* sigue abajo */ }
+    location.href = "../index.html";
+  });
+
   let registro = null;
   function terminarPartida() {
     fase = "final";
     ui.hud.hidden = true;
-    ui.finPuntos.textContent = puntosTotal;
-    const total = AJUSTES.niveles.length;
-    ui.finMensaje.textContent =
-      victorias === total ? "Le ganaste al optimizador en todos los niveles. ¡Pulso de cirujano y ojo de despachador!" :
-      victorias > 0 ? `Le ganaste al optimizador en ${victorias} de ${total} niveles.` :
-      "Manejar y planificar a la vez es difícil. El optimizador solo planifica, y no se equivoca.";
+    const antes = (ranking.leer()[0] || {}).puntos || 0;
+    pintarFinal(puntosTotal, antes, [
+      [`${victorias}/${AJUSTES.niveles.length}`, "niveles ganados"],
+      [clientesTotal, clientesTotal === 1 ? "cliente" : "clientes"],
+      [choquesTotal, choquesTotal === 1 ? "choque" : "choques"],
+    ]);
     registro = null; ui.form.hidden = false; ui.nombre.value = "";
     ranking.pintar(ui.rankingFinal, null);
     mostrar(ui.final);

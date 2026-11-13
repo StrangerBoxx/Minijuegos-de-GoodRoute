@@ -67,7 +67,8 @@
     resPuntos: $("res-puntos"), btnSiguiente: $("btn-siguiente"),
     rOkTu: $("r-ok-tu"), rOkGr: $("r-ok-gr"), rKmTu: $("r-km-tu"), rKmGr: $("r-km-gr"),
     rFinTu: $("r-fin-tu"), rFinGr: $("r-fin-gr"),
-    final: $("final"), finPuntos: $("fin-puntos"), finMensaje: $("fin-mensaje"),
+    final: $("final"), finPuntos: $("fin-puntos"),
+    finRecord: $("fin-record"), finRecordAnt: $("fin-record-ant"), finStats: $("fin-stats"),
     form: $("form-nombre"), nombre: $("nombre"),
     rankingInicio: $("ranking-inicio"), rankingFinal: $("ranking-final"),
   };
@@ -76,7 +77,7 @@
   let fase = "inicio";          // inicio | dia | resultado | final
   let diaIdx = 0;
   let puntosTotal = 0;
-  let diasIgualados = 0;
+  let diasIgualados = 0, aTiempoTotal = 0, atrasadosTotal = 0;
   let mapa = null;              // { cols, rows, bloqueadas, base, clientes:[{nodo,hora}], arboles }
   let jugador = null;           // ver nuevoTecnico()
   let gr = null;                // { ...tecnico, orden, ms }
@@ -537,7 +538,7 @@
   }
 
   function nuevaPartida() {
-    diaIdx = 0; puntosTotal = 0; diasIgualados = 0;
+    diaIdx = 0; puntosTotal = 0; diasIgualados = 0; aTiempoTotal = 0; atrasadosTotal = 0;
     empezarDia();
   }
 
@@ -598,6 +599,7 @@
 
     const iguala = tu.ok >= go.ok && tu.atendidos >= go.atendidos && tu.cuadras <= go.cuadras;
     if (iguala) diasIgualados++;
+    aTiempoTotal += tu.ok; atrasadosTotal += tu.tarde;
     const eficiencia = tu.atendidos ? Math.min(1, go.cuadras / Math.max(tu.cuadras, 1)) * (tu.atendidos / n) : 0;
     const puntos = tu.ok * AJUSTES.puntosATiempo + tu.tarde * AJUSTES.puntosAtrasado
                  + Math.round(AJUSTES.puntosKm * eficiencia) + (iguala ? AJUSTES.bonoIgualar : 0);
@@ -633,16 +635,32 @@
     else terminarPartida();
   }
 
+
+  /** Pantalla final (mismo formato que ¿Cuál es más corta?): récord anterior y 3 datos. */
+  function pintarFinal(puntos, antes, stats) {
+    const fmt = (v) => Math.round(v).toLocaleString("es-CL");
+    const nuevo = puntos > antes;
+    ui.finPuntos.textContent = fmt(puntos);
+    ui.finRecord.hidden = !nuevo;
+    ui.finRecordAnt.textContent = nuevo ? (antes ? `Tu récord anterior era ${fmt(antes)}` : "") : `Tu récord: ${fmt(antes)}`;
+    ui.finStats.innerHTML = stats.map(([v, l]) => `<div class="stat"><b>${v}</b><small>${l}</small></div>`).join("");
+  }
+  // "Otros juegos": vuelve a la biblioteca (dentro de ella, o a la página de inicio si se abrió suelto)
+  $("btn-otros").addEventListener("click", () => {
+    try { if (window.parent !== window && window.parent.document) { window.parent.location.hash = ""; return; } } catch { /* sigue abajo */ }
+    location.href = "../index.html";
+  });
+
   let registroActual = null;
   function terminarPartida() {
     fase = "final";
     ui.hud.hidden = true;
-    ui.finPuntos.textContent = puntosTotal;
-    const total = AJUSTES.dias.length;
-    ui.finMensaje.textContent =
-      diasIgualados === total ? "Igualaste a GoodRoute los tres días. Tienes ojo de despachador." :
-      diasIgualados > 0 ? `Igualaste a GoodRoute en ${diasIgualados} de ${total} días.` :
-      "Cuadrar horas, distancias y jornada a la vez es difícil. Para eso está GoodRoute.";
+    const antes = (leerRanking()[0] || {}).puntos || 0;
+    pintarFinal(puntosTotal, antes, [
+      [aTiempoTotal, "a tiempo"],
+      [atrasadosTotal, atrasadosTotal === 1 ? "atrasado" : "atrasados"],
+      [`${diasIgualados}/${AJUSTES.dias.length}`, "días como GoodRoute"],
+    ]);
     registroActual = null;
     ui.form.hidden = false;
     ui.nombre.value = "";
