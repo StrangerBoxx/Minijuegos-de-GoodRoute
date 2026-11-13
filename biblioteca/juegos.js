@@ -45,11 +45,6 @@ window.CATALOGO = {
       muestra: "Calles cortadas", duracion: "60 s", rondas: "contrarreloj",
     },
     {
-      oculto: true, carpeta: "dia-imprevisto", nombre: "Día Imprevisto", tipo: "individual", control: "mouse",
-      frase: "Reorganiza el día de tus técnicos cada vez que surge un imprevisto.",
-      muestra: "Reprogramación", duracion: "1 min", rondas: "4 imprevistos",
-    },
-    {
       carpeta: "ganale-al-chip-pulso", nombre: "Gánale al Chip · A pulso", tipo: "individual", control: "mouse",
       frase: "Maneja la camioneta por las calles y visita a todos antes que el chip.",
       muestra: "Ruta óptima", duracion: "1 min", rondas: "3 niveles",
@@ -64,36 +59,6 @@ window.CATALOGO = {
       frase: "Mira el recorrido óptimo y repite el orden de visitas.",
       muestra: "Orden de visitas", duracion: "3 vidas", rondas: "niveles",
     },
-    // Ocultos (no aparecen en la biblioteca).
-    {
-      oculto: true, carpeta: "ruta-en-relevo", nombre: "Ruta en Relevo", tipo: "grupal", control: "mouse", jugadores: "2 a 4",
-      frase: "Entre todos arman una sola ruta: por turnos, cada uno toma el mouse y elige el próximo cliente.",
-      muestra: "Ruta óptima, jugada a jugada", rondas: "3 turnos c/u", duracion: "1,5 min",
-    },
-    {
-      oculto: true, carpeta: "turno-de-crisis", nombre: "Turno de Crisis", tipo: "grupal", control: "mouse", jugadores: "2 a 4",
-      frase: "Son la central de despacho: cada imprevisto del día le toca a una persona distinta.",
-      muestra: "Reprogramación en equipo", rondas: "2 imprevistos c/u", duracion: "1,5 min",
-    },
-    {
-      oculto: true, carpeta: "flota-en-vivo", nombre: "Flota en Vivo", tipo: "grupal", control: "tactil", jugadores: "2 a 4",
-      frase: "Las órdenes llegan durante el día. Cada uno maneja una camioneta y entre todos las atienden a tiempo.",
-      muestra: "Despacho en tiempo real", rondas: "1 día", duracion: "1,5 min",
-    },
-    {
-      oculto: true, carpeta: "duelo-de-rutas", nombre: "Duelo de Rutas", tipo: "grupal", control: "tactil", jugadores: "2 a 4",
-      frase: "La misma ciudad para todos, un tablero para cada uno. ¿Quién arma la ruta más corta?",
-      muestra: "Ruta óptima vs. ruta a ojo", rondas: "3 rondas", duracion: "1,5 min",
-    },
-    {
-      oculto: true, carpeta: "ganale-al-chip", nombre: "Gánale al Chip", tipo: "individual", control: "mouse",
-      frase: "El chip es nuestro optimizador de rutas. ¿Puedes armar una ruta mejor y llegar antes que él?",
-      muestra: "Orden de visitas", rondas: "3 niveles", duracion: "1 min",
-    },
-    {
-      oculto: true, carpeta: "reparto", nombre: "Reparto", tipo: "individual", control: "mouse",
-      frase: "Reparte las órdenes del día entre tus técnicos para que nadie termine tarde.",
-      muestra: "Asignación y equilibrio de carga", rondas: "2 rondas", duracion: "1,5 min",
-    },
+    // Ocultos (no aparecen en la biblioteca): minijuegos de ruta que siguen en minijuegos-de-ruta/index.html.
   ],
 };
