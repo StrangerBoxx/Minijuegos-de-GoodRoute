@@ -49,6 +49,26 @@
     { nombre: "Azul", color: "#2f6fd6" }, { nombre: "Naranjo", color: "#E8772E" }, { nombre: "Verde", color: "#1f9d6b" },
     { nombre: "Morado", color: "#7c54c9" }, { nombre: "Rosa", color: "#c23b7a" }, { nombre: "Turquesa", color: "#0f8b8d" },
   ];
+  const GR = '<span class="gr-marca">GoodRoute</span>';
+  const PITCH = {
+    "ganale-al-chip-pulso": {
+      titular: `Mientras ustedes manejaban, ${GR} calculó la ruta óptima de cada nivel en milisegundos.`,
+      dato: `${GR} no maneja: planifica. Arma la ruta óptima de cada técnico en milisegundos, sin choques ni vueltas de más.`,
+    },
+    "jornada-perfecta": {
+      titular: `${GR} llega a la hora a cada cliente y arma el día completo en milisegundos.`,
+      dato: `${GR} toma la hora acordada con cada cliente como una regla del plan: ordena las visitas para cumplirla y, entre las rutas que la cumplen, elige la más corta.`,
+    },
+    "modo-goodroute": {
+      titular: `Lo que a ustedes les tomó minutos, ${GR} lo resuelve en segundos, cumpliendo todas las reglas a la vez.`,
+      dato: `Hoy la dispatcher considera todos estos objetivos a mano.<br>${GR} entrega la propuesta lista, en segundos.`,
+    },
+  }[JUEGO] || { titular: "", dato: "" };
+  const SEGUNDOS_NOMBRE = 120;
+  const volverAlHub = () => {
+    try { if (window.parent !== window && window.parent.document) { window.parent.location.hash = ""; return; } } catch { /* sigue abajo */ }
+    location.href = "../index.html";
+  };
   const params = new URLSearchParams(location.search);
   const SALA = params.get("sala"), YO = Number(params.get("j")) - 1;
   const ES_CELULAR = !!(SALA && JUGADORES[YO]);
@@ -125,8 +145,14 @@
         <p class="multi-eyebrow">${esc(document.title.split("·")[0].trim())} · resultado</p>
         <h2 class="multi-podio-titulo"></h2>
         <ol class="multi-lista"></ol>
+        <div class="multi-pitch">
+          ${PITCH.titular ? `<p class="dato-tit">${PITCH.titular}</p>` : ""}
+          ${PITCH.dato ? `<p class="dato-txt">${PITCH.dato}</p>` : ""}
+        </div>
+        <p class="multi-pide-nombre" hidden></p>
         <div class="multi-botones">
           <button class="btn multi-otra" type="button">Jugar de nuevo</button>
+          <button class="btn multi-hub" type="button">Volver al HUB</button>
         </div>
       </div>
     </section>`);
@@ -241,30 +267,56 @@
       });
     }
 
+    let cierrePodio = 0;
+    function pintarPodio(o, nombres) {
+      const quien = (p) => nombres[p] || JUGADORES[p].nombre;
+      capaPodio.querySelector(".multi-podio-titulo").textContent = o.length > 1 ? `¡Gana ${quien(o[0].p)}!` : "¡Terminó!";
+      capaPodio.querySelector(".multi-lista").innerHTML = o.map((j, k) => `<li class="${k === 0 ? "primero" : ""}">
+        <span class="pos">${k + 1}º</span><span class="num" style="background:${JUGADORES[j.p].color}">${j.p + 1}</span>
+        <span class="quien">${esc(quien(j.p))}</span><span class="pts">${fmt(j.puntos)}</span></li>`).join("");
+    }
+
     function podio() {
       if (estadoSala !== "jugar") return;
       estadoSala = "podio";
       const o = jug.map((j, p) => ({ ...j, p })).sort((a, b) => b.puntos - a.puntos || a.p - b.p);
-      capaPodio.querySelector(".multi-podio-titulo").textContent = o.length > 1 ? `¡Gana ${JUGADORES[o[0].p].nombre}!` : "¡Terminó!";
-      capaPodio.querySelector(".multi-lista").innerHTML = o.map((j, k) => `<li class="${k === 0 ? "primero" : ""}">
-        <span class="pos">${k + 1}º</span><span class="num" style="background:${JUGADORES[j.p].color}">${j.p + 1}</span>
-        <span class="quien">${JUGADORES[j.p].nombre}</span><span class="pts">${fmt(j.puntos)}</span></li>`).join("");
+      const ganador = o[0] && o[0].puntos > 0 ? o[0] : null;
+      const nombres = {};
+      pintarPodio(o, nombres);
       capaVivo.querySelector(".multi-terminar").hidden = true;
+      const aviso = capaPodio.querySelector(".multi-pide-nombre");
+      aviso.hidden = !ganador;
+      if (ganador) aviso.innerHTML = `<i style="background:${JUGADORES[ganador.p].color}">${ganador.p + 1}</i>${JUGADORES[ganador.p].nombre}: escribe tu nombre en el celular para el ranking.`;
       capaPodio.hidden = false;
-      // El ganador queda en el ranking del juego (con el nombre de su color); la biblioteca muestra el récord.
-      if (o[0] && o[0].puntos > 0) {
+      const vivo = { fase: "podio", podio: o.map((j) => ({ p: j.p, puntos: j.puntos })), pideNombre: ganador ? ganador.p : -1 };
+      if (!ganador) { sala.cerrar(vivo); sala = null; return; }
+      const registro = { nombre: JUGADORES[ganador.p].nombre, puntos: ganador.puntos, t: Date.now() };
+      const guardar = (cambiar) => {
         try {
-          const lista = JSON.parse(localStorage.getItem(CLAVE_RANKING)) || [];
-          lista.push({ nombre: JUGADORES[o[0].p].nombre, puntos: o[0].puntos, t: Date.now() });
+          let lista = JSON.parse(localStorage.getItem(CLAVE_RANKING)) || [];
+          lista = cambiar(lista);
           localStorage.setItem(CLAVE_RANKING, JSON.stringify(lista.sort((a, b) => b.puntos - a.puntos || a.t - b.t).slice(0, 10)));
         } catch { /* sin almacenamiento */ }
-      }
-      sala.cerrar({ fase: "podio", podio: o.map((j) => ({ p: j.p, puntos: j.puntos })) });
-      sala = null;
+      };
+      guardar((l) => [...l, registro]);
+      const actual = sala;
+      actual.publicar("vivo", vivo);
+      const terminarSala = () => { clearTimeout(cierrePodio); if (sala === actual) { actual.cerrar(); sala = null; } };
+      actual.alValor("nombres", (v) => {
+        const n = v && typeof v[ganador.p] === "string" ? v[ganador.p].trim().slice(0, 14) : "";
+        if (!n || sala !== actual) return;
+        nombres[ganador.p] = n;
+        guardar((l) => l.map((r) => (r.t === registro.t && r.puntos === registro.puntos ? { ...r, nombre: n } : r)));
+        pintarPodio(o, nombres);
+        aviso.innerHTML = `<i style="background:${JUGADORES[ganador.p].color}">${ganador.p + 1}</i>${esc(n)} quedó en el ranking.`;
+        Promise.resolve(actual.publicar("vivo", { ...vivo, nombreOk: n })).catch(() => {}).finally(terminarSala);
+      });
+      clearTimeout(cierrePodio);
+      cierrePodio = setTimeout(terminarSala, SEGUNDOS_NOMBRE * 1000);
     }
 
     function cerrar() {
-      clearTimeout(autoInicio);
+      clearTimeout(autoInicio); clearTimeout(cierrePodio);
       if (sala) sala.cerrar();
       sala = null; estadoSala = "";
       capaSala.hidden = true; capaVivo.hidden = true; capaPodio.hidden = true;
@@ -276,6 +328,7 @@
     capaSala.querySelector(".multi-volver").addEventListener("click", () => { cerrar(); $("inicio").hidden = false; pintarNumeros(); });
     capaVivo.querySelector(".multi-terminar").addEventListener("click", podio);
     capaPodio.querySelector(".multi-otra").addEventListener("click", () => { cerrar(); $("inicio").hidden = false; pintarNumeros(); });
+    capaPodio.querySelector(".multi-hub").addEventListener("click", () => { cerrar(); volverAlHub(); });
 
     window.__multi = { estado: () => ({ estadoSala, jug, preparados }), urlDe: (p) => (sala ? sala.urlControl(p) : null) };
   }
@@ -324,7 +377,7 @@
         const antes = ultimoVivo; ultimoVivo = v;
         if (v.fase === "jugar" && Number(v.lado) > 0) ladoImagen = Math.max(AJUSTES.ladoMin, Math.min(AJUSTES.ladoMax, Number(v.lado)));
         if (v.fase === "jugar" && (!antes || antes.fase !== "jugar")) cuentaRegresiva(v.semilla);
-        if (v.fase === "podio") { if (!terminado) cortar(); puesto(v.podio); }
+        if (v.fase === "podio") { if (!terminado) cortar(); puesto(v.podio, v); }
       });
     }
 
@@ -473,11 +526,14 @@
       clearInterval(envio); clearInterval(envioImg);
       const pts = puntosJuego();
       if (conexion) conexion.enviar({ tipo: "fin", puntos: pts });
+      const titular = (!porPantalla && $("fin-titular") && $("fin-titular").innerHTML.trim()) || "";
+      const dato = (!porPantalla && $("fin-dato") && $("fin-dato").innerHTML.trim()) || PITCH.dato;
       mostrarFinal(`<h2>${porPantalla ? "Se terminó la partida" : "¡Terminaste!"}</h2>
         <div class="multi-grande">${fmt(pts)}</div><p class="multi-sub">puntos</p>
+        <div class="multi-puesto"></div>
         <p class="multi-msg">${porPantalla ? "La partida se terminó desde la pantalla." : "Mira la pantalla grande: ahí está el marcador."}</p>
-        <p class="multi-puesto"></p>`);
-      if (ultimoVivo && ultimoVivo.fase === "podio") puesto(ultimoVivo.podio);
+        <div class="multi-pitch">${titular ? `<p class="dato-tit">${titular}</p>` : ""}${dato ? `<p class="dato-txt">${dato}</p>` : ""}</div>`);
+      if (ultimoVivo && ultimoVivo.fase === "podio") puesto(ultimoVivo.podio, ultimoVivo);
     }
 
     /** La pantalla terminó la partida: el juego queda tapado y ya no se puede seguir. */
@@ -487,10 +543,28 @@
       else { btnListo.hidden = true; msg.innerHTML = "<b>La partida terminó.</b><br>Para jugar otra, escanea un QR nuevo en la pantalla."; }
     }
 
-    function puesto(podio) {
+    let nombreEnviado = false;
+    function puesto(podio, v) {
       const k = (podio || []).findIndex((x) => x.p === YO), el = capa.querySelector(".multi-puesto");
       if (k < 0 || !el) return;
-      el.innerHTML = podio.length > 1 ? `<b>${k === 0 ? "¡Ganaste!" : `Quedaste ${k + 1}º de ${podio.length}`}</b>` : "<b>¡Bien jugado!</b>";
+      const titulo = podio.length > 1 ? `<b>${k === 0 ? "¡Ganaste!" : `Quedaste ${k + 1}º de ${podio.length}`}</b>` : "<b>¡Bien jugado!</b>";
+      const pide = v && v.pideNombre === YO;
+      if (!pide) { el.innerHTML = titulo; return; }
+      if (v.nombreOk) { el.innerHTML = `${titulo}<p class="multi-nombre-ok">✓ ${esc(v.nombreOk)} quedó en el ranking.</p>`; return; }
+      if (el.querySelector(".multi-nombre")) return;
+      el.innerHTML = `${titulo}<form class="multi-nombre">
+        <label for="multi-nombre-campo">Escribe tu nombre para el ranking</label>
+        <div><input id="multi-nombre-campo" maxlength="14" autocomplete="off" placeholder="Tu nombre" aria-label="Tu nombre" required>
+        <button class="btn" type="submit">Guardar</button></div></form>`;
+      const form = el.querySelector(".multi-nombre"), campo = form.querySelector("input");
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const n = campo.value.trim().slice(0, 14);
+        if (!n || nombreEnviado || !conexion) return;
+        nombreEnviado = true;
+        campo.disabled = true; form.querySelector("button").disabled = true;
+        Promise.resolve(conexion.marcar("nombres", n)).catch(() => { nombreEnviado = false; campo.disabled = false; form.querySelector("button").disabled = false; });
+      });
     }
 
     unirse();

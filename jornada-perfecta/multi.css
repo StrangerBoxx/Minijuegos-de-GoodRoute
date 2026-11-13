@@ -180,3 +180,22 @@
 .multi-dibujo { position: absolute; inset: 0; }
 .multi-dibujo[hidden] { display: none; }
 .multi-dibujo > canvas, .multi-dibujo > svg { display: block; position: static; inset: auto; width: 100%; height: 100%; }
+
+.multi-pitch { margin: 14px 0 12px; text-align: center; font-family: Poppins, sans-serif; }
+.multi-pitch:empty { display: none; }
+.multi-pitch .dato-tit { margin: 0 0 10px; font-size: 20px; font-weight: 700; line-height: 1.25; color: #0B2545; text-wrap: balance; }
+.multi-pitch .dato-txt { margin: 0; padding: 12px 14px; border-radius: 14px; background: #e3ebf5; color: #033E84; font-size: 14px; line-height: 1.5; text-wrap: pretty; }
+.multi-pitch .gr-marca { font-family: Poppins, sans-serif; font-weight: 700; font-style: italic; letter-spacing: -0.01em; }
+.multi-pide-nombre { margin: 0 0 12px; padding: 10px 14px; border-radius: 14px; background: #FAEAC8; color: #0B2545; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.multi-pide-nombre[hidden] { display: none; }
+.multi-pide-nombre i { flex: none; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-style: normal; font-weight: 800; font-size: 14px; }
+.multi-botones .multi-hub { background: #fff; color: #0B2545; border: 2px solid #ece6df; }
+.multi-nombre { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin: 12px 0 4px; text-align: left; }
+.multi-nombre label { font-size: 15px; font-weight: 600; color: #0B2545; text-align: center; }
+.multi-nombre div { display: flex; gap: 8px; min-width: 0; }
+.multi-nombre input {
+  flex: 1 1 0; width: 0; min-width: 0; font: inherit; font-size: 16px; padding: 10px 14px; border-radius: 999px;
+  border: 2px solid #ece6df; background: #F7F4F1; color: #1d2433;
+}
+.multi-nombre .btn { flex: none; width: auto; min-height: 46px; margin: 0; padding: 10px 20px; border-radius: 999px; background: #0B2545; color: #fff; font-family: inherit; font-size: 16px; }
+.multi-nombre-ok { margin: 10px 0 0; font-size: 16px; font-weight: 600; color: #1f9d6b; }
