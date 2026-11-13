@@ -210,3 +210,7 @@
 .voto-pista i { font-style: normal; color: rgba(250, 234, 200, .35); }
 @keyframes voto-avance { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .voto-pista { animation: none; } }
+
+.multi-nombre-ini { display: block; width: 100%; margin: 0 0 12px; font: inherit; font-size: 17px; text-align: center; padding: 12px 16px; border-radius: 999px; border: 2px solid #ece6df; background: #F7F4F1; color: #1d2433; }
+.multi-nombre-ini[hidden] { display: none; }
+.multi-nombre input, .multi-nombre-ini { user-select: text; -webkit-user-select: text; }

@@ -95,7 +95,9 @@
     const btnJugar = $("btn-jugar");
     if (!btnJugar) return;
     let nJug = 1, sala = null, estadoSala = "", jug = [], preparados = {}, autoInicio = 0, semilla = 0;
-    let vivoJuego = null, forzando = false, forzarT = 0;
+    let vivoJuego = null, forzando = false, forzarT = 0, nombresSala = {};
+    const limpio = (n) => (typeof n === "string" ? n.trim().slice(0, 14) : "");
+    const nombreDe = (p) => limpio(nombresSala[p]) || JUGADORES[p].nombre;
     const SEGUNDOS_FORZAR = 30;
 
     // ---------- En la tarjeta de inicio: cuántos juegan y cómo ----------
@@ -177,6 +179,8 @@
         sala.alJugadores((v) => { jug.forEach((j, p) => (j.conectado = !!v[p])); actualizarQR(v); revisarSala(); pintarVivo(); });
         sala.alEntrada(recibir);
         sala.alValor("listos", (v) => { preparados = v || {}; revisarSala(); });
+        nombresSala = {};
+        sala.alValor("nombres", (v) => { nombresSala = v || {}; revisarSala(); pintarVivo(); });
         jug.forEach((_, p) => {
           sala.alValor(`vivoNivel/${p}`, (s) => { const v = leerJSON(s); if (v && jug[p]) { jug[p].nivel = v; jug[p].cache = {}; O.actividad(); dibujarDatos(p); } });
           sala.alValor(`vivoEstado/${p}`, (s) => { const v = leerJSON(s); if (v && jug[p]) { jug[p].estado = v; O.actividad(); dibujarDatos(p); } });
@@ -203,7 +207,7 @@
       const zona = grilla.querySelector(".qr-listos");
       if (zona) zona.innerHTML = todos()
         ? `${todosListos() ? "¡Todos listos!" : "Confirmen en su celular: ¿están listos?"}<div class="multi-listos">${jug.map((_, p) =>
-            `<span class="${preparados[p] ? "si" : ""}"><i style="background:${JUGADORES[p].color}">${p + 1}</i>${JUGADORES[p].nombre}${preparados[p] ? " ✓" : "…"}</span>`).join("")}</div>`
+            `<span class="${preparados[p] ? "si" : ""}"><i style="background:${JUGADORES[p].color}">${p + 1}</i>${esc(nombreDe(p))}${preparados[p] ? " ✓" : "…"}</span>`).join("")}</div>`
         : "";
       if (todosListos()) {
         btnEmpezar.disabled = false; btnEmpezar.textContent = "¡Empezar!";
@@ -221,7 +225,7 @@
       capaVivo.querySelector(".multi-cuadros").style.setProperty("--n", nJug);
       capaVivo.querySelector(".multi-cuadros").dataset.n = nJug;
       capaVivo.querySelector(".multi-cuadros").innerHTML = jug.map((_, p) => `<div class="multi-cuadro" data-p="${p}" style="--color:${JUGADORES[p].color}">
-        <div class="multi-cuadro-cab"><b>${p + 1}</b><span>${JUGADORES[p].nombre}</span><i class="multi-nivel" hidden></i><em class="multi-pts">0 pts</em></div>
+        <div class="multi-cuadro-cab"><b>${p + 1}</b><span>${esc(nombreDe(p))}</span><i class="multi-nivel" hidden></i><em class="multi-pts">0 pts</em></div>
         <div class="multi-cuadro-cuerpo"><img alt="" hidden><div class="multi-dibujo" hidden></div><p class="multi-espera">Esperando su partida…</p><p class="multi-termino" hidden>✓ Terminó</p></div>
       </div>`).join("");
       // Tamaño real de cada recuadro (en px de pantalla): los celulares mandan imágenes de ese tamaño.
@@ -269,6 +273,7 @@
         const c = capaVivo.querySelector(`.multi-cuadro[data-p="${p}"]`);
         if (!c) return;
         c.querySelector(".multi-pts").textContent = `${fmt(j.puntos)} pts`;
+        c.querySelector(".multi-cuadro-cab span").textContent = nombreDe(p);
         const nivel = c.querySelector(".multi-nivel");
         nivel.textContent = j.etapa || ""; nivel.hidden = !j.etapa;
         c.querySelector(".multi-termino").hidden = !j.listo;
@@ -306,15 +311,18 @@
       const o = jug.map((j, p) => ({ ...j, p })).sort((a, b) => b.puntos - a.puntos || a.p - b.p);
       const ganador = o[0] && o[0].puntos > 0 ? o[0] : null;
       const nombres = {};
+      jug.forEach((_, p) => { const n = limpio(nombresSala[p]); if (n) nombres[p] = n; });
       pintarPodio(o, nombres);
       capaVivo.querySelector(".multi-terminar").hidden = true;
       const aviso = capaPodio.querySelector(".multi-pide-nombre");
       aviso.hidden = !ganador;
-      if (ganador) aviso.innerHTML = `<i style="background:${JUGADORES[ganador.p].color}">${ganador.p + 1}</i>${JUGADORES[ganador.p].nombre}: escribe tu nombre en el celular para el ranking.`;
+      if (ganador) aviso.innerHTML = nombres[ganador.p]
+        ? `<i style="background:${JUGADORES[ganador.p].color}">${ganador.p + 1}</i>${esc(nombres[ganador.p])} quedó en el ranking.`
+        : `<i style="background:${JUGADORES[ganador.p].color}">${ganador.p + 1}</i>${JUGADORES[ganador.p].nombre}: escribe tu nombre en el celular para el ranking.`;
       capaPodio.hidden = false;
       const vivo = { fase: "podio", podio: o.map((j) => ({ p: j.p, puntos: j.puntos })), pideNombre: ganador ? ganador.p : -1 };
       if (!ganador) { sala.cerrar(vivo); sala = null; return; }
-      const registro = { nombre: JUGADORES[ganador.p].nombre, puntos: ganador.puntos, t: Date.now() };
+      const registro = { nombre: nombres[ganador.p] || JUGADORES[ganador.p].nombre, puntos: ganador.puntos, t: Date.now() };
       const guardar = (cambiar) => {
         try {
           let lista = JSON.parse(localStorage.getItem(CLAVE_RANKING)) || [];
@@ -377,11 +385,14 @@
         <h2>${titulo ? titulo.innerHTML : esc(document.title)}</h2>
         ${reglas ? reglas.outerHTML : ""}
         <p class="multi-msg">Conectando con la pantalla…</p>
+        <input class="multi-nombre-ini" type="text" maxlength="14" autocomplete="off" placeholder="Tu nombre (opcional)" aria-label="Tu nombre (opcional)" hidden>
         <button class="btn multi-listo" type="button" hidden>¡Estoy listo!</button>
       </div>
     </section>`);
     document.body.append(capa);
     const msg = capa.querySelector(".multi-msg"), btnListo = capa.querySelector(".multi-listo");
+    const campoNombre = capa.querySelector(".multi-nombre-ini");
+    let nombreYo = "";
     const panel = capa.querySelector(".multi-panel");
     if ($("inicio")) $("inicio").hidden = true;
     const btnPantalla = $("btn-pantalla"); if (btnPantalla) btnPantalla.hidden = true;
@@ -395,8 +406,8 @@
       const motivo = O ? O.motivoNoDisponible() : "No se pudo cargar la conexión.";
       if (motivo) { msg.textContent = motivo; return; }
       try { conexion = await O.unirse(SALA, YO); } catch (e) { msg.textContent = e.message || String(e); return; }
-      msg.innerHTML = `Eres el jugador <b>${YO + 1}</b> · ${J.nombre}.<br>Lee cómo se juega y, cuando estés preparado, confirma:`;
-      btnListo.hidden = false;
+      msg.innerHTML = `Eres el jugador <b>${YO + 1}</b> · ${J.nombre}.<br>Lee cómo se juega, escribe tu nombre para el ranking si quieres y confirma:`;
+      btnListo.hidden = false; campoNombre.hidden = false;
       conexion.escuchar("vivo", (v) => {
         if (!v) { if (!empezo) msg.innerHTML = "<b>La partida terminó.</b><br>Para jugar otra, escanea un QR nuevo en la pantalla."; return; }
         const antes = ultimoVivo; ultimoVivo = v;
@@ -409,14 +420,16 @@
 
     btnListo.addEventListener("click", () => {
       if (!conexion) return;
+      const n = campoNombre.value.trim().slice(0, 14);
+      if (n) { nombreYo = n; conexion.marcar("nombres", n); }
       conexion.marcar("listos", true);
-      btnListo.hidden = true;
-      msg.innerHTML = `<b class="multi-grande">✓ ¡Listo!</b><br>Esperando a que los demás confirmen…`;
+      btnListo.hidden = true; campoNombre.hidden = true; campoNombre.blur();
+      msg.innerHTML = `<b class="multi-grande">✓ ¡Listo${nombreYo ? `, ${esc(nombreYo)}` : ""}!</b><br>Esperando a que los demás confirmen…`;
       try { navigator.vibrate && navigator.vibrate(30); } catch { /* no disponible */ }
     });
 
     async function cuentaRegresiva(semilla) {
-      btnListo.hidden = true;
+      btnListo.hidden = true; campoNombre.hidden = true;
       for (const n of [3, 2, 1]) { msg.innerHTML = `<b class="multi-grande">${n}</b><br>¡Prepárate!`; await new Promise((ok) => setTimeout(ok, 800)); }
       if (cortada) return;
       sembrar(semilla);
@@ -577,7 +590,7 @@
       const titulo = podio.length > 1 ? `<b>${k === 0 ? "¡Ganaste!" : `Quedaste ${k + 1}º de ${podio.length}`}</b>` : "<b>¡Bien jugado!</b>";
       const pide = v && v.pideNombre === YO;
       if (!pide) { el.innerHTML = titulo; return; }
-      if (v.nombreOk) { el.innerHTML = `${titulo}<p class="multi-nombre-ok">✓ ${esc(v.nombreOk)} quedó en el ranking.</p>`; return; }
+      if (v.nombreOk || nombreYo) { el.innerHTML = `${titulo}<p class="multi-nombre-ok">✓ ${esc(v.nombreOk || nombreYo)} quedó en el ranking.</p>`; return; }
       if (el.querySelector(".multi-nombre")) return;
       el.innerHTML = `${titulo}<form class="multi-nombre">
         <label for="multi-nombre-campo">Escribe tu nombre para el ranking</label>
