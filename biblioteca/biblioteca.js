@@ -29,8 +29,6 @@
     mouse: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3v6" stroke="currentColor" stroke-width="2"/></svg>',
     tactil: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
   };
-  // En la tarjeta va en singular; en los filtros, en plural (desde el catálogo).
-  const ETIQUETA_TIPO = { individual: "Individual", grupal: "Grupal" };
   const $ = (id) => document.getElementById(id);
   const ui = {
     biblioteca: $("biblioteca"), filtros: $("filtros"), grilla: $("grilla"), conteo: $("conteo"),
@@ -105,7 +103,6 @@
         <div class="juego-cuerpo">
           <div class="etiquetas">
             <span class="etiqueta">${escapar(j.muestra)}</span>
-            <span class="etiqueta tipo">${escapar(ETIQUETA_TIPO[j.tipo] ?? tipos[j.tipo] ?? j.tipo)}${j.jugadores ? ` · ${escapar(j.jugadores)}` : ""}</span>
           </div>
           <h2>${escapar(j.nombre)}</h2>
           <p class="frase">${escapar(j.frase)}</p>
