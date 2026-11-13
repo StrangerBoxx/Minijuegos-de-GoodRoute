@@ -1,6 +1,6 @@
-# Gánale al Chip · A pulso
+# Ruta a Mano
 
-Minijuego del stand de Control Position para mostrar **GoodRoute**. Es una versión de *Gánale al Chip* en que el jugador maneja la camioneta.
+Minijuego del stand de Control Position para mostrar **GoodRoute**. Antes se llamaba *Gánale al Chip · A pulso*: es una versión de *Gánale al Chip* en que el jugador maneja la camioneta. La carpeta conserva el nombre `ganale-al-chip-pulso`.
 
 > Lleva tú la camioneta por las calles hasta todos los clientes, antes que el chip y sin tocar los bordes.
 

@@ -1,4 +1,4 @@
-/* Gánale al Chip · A pulso — minijuego del stand de Control Position (GoodRoute).
+/* Ruta a Mano (antes "Gánale al Chip · A pulso") — minijuego del stand de Control Position (GoodRoute).
  *
  * Versión de "Gánale al Chip" en que el jugador maneja: arrastra la camioneta
  * por las calles con el mouse o el dedo hasta visitar a todos los clientes.

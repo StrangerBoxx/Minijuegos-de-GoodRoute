@@ -12,8 +12,8 @@ La biblioteca muestra 3 juegos, en orden alfabético:
 | Juego | Qué muestra | Duración | Carpeta |
 |---|---|---|---|
 | ¿Cuál es más corta? | Ojo de optimizador | 40 s | `minijuegos-de-ruta/` (`?juego=corta`) |
-| Gánale al Chip · A pulso | Ruta óptima | 1 min · 3 niveles | `ganale-al-chip-pulso/` |
 | Jornada Perfecta | Ventanas horarias | 1 min · 3 días | `jornada-perfecta/` |
+| Ruta a Mano | Ruta óptima | 1 min · 3 niveles | `ganale-al-chip-pulso/` |
 
 **Minijuegos de ruta ocultos.** `minijuegos-de-ruta/index.html` es un solo archivo con 5 minijuegos. Además de *¿Cuál es más corta?*, tiene *Carril libre*, *Desvío*, *Despacho relámpago* y *Memoriza la ruta*, que están ocultos en la biblioteca (`oculto: true` en `biblioteca/juegos.js`). Para mostrar uno, borra ese `oculto: true`.
 
@@ -37,7 +37,7 @@ En la pantalla de inicio de cada juego se elige cuántos juegan:
 
 Cómo está hecho:
 - **¿Cuál es más corta?:** cada celular manda una "foto" del estado de su juego y la pantalla la redibuja con el mismo código.
-- **Gánale al Chip · A pulso y Jornada Perfecta:** usan `multi.js` (y `multi.css`), que se suma al juego sin cambiar su lógica. Cada celular manda una imagen reducida de su pantalla unas 3 veces por segundo.
+- **Ruta a Mano y Jornada Perfecta:** usan `multi.js` (y `multi.css`), que se suma al juego sin cambiar su lógica. Cada celular manda una imagen reducida de su pantalla unas 3 veces por segundo.
 
 ### Firebase
 
