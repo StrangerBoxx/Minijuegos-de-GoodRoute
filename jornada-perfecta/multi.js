@@ -383,6 +383,8 @@
      *  así la pantalla grande va al día en vez de ir mostrando cuadros atrasados. */
     function enviarImagen() {
       if (!conexion || terminado || enVuelo >= AJUSTES.imagenesEnVuelo) return;
+      // Celular girado (iPhone no deja bloquearlo): la pantalla grande se queda con la última imagen vertical.
+      if (O && O.girado && O.girado()) return;
       enVuelo++;
       Promise.resolve(imagen())
         .then((img) => {

@@ -321,6 +321,7 @@
     const esCelular = () => {
       try { return matchMedia("(pointer: coarse)").matches && Math.min(screen.width, screen.height) < 600; } catch { return false; }
     };
+    O.girado = () => false;   // ¿el celular está horizontal? (multi.js no transmite mientras tanto)
     if (!esCelular()) return;
     // Orientación del aparato (no de la ventana: el teclado al escribir el nombre la achica)
     const apaisado = () => (screen.orientation && screen.orientation.type
@@ -345,6 +346,7 @@
         <rect x="14" y="4" width="20" height="40" rx="4"/><path d="M21 38h6"/></svg>
       <b>Gira tu celular</b>Este juego se juega con el celular vertical.<small>Ponlo derecho para seguir.</small></div>`;
     const revisar = () => { capa.hidden = !apaisado(); };
+    O.girado = () => apaisado();
     const montar = () => { document.head.append(estilo); document.body.append(capa); revisar(); };
     if (document.body) montar(); else addEventListener("DOMContentLoaded", montar);
     if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener("change", revisar);
