@@ -19,6 +19,7 @@
     // navegador no deja ver los toques dentro del juego y queda desactivado.
     volverTrasInactividadMs: 120000,
     ocultarControlesMs: 2500,
+    version: "20261114a",
     claveFiltro: "biblioteca.filtro",
     claveControl: "biblioteca.control",
   };
@@ -174,7 +175,8 @@
     abierto = j;
     ui.barraTitulo.textContent = j.nombre;
     document.title = `${j.nombre} · Minijuegos GoodRoute`;
-    nuevoMarco(j.url || `${j.carpeta}/index.html`);
+    const src = j.url || `${j.carpeta}/index.html`;
+    nuevoMarco(`${src}${src.includes("?") ? "&" : "?"}v=${AJUSTES.version}`);
     ui.sala.hidden = false; ui.biblioteca.hidden = true;
     document.body.classList.add("jugando");
     ultimoToque = Date.now();

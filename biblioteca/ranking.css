@@ -42,6 +42,22 @@
   50% { box-shadow: 0 0 0 4px rgba(224, 116, 25, .55); }
 }
 
+@media (max-width: 700px), (max-width: 1000px) and (orientation: portrait) {
+  .marcador .tarjeta-portada { aspect-ratio: 12 / 5; }
+  .filas { gap: 6px; }
+  .fila { flex: none; min-height: 50px; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; padding: 0 12px 0 8px; border-radius: 12px; }
+  .pos { width: 34px; height: 34px; font-size: 17px; }
+  .nombre, .pts { font-size: 18px; }
+  .fila.primera { flex: none; min-height: 72px; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; }
+  .fila.primera .pos { width: 44px; height: 44px; font-size: 22px; }
+  .fila.primera .nombre { font-size: 22px; }
+  .fila.primera .pts { font-size: 20px; }
+  .fila.vacia.primera { border-width: 2px; }
+  .fila.vacia.primera .nombre { font-size: 18px; }
+  .fila:nth-child(n + 4) .pos, .fila.vacia .pos { box-shadow: inset 0 0 0 2px var(--border); }
+  .chip { top: -8px; right: 10px; font-size: 12px; padding: 2px 8px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fila.nueva { animation: none; }
 }

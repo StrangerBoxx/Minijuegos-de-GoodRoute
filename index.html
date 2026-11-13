@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="biblioteca/biblioteca.css" />
-  <link rel="stylesheet" href="biblioteca/ranking.css" />
+  <link rel="stylesheet" href="biblioteca/biblioteca.css?v=20261114a" />
+  <link rel="stylesheet" href="biblioteca/ranking.css?v=20261114a" />
 </head>
 <body>
   <main class="vista biblioteca" id="biblioteca">
@@ -63,15 +63,15 @@
 
   <section class="sala" id="sala" hidden>
     <header class="barra">
-      <a class="volver" href="#" id="volver">← Biblioteca</a>
+      <a class="btn-icono volver" href="#" id="volver" title="Minijuegos" aria-label="Volver a los minijuegos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10a5 5 0 0 1 4.9 5.9l-.6 3.4a2.6 2.6 0 0 1-4.6 1.1L15 15H9l-1.7 2.4a2.6 2.6 0 0 1-4.6-1.1l-.6-3.4A5 5 0 0 1 7 7z"/><path d="M7.5 10v4M5.5 12h4"/><circle cx="16" cy="11" r=".6" fill="currentColor"/><circle cx="18" cy="13" r=".6" fill="currentColor"/></svg></a>
       <span class="barra-titulo" id="barra-titulo"></span>
-      <button class="barra-pantalla" id="barra-pantalla" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
+      <button class="btn-icono barra-pantalla" id="barra-pantalla" type="button" title="Pantalla completa" aria-label="Pantalla completa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
     </header>
     <iframe id="marco" title="Minijuego" allow="fullscreen"></iframe>
   </section>
 
-  <script src="biblioteca/juegos.js"></script>
-  <script src="biblioteca/ranking.js"></script>
-  <script src="biblioteca/biblioteca.js"></script>
+  <script src="biblioteca/juegos.js?v=20261114a"></script>
+  <script src="biblioteca/ranking.js?v=20261114a"></script>
+  <script src="biblioteca/biblioteca.js?v=20261114a"></script>
 </body>
 </html>
