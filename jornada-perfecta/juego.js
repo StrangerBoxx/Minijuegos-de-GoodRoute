@@ -302,11 +302,15 @@
     const margen = Math.min(40, innerWidth * 0.08);   // deja espacio para las etiquetas de hora
     const ancho = innerWidth - margen * 2;
     const alto = innerHeight - arriba - margen * 2;
-    geo.celda = Math.min(ancho / (mapa.cols - 1), alto / (mapa.rows - 1));
-    geo.ox = (innerWidth - geo.celda * (mapa.cols - 1)) / 2;
-    geo.oy = arriba + margen + (alto - geo.celda * (mapa.rows - 1)) / 2;
+    // Si la pantalla se giró y quedó al revés del mapa, se dibuja acostado para que la llene.
+    geo.t = (mapa.rows > mapa.cols) !== (alto > ancho) && mapa.rows !== mapa.cols;
+    const cols = geo.t ? mapa.rows : mapa.cols, rows = geo.t ? mapa.cols : mapa.rows;
+    geo.celda = Math.min(ancho / (cols - 1), alto / (rows - 1));
+    geo.ox = (innerWidth - geo.celda * (cols - 1)) / 2;
+    geo.oy = arriba + margen + (alto - geo.celda * (rows - 1)) / 2;
   }
-  const px = (n) => [geo.ox + col(n) * geo.celda, geo.oy + fila(n) * geo.celda];
+  const px = (n) => geo.t ? [geo.ox + fila(n) * geo.celda, geo.oy + col(n) * geo.celda]
+                          : [geo.ox + col(n) * geo.celda, geo.oy + fila(n) * geo.celda];
 
   // Posición del técnico a la hora t según sus tramos.
   function posicionTecnico(tec, t) {
@@ -358,7 +362,8 @@
 
     // Edificios (varias manzanas unidas), con un techo marcado
     for (const e of mapa.edificios) {
-      const [x, y] = px(id(e.k, e.r)), w = e.w * c - calle, h = e.h * c - calle, rr = Math.min(12, c * 0.16);
+      const [ew, eh] = geo.t ? [e.h, e.w] : [e.w, e.h];
+      const [x, y] = px(id(e.k, e.r)), w = ew * c - calle, h = eh * c - calle, rr = Math.min(12, c * 0.16);
       redondeado(x + calle / 2, y + calle / 2, w, h, rr);
       ctx.fillStyle = "#e3d7d7"; ctx.fill();
       ctx.strokeStyle = "#d3c5c5"; ctx.lineWidth = 1.5; ctx.stroke();

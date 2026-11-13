@@ -224,6 +224,7 @@
       this.canvas = canvas;
       this.ctx = canvas.getContext("2d");
       this.celda = 40; this.ox = 0; this.oy = 0; this.mapa = null;
+      this.t = false;   // transpuesto: el mapa se dibuja acostado (se giró la pantalla)
     }
     ajustarLienzo() {
       const dpr = window.devicePixelRatio || 1;
@@ -234,12 +235,22 @@
     /** Encaja la grilla dentro del rectángulo {x, y, w, h} (px de pantalla). */
     encuadrar(mapa, r, margen = 36) {
       this.mapa = mapa;
+      // Si la pantalla se giró y quedó al revés del mapa, se dibuja acostado para que la llene.
+      this.t = (mapa.rows > mapa.cols) !== (r.h > r.w) && mapa.rows !== mapa.cols;
+      const cols = this.t ? mapa.rows : mapa.cols, rows = this.t ? mapa.cols : mapa.rows;
       const ancho = r.w - margen * 2, alto = r.h - margen * 2;
-      this.celda = Math.max(10, Math.min(ancho / (mapa.cols - 1), alto / (mapa.rows - 1)));
-      this.ox = r.x + (r.w - this.celda * (mapa.cols - 1)) / 2;
-      this.oy = r.y + (r.h - this.celda * (mapa.rows - 1)) / 2;
+      this.celda = Math.max(10, Math.min(ancho / (cols - 1), alto / (rows - 1)));
+      this.ox = r.x + (r.w - this.celda * (cols - 1)) / 2;
+      this.oy = r.y + (r.h - this.celda * (rows - 1)) / 2;
     }
-    px(n) { return [this.ox + this.mapa.col(n) * this.celda, this.oy + this.mapa.fila(n) * this.celda]; }
+    /** Punto de la grilla (columna, fila; con decimales) en la pantalla, y al revés. */
+    aPantalla(gx, gy) { const [a, b] = this.t ? [gy, gx] : [gx, gy]; return [this.ox + a * this.celda, this.oy + b * this.celda]; }
+    aGrilla(x, y) { const a = (x - this.ox) / this.celda, b = (y - this.oy) / this.celda; return this.t ? [b, a] : [a, b]; }
+    /** Ángulo de la grilla en la pantalla (acostado, el mapa queda reflejado en la diagonal). */
+    angulo(a) { return this.t ? Math.PI / 2 - a : a; }
+    /** Tamaño en pantalla de w columnas por h filas. */
+    medida(w, h) { return this.t ? [h, w] : [w, h]; }
+    px(n) { return this.aPantalla(this.mapa.col(n), this.mapa.fila(n)); }
     /** Nodo más cercano a un punto de pantalla y su distancia en px. */
     cercano(nodos, x, y) {
       let mejor = -1, d = Infinity;
@@ -277,7 +288,8 @@
     /** Edificio: varias manzanas unidas, con un techo marcado para que se distinga. */
     edificio(e, calle, radio) {
       const { ctx, celda: c } = this, [x, y] = this.px(this.mapa.id(e.k, e.r));
-      const w = e.w * c - calle, h = e.h * c - calle, rr = radio ?? Math.min(12, c * 0.16);
+      const [ew, eh] = this.medida(e.w, e.h);
+      const w = ew * c - calle, h = eh * c - calle, rr = radio ?? Math.min(12, c * 0.16);
       this.redondeado(x + calle / 2, y + calle / 2, w, h, rr);
       ctx.fillStyle = C.COLOR.edificio; ctx.fill();
       ctx.strokeStyle = C.COLOR.edificioBorde; ctx.lineWidth = 1.5; ctx.stroke();

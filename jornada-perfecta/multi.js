@@ -27,9 +27,11 @@
   const JUEGO = etiqueta?.dataset.juego || location.pathname.split("/").slice(-2, -1)[0] || "juego";
   const CLAVE_RANKING = etiqueta?.dataset.ranking || `${JUEGO}.ranking`;
   const AJUSTES = {
-    imagenesPorSegundo: 3,
-    ladoImagen: 420,           // px del lado más largo de la imagen que manda cada celular
-    calidadImagen: 0.6,
+    puntosPorSegundo: 3,
+    imagenesPorSegundo: 10,    // como máximo; si la red no da, se saltan cuadros en vez de acumular atraso
+    imagenesEnVuelo: 2,
+    ladoImagen: 360,           // px del lado más largo de la imagen que manda cada celular
+    calidadImagen: 0.55,
     segundosAutoInicio: 1.5,   // cuando todos confirmaron
   };
   const JUGADORES = [
@@ -246,7 +248,7 @@
   function iniciarCelular() {
     const J = JUGADORES[YO];
     let conexion = null, ultimoVivo = null, empezo = false, terminado = false, cortada = false;
-    let envio = 0, ultimoPuntaje = -1;
+    let envio = 0, envioImg = 0, ultimoPuntaje = -1, enVuelo = 0, ultimaImg = "";
 
     // Distintivo con el color del jugador, siempre visible.
     document.body.append(crear(`<div class="multi-yo" style="background:${J.color}"><b>${YO + 1}</b>${J.nombre}</div>`));
@@ -305,7 +307,8 @@
       $("btn-jugar").disabled = false;
       $("btn-jugar").click();
       // Puntaje e imagen de su pantalla, para la pantalla grande.
-      envio = setInterval(tick, 1000 / AJUSTES.imagenesPorSegundo);
+      envio = setInterval(tick, 1000 / AJUSTES.puntosPorSegundo);
+      envioImg = setInterval(enviarImagen, 1000 / AJUSTES.imagenesPorSegundo);
     }
 
     const lienzo = document.querySelector("canvas");
@@ -339,7 +342,25 @@
       const g = mini.getContext("2d");
       g.fillStyle = "#FBF6F6"; g.fillRect(0, 0, w, h);
       g.drawImage(lienzo, r.x, r.y, r.w, r.h, 0, 0, w, h);
-      try { return mini.toDataURL("image/jpeg", AJUSTES.calidadImagen); } catch { return null; }
+      try { return mini.toDataURL(formato(), AJUSTES.calidadImagen); } catch { return null; }
+    }
+    /** WebP pesa menos que JPEG; se usa si el navegador lo genera (Safari no: ahí JPEG). */
+    let formatoImg = null;
+    function formato() {
+      if (!formatoImg) {
+        const c = document.createElement("canvas"); c.width = c.height = 2;
+        formatoImg = c.toDataURL("image/webp").startsWith("data:image/webp") ? "image/webp" : "image/jpeg";
+      }
+      return formatoImg;
+    }
+    /** Manda la imagen de la pantalla. Si hay envíos sin confirmar, se salta el cuadro:
+     *  así la pantalla grande va al día en vez de ir mostrando cuadros atrasados. */
+    function enviarImagen() {
+      if (!conexion || terminado || enVuelo >= AJUSTES.imagenesEnVuelo) return;
+      const img = imagen();
+      if (!img || img === ultimaImg) return;
+      ultimaImg = img; enVuelo++;
+      Promise.resolve().then(() => conexion.marcar("imagenes", img)).catch(() => {}).finally(() => { enVuelo--; });
     }
 
     function tick() {
@@ -349,15 +370,13 @@
       document.dispatchEvent(new KeyboardEvent("keydown"));
       const pts = puntosJuego();
       if (pts !== ultimoPuntaje) { ultimoPuntaje = pts; conexion.enviar({ tipo: "puntos", puntos: pts }); }
-      const img = imagen();
-      if (img) conexion.marcar("imagenes", img);
       if (estado().fase === "final") terminar(false);
     }
 
     function terminar(porPantalla) {
       if (terminado) return;
       terminado = true;
-      clearInterval(envio);
+      clearInterval(envio); clearInterval(envioImg);
       const pts = puntosJuego();
       if (conexion) conexion.enviar({ tipo: "fin", puntos: pts });
       mostrarFinal(`<h2>${porPantalla ? "Se terminó la partida" : "¡Terminaste!"}</h2>

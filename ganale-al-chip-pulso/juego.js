@@ -68,8 +68,8 @@
   const segs = (t) => t.toFixed(1).replace(".", ",") + " s";
 
   // ---------- Geometría de calles (coordenadas de grilla: 1 = una cuadra) ----------
-  const aGrilla = (x, y) => [(x - vista.ox) / vista.celda, (y - vista.oy) / vista.celda];
-  const aPantalla = (gx, gy) => [vista.ox + gx * vista.celda, vista.oy + gy * vista.celda];
+  const aGrilla = (x, y) => vista.aGrilla(x, y);
+  const aPantalla = (gx, gy) => vista.aPantalla(gx, gy);
   const bloqueada = (a, b) => mapa.bloqueadas.has(a < b ? a + "-" + b : b + "-" + a);   // obra: barrera al medio de la calle
   const cerrada = (a, b) => mapa.cerradas.has(a < b ? a + "-" + b : b + "-" + a);       // dentro de un edificio: toda la calle es pared
 
@@ -340,7 +340,8 @@
       vista.edificio(e, calle, Math.min(8, c * 0.08));
       ctx.strokeStyle = "#cfc3c3"; ctx.lineWidth = 2;
       const [x, y] = vista.px(mapa.id(e.k, e.r));
-      vista.redondeado(x + calle / 2, y + calle / 2, e.w * c - calle, e.h * c - calle, Math.min(8, c * 0.08)); ctx.stroke();
+      const [ew, eh] = vista.medida(e.w, e.h);
+      vista.redondeado(x + calle / 2, y + calle / 2, ew * c - calle, eh * c - calle, Math.min(8, c * 0.08)); ctx.stroke();
     }
     for (let r = 0; r < mapa.rows - 1; r++) for (let k = 0; k < mapa.cols - 1; k++) {
       if (enEdificio.has(mapa.id(k, r))) continue;
@@ -434,7 +435,7 @@
         ctx.lineWidth = 4; ctx.strokeStyle = C.COLOR.tarde; ctx.stroke();
       }
     }
-    vista.furgon({ x, y, ang: yo.ang }, AZUL);
+    vista.furgon({ x, y, ang: vista.angulo(yo.ang) }, AZUL);
     if (fase === "carrera" && !yo.agarrado && yo.fin == null && ui.aviso.hidden) {
       const fs = Math.max(12, Math.min(16, c * 0.16));
       ctx.font = `600 ${fs}px "IBM Plex Sans", sans-serif`;
@@ -468,7 +469,8 @@
       canvas.classList.toggle("agarrable", enCarrera() && Math.hypot(e.clientX - x, e.clientY - y) <= Math.max(34, vista.celda * 0.45));
     }
     if (!enCarrera() || !yo.agarrado) return;
-    const eventos = e.getCoalescedEvents?.() || [e];
+    const juntos = e.getCoalescedEvents?.();
+    const eventos = juntos && juntos.length ? juntos : [e];
     for (const ev of eventos) {
       if (!yo.agarrado) break;
       const [gx, gy] = aGrilla(ev.clientX + yo.offset[0], ev.clientY + yo.offset[1]);
