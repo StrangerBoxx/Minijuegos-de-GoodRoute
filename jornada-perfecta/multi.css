@@ -114,7 +114,6 @@
 .inicio-ruta .multi-btn-cel { background: #E8772E; box-shadow: 0 6px 18px rgba(232, 119, 46, .32); margin: 0; }
 .inicio-ruta #btn-jugar { background: #0B2545; margin: 0 0 10px; }
 .inicio-ruta .multi-nota { font-size: 13px; }
-.inicio-ruta .ranking { font-family: var(--sans); }
 /* En el celular, la capa de espera muestra los mismos pasos */
 .multi-capa-cel .pasos { list-style: none; padding: 0; margin: 12px 0 14px; text-align: left; display: grid; gap: 10px; }
 .multi-capa-cel .pasos li { display: flex; gap: 10px; align-items: flex-start; line-height: 1.4; }
@@ -125,3 +124,23 @@
 .multi-capa-cel .btn { font-family: inherit; border-radius: 999px; min-height: 50px; font-size: 16px; font-weight: 600; }
 .multi-capa-cel .multi-listo { background: #E8772E; color: #fff; box-shadow: 0 6px 18px rgba(232, 119, 46, .32); }
 .multi-capa-cel .multi-grande { font-style: italic; color: #E8772E; }
+
+/* ---------- Ranking: la misma tabla en todos los juegos ---------- */
+.ranking { margin-top: 18px; text-align: left; font-family: Poppins, system-ui, sans-serif; }
+.ranking:empty { display: none; }
+.ranking h3 { margin: 0 0 8px; text-align: center; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #6b7280; font-style: normal; }
+.ranking ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.ranking li {
+  display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 10px;
+  padding: 7px 12px; border-radius: 12px; background: #F7F4F1; font-size: 15px; color: #1d2433;
+}
+.ranking li .pos {
+  width: 24px; height: 24px; border-radius: 999px; display: grid; place-items: center;
+  font-weight: 700; font-size: 12px; background: #ece6df; color: #0B2545; font-family: inherit;
+}
+.ranking li:nth-child(1) .pos { background: #E8772E; color: #fff; }
+.ranking li:nth-child(2) .pos { background: #0B2545; color: #fff; }
+.ranking li:nth-child(3) .pos { background: #b08a5a; color: #fff; }
+.ranking li .nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ranking li .pts { margin: 0; font-weight: 700; color: #0B2545; font-variant-numeric: tabular-nums; font-family: inherit; }
+.ranking li.tuyo { background: #FAEAC8; font-weight: 600; box-shadow: inset 0 0 0 2px #E8772E; }

@@ -658,12 +658,13 @@
     try { localStorage.setItem(AJUSTES.claveRanking, JSON.stringify(lista)); } catch { /* sin almacenamiento */ }
   }
   const escapar = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  /** Tabla de ranking (mismo diseño en todos los juegos): top 5 en el inicio, top 10 al final. */
   function pintarRanking(el, resaltado) {
-    const lista = leerRanking();
+    const lista = leerRanking().slice(0, el.id === "ranking-inicio" ? 5 : 10);
     if (!lista.length) { el.innerHTML = ""; return; }
-    el.innerHTML = "<h3>Mejores puntajes</h3><ol>" + lista.map((r, i) =>
+    el.innerHTML = "<h3>Ranking</h3><ol>" + lista.map((r, i) =>
       `<li class="${resaltado && r.t === resaltado.t ? "tuyo" : ""}"><span class="pos">${i + 1}</span>` +
-      `<span>${escapar(r.nombre)}</span><span class="pts">${r.puntos}</span></li>`).join("") + "</ol>";
+      `<span class="nombre">${escapar(r.nombre || "Anónimo")}</span><span class="pts">${Math.round(r.puntos).toLocaleString("es-CL")}</span></li>`).join("") + "</ol>";
   }
 
   ui.form.addEventListener("submit", (e) => {

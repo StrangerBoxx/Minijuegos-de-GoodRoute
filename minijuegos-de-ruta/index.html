@@ -105,6 +105,33 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
 .dato { background: var(--crema); border-left: 5px solid var(--naranjo); border-radius: 16px; padding: 12px 14px; text-align: left; font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
 .dato strong { display: block; color: #b9551a; font-style: italic; margin-bottom: 2px; }
 .botones { display: grid; gap: 10px; }
+.guardar-nombre { display: flex; gap: 8px; margin: 0 0 4px; }
+.guardar-nombre input {
+  flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 10px 14px; border-radius: 999px;
+  border: 2px solid var(--borde); background: var(--fondo); color: var(--texto); user-select: text; -webkit-user-select: text;
+}
+.guardar-nombre .btn { width: auto; padding: 10px 20px; min-height: 46px; }
+#fin-ranking { margin: 14px 0 16px; }
+/* ---------- Ranking: la misma tabla en todos los juegos ---------- */
+.ranking { margin-top: 18px; text-align: left; font-family: Poppins, system-ui, sans-serif; }
+.ranking:empty { display: none; }
+.ranking h3 { margin: 0 0 8px; text-align: center; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #6b7280; font-style: normal; }
+.ranking ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.ranking li {
+  display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 10px;
+  padding: 7px 12px; border-radius: 12px; background: #F7F4F1; font-size: 15px; color: #1d2433;
+}
+.ranking li .pos {
+  width: 24px; height: 24px; border-radius: 999px; display: grid; place-items: center;
+  font-weight: 700; font-size: 12px; background: #ece6df; color: #0B2545; font-family: inherit;
+}
+.ranking li:nth-child(1) .pos { background: #E8772E; color: #fff; }
+.ranking li:nth-child(2) .pos { background: #0B2545; color: #fff; }
+.ranking li:nth-child(3) .pos { background: #b08a5a; color: #fff; }
+.ranking li .nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ranking li .pts { margin: 0; font-weight: 700; color: #0B2545; font-variant-numeric: tabular-nums; font-family: inherit; }
+.ranking li.tuyo { background: #FAEAC8; font-weight: 600; box-shadow: inset 0 0 0 2px #E8772E; }
+
 
 /* ---------- Jugadores y celulares ---------- */
 .cuantos { margin: 0 0 8px; font-weight: 600; color: var(--azul); }
@@ -181,6 +208,7 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
             <p class="modo-nota" id="modo-nota"></p>
           </div>
         </div>
+        <div class="ranking" id="intro-ranking"></div>
         <p class="lead" id="intro-espera" hidden></p>
         <button class="btn btn-naranjo" id="btn-listo" type="button" hidden>¡Estoy listo!</button>
       </div>
@@ -230,6 +258,11 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
         <p class="record-ant" id="fin-record-ant"></p>
         <div class="stats" id="fin-stats"></div>
         <div class="dato"><strong>Dato GoodRoute</strong><span id="fin-dato"></span></div>
+        <form class="guardar-nombre" id="fin-form">
+          <input id="fin-nombre" maxlength="14" autocomplete="off" placeholder="Tu nombre" aria-label="Tu nombre">
+          <button class="btn btn-azul" type="submit">Guardar</button>
+        </form>
+        <div class="ranking" id="fin-ranking"></div>
         <p class="lead" id="fin-celular" hidden></p>
         <div class="botones" id="fin-botones">
           <button class="btn btn-naranjo" id="btn-otra" type="button">Jugar de nuevo</button>
@@ -492,6 +525,7 @@ const ui = {
   vivo: $("capa-vivo"), vivoEtq: $("vivo-etq"), vivoTitulo: $("vivo-titulo"), vivoSub: $("vivo-sub"), vivoLista: $("vivo-lista"),
   vivoDato: $("vivo-dato"), vivoDatoTxt: $("vivo-dato-txt"), vivoBotones: $("vivo-botones"), podioBotones: $("podio-botones"),
   listo: $("btn-listo"), terminarVivo: $("btn-terminar-vivo"),
+  introRanking: $("intro-ranking"), finForm: $("fin-form"), finNombre: $("fin-nombre"), finRanking: $("fin-ranking"),
 };
 const ctx = ui.lienzo.getContext("2d");
 
@@ -500,9 +534,29 @@ function leerRecords() { try { return JSON.parse(localStorage.getItem(CLAVE_RECO
 function guardarRecord(id, puntos) {
   try {
     const r = leerRecords(); r[id] = puntos; localStorage.setItem(CLAVE_RECORDS, JSON.stringify(r));
-    // Copia en el formato de la biblioteca de minijuegos, para que muestre el récord en su tarjeta.
-    localStorage.setItem(`ruta-${id}.ranking`, JSON.stringify([{ nombre: "", puntos, t: Date.now() }]));
   } catch { /* sin almacenamiento */ }
+}
+
+// Ranking de cada minijuego (top 10 con nombre), en "ruta-<id>.ranking": la biblioteca
+// muestra el primero como récord en la tarjeta. Misma tabla que los otros juegos.
+const MAX_RANKING = 10;
+const claveRanking = (id) => `ruta-${id}.ranking`;
+const escHTML = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function leerRanking(id) { try { return JSON.parse(localStorage.getItem(claveRanking(id))) || []; } catch { return []; } }
+function agregarRanking(id, nombre, puntos) {
+  const r = { nombre: String(nombre || "").trim().slice(0, 14) || "Anónimo", puntos: Math.round(puntos), t: Date.now() };
+  try {
+    const l = [...leerRanking(id), r].sort((a, b) => b.puntos - a.puntos || a.t - b.t).slice(0, MAX_RANKING);
+    localStorage.setItem(claveRanking(id), JSON.stringify(l));
+  } catch { /* sin almacenamiento */ }
+  return r;
+}
+function pintarRanking(el, id, resaltado, max) {
+  const l = leerRanking(id).slice(0, max);
+  if (!l.length) { el.innerHTML = ""; return; }
+  el.innerHTML = "<h3>Ranking</h3><ol>" + l.map((r, i) =>
+    `<li class="${resaltado && r.t === resaltado.t ? "tuyo" : ""}"><span class="pos">${i + 1}</span>` +
+    `<span class="nombre">${escHTML(r.nombre || "Anónimo")}</span><span class="pts">${Math.round(r.puntos).toLocaleString("es-CL")}</span></li>`).join("") + "</ol>";
 }
 
 // Abierto desde la biblioteca (…/index.html?juego=corta): va directo a ese juego.
@@ -582,6 +636,8 @@ function abrirJuego(j) {
   fase = "intro";
   ui.fin.hidden = true; ui.intro.hidden = false;
   Online_.alAbrir();
+  if (Online_.esCelular) ui.introRanking.innerHTML = "";
+  else pintarRanking(ui.introRanking, j.id, null, 5);
   dibujarCuadro();
   if (!Online_.esCelular) ui.jugar.focus({ preventScroll: true });
 }
@@ -594,6 +650,15 @@ function empezar() {
   fase = "jugando";
   arrancarBucle();
 }
+
+let ultimoPuntaje = 0;
+ui.finForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!actual || ui.finForm.hidden) return;
+  const r = agregarRanking(actual.id, ui.finNombre.value, ultimoPuntaje);
+  ui.finForm.hidden = true; ui.finNombre.blur();
+  pintarRanking(ui.finRanking, actual.id, r, MAX_RANKING);
+});
 
 function terminarJuego(puntos, stats) {
   if (fase !== "jugando") return;
@@ -608,6 +673,10 @@ function terminarJuego(puntos, stats) {
   ui.finRecordAnt.textContent = nuevo ? (antes ? `Tu récord anterior era ${fmt(antes)}` : "") : `Tu récord: ${fmt(antes)}`;
   ui.finStats.innerHTML = stats.map(([v, l]) => `<div class="stat"><b>${v}</b><small>${l}</small></div>`).join("");
   ui.finDato.textContent = actual.dato;
+  ultimoPuntaje = puntos;
+  ui.finForm.hidden = Online_.esCelular || puntos <= 0; ui.finNombre.value = "";
+  if (Online_.esCelular) ui.finRanking.innerHTML = "";
+  else pintarRanking(ui.finRanking, actual.id, null, MAX_RANKING);
   Online_.alTerminar(puntos, stats);
   setTimeout(() => { if (fase === "fin") { ui.fin.hidden = false; ui.otra.focus({ preventScroll: true }); } }, 450);
 }
@@ -1538,6 +1607,7 @@ const Online_ = (() => {
     ui.vivo.hidden = false; ui.terminarVivo.hidden = true;
     // El mejor puntaje queda como récord de este juego (lo muestra la biblioteca).
     if (mejor && mejor.puntos > (leerRecords()[actual.id] || 0)) guardarRecord(actual.id, mejor.puntos);
+    if (mejor && mejor.puntos > 0) agregarRanking(actual.id, JUGADORES[mejor.p].nombre, mejor.puntos);
     sala.cerrar({ fase: "podio", podio: o.map((j) => ({ p: j.p, puntos: j.puntos })) });
     sala = null;
   }

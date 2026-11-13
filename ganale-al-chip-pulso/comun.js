@@ -420,12 +420,13 @@
       return r;
     }
     borrar() { this.guardar([]); }
+    /** Tabla de ranking (mismo diseño en todos los juegos): top 5 en el inicio, top 10 al final. */
     pintar(el, resaltado) {
-      const l = this.leer();
+      const l = this.leer().slice(0, el.id === "ranking-inicio" ? 5 : 10);
       if (!l.length) { el.innerHTML = ""; return; }
-      el.innerHTML = "<h3>Mejores puntajes</h3><ol>" + l.map((r, i) =>
+      el.innerHTML = "<h3>Ranking</h3><ol>" + l.map((r, i) =>
         `<li class="${resaltado && r.t === resaltado.t ? "tuyo" : ""}"><span class="pos">${i + 1}</span>` +
-        `<span>${C.escapar(r.nombre)}</span><span class="pts">${r.puntos}</span></li>`).join("") + "</ol>";
+        `<span class="nombre">${C.escapar(r.nombre || "Anónimo")}</span><span class="pts">${Math.round(r.puntos).toLocaleString("es-CL")}</span></li>`).join("") + "</ol>";
     }
   };
 

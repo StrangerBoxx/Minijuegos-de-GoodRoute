@@ -77,7 +77,7 @@ Reglas de la base de datos: solo permiten leer y escribir partidas (`salas/CÓDI
 
 - **Un juego fijo:** abre `index.html#carpeta`, por ejemplo `index.html#jornada-perfecta`, y el juego se abre directo.
 - **Vuelta a la biblioteca:** si nadie toca la pantalla por 2 minutos dentro de un juego, se vuelve sola a la biblioteca. Se ajusta en `AJUSTES`, al comienzo de `biblioteca/biblioteca.js`, y funciona cuando el sitio se sirve por http(s).
-- **Rankings:** se guardan en el navegador de cada equipo. Para borrar el de un juego, mantén presionado su logo 3 s.
+- **Rankings:** los 3 juegos usan la misma tabla: top 5 en el inicio y top 10 al final, donde cada uno escribe su nombre. En las partidas con celulares, el ganador queda con el nombre de su color. Se guardan en el navegador de cada equipo. Para borrar el de *Ruta a Mano* o *Jornada Perfecta*, mantén presionada su etiqueta naranja 3 s.
 
 ## Agregar o quitar un juego
 
