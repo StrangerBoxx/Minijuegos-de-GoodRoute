@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="color-scheme" content="only light" />
   <title>Ruta a Mano · GoodRoute</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Poppins:ital,wght@0,400;0,600;0,700;1,800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="comun.css?v=20261113h" />
-  <link rel="stylesheet" href="estilos.css?v=20261113h" />
+  <link rel="stylesheet" href="comun.css?v=20261113i" />
+  <link rel="stylesheet" href="estilos.css?v=20261113i" />
   <link rel="stylesheet" href="online.css?v=20261113h" />
-  <link rel="stylesheet" href="multi.css?v=20261113h" />
+  <link rel="stylesheet" href="multi.css?v=20261113i" />
 </head>
 <body>
   <header class="hud" id="hud" hidden>
@@ -34,7 +35,7 @@
       <span class="etq" id="logo">Ruta óptima</span>
       <h1>Ruta a Mano</h1>
       <ol class="reglas pasos">
-        <li><span>1</span>Agarra la camioneta en la base y arrástrala por las calles hasta todos los clientes.</li>
+        <li id="paso-arrastre"><span>1</span>Agarra la camioneta en la base y arrástrala por las calles hasta todos los clientes.</li>
         <li><span>2</span>Si tocas una manzana, una obra o el borde del mapa, chocas y vuelves a la base.</li>
         <li><span>3</span>El optimizador va por la ruta óptima y nunca choca. Gana quien visite a todos primero.</li>
       </ol>
@@ -73,7 +74,7 @@
       <div class="record-nuevo" id="fin-record" hidden>¡Nuevo récord!</div>
       <p class="record-ant" id="fin-record-ant"></p>
       <div class="stats" id="fin-stats"></div>
-      <div class="dato"><strong>Dato GoodRoute</strong><span>El optimizador no maneja: planifica. GoodRoute arma la ruta óptima de cada técnico en milisegundos, sin choques ni vueltas de más.</span></div>
+      <div class="dato"><p class="dato-tit" id="fin-titular"></p><p class="dato-txt" id="fin-dato"></p></div>
       <form class="guardar" id="form-nombre">
         <input id="nombre" maxlength="14" autocomplete="off" placeholder="Tu nombre" aria-label="Tu nombre" />
         <button class="btn" type="submit">Guardar</button>
@@ -89,7 +90,7 @@
   <button class="btn-pantalla" id="btn-pantalla" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
 
   <script src="comun.js?v=20261113h"></script>
-  <script src="juego.js?v=20261113h"></script>
+  <script src="juego.js?v=20261113i"></script>
   <!-- Jugar con celulares (QR, de 1 a 6 jugadores) -->
   <script src="../firebase-config.js?v=20261113h"></script>
   <script src="online.js?v=20261113h"></script>

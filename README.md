@@ -78,8 +78,9 @@ Reglas de la base de datos: solo permiten leer y escribir partidas (`salas/CÓDI
 ## En el stand
 
 - **Un juego fijo:** abre `index.html#carpeta`, por ejemplo `index.html#jornada-perfecta`, y el juego se abre directo.
+- **Pantalla de ranking:** el botón del trofeo, abajo a la derecha en la biblioteca, cambia a la pantalla de ranking, y el del mando vuelve a los juegos. Se puede dejar fija abriendo `index.html#ranking`. Muestra el top 5 de cada juego en grande, en 16:9, para leerlo al pasar, y se actualiza sola cuando alguien entra al ranking. Las entradas de los últimos 15 minutos se marcan como **Nuevo**. El punto de abajo a la derecha es verde con internet y gris sin internet. Los botones se esconden cuando no se mueve el mouse. La biblioteca y el ranking comparten el mismo diseño en 16:9 (cabecera, tarjetas y botones de abajo a la derecha) y se escalan a cualquier pantalla. La pantalla completa se mantiene al cambiar entre ranking y juegos.
 - **Vuelta a la biblioteca:** si nadie toca la pantalla por 2 minutos dentro de un juego, se vuelve sola a la biblioteca. Se ajusta en `AJUSTES`, al comienzo de `biblioteca/biblioteca.js`, y funciona cuando el sitio se sirve por http(s).
-- **Rankings:** los 3 juegos usan la misma tabla: top 5 en el inicio y top 10 al final, donde cada uno escribe su nombre. En las partidas con celulares, el ganador queda con el nombre de su color. Se guardan en el navegador de cada equipo. Para borrar el de *Ruta a Mano* o *Jornada Perfecta*, mantén presionada su etiqueta naranja 3 s. Para borrar **todos** los récords y rankings de una vez, usa el botón **↺ Reiniciar récords**, abajo en la biblioteca. Pide confirmación y no se puede deshacer.
+- **Rankings:** los 3 juegos usan la misma tabla: top 5 en el inicio y top 10 al final, donde cada uno escribe su nombre. En las partidas con celulares, el ganador queda con el nombre de su color. Se guardan en el navegador de cada equipo. Para borrar el de *Ruta a Mano* o *Jornada Perfecta*, mantén presionada su etiqueta naranja 3 s. Para borrar **todos** los récords y rankings de una vez, usa el botón ↺ de la pantalla de ranking. Pide confirmar 4 veces y no se puede deshacer.
 
 ## Agregar o quitar un juego
 
@@ -90,6 +91,7 @@ Reglas de la base de datos: solo permiten leer y escribir partidas (`salas/CÓDI
 ## Archivos
 
 - `index.html`: la biblioteca.
+- `biblioteca/ranking.js` y `biblioteca/ranking.css`: la pantalla de ranking, que vive dentro de `index.html`.
 - `biblioteca/`: lógica, estilos, catálogo (`juegos.js`), logo, ícono y miniaturas.
 - `minijuegos-de-ruta/`: los 5 minijuegos de ruta en un solo archivo (`index.html`), más `online.js` y `online.css`.
 - `ganale-al-chip-pulso/` y `jornada-perfecta/`: un juego cada una. Cada carpeta tiene su `juego.js`, sus estilos, `multi.js` / `multi.css` y `online.js` / `online.css`.

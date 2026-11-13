@@ -1,5 +1,6 @@
 /* comun.css — estilos compartidos de los minijuegos de GoodRoute. */
 :root {
+  color-scheme: only light;
   --bg: #FBF6F6;
   --surface: #ffffff;
   --border: #ece4e4;

@@ -8,7 +8,7 @@ Minijuego del stand de Control Position para mostrar **GoodRoute**. Antes se lla
 
 ## Cómo se juega
 
-1. **Partida:** después de la cuenta regresiva, agarra la camioneta azul en la base y arrástrala con el mouse o el dedo. Si la sueltas, se queda donde está y la puedes volver a agarrar.
+1. **Partida:** después de la cuenta regresiva, agarra la camioneta azul en la base y arrástrala con el mouse. En pantallas táctiles el dedo se desliza en cualquier parte y la camioneta copia su movimiento, para que el dedo no tape el mapa. Si la sueltas, se queda donde está y la puedes volver a agarrar.
 2. **Recorrido:** pasa por todos los clientes en el orden que quieras. Cada cliente visitado se pinta azul con su número.
 3. **Choques:** si tocas el borde de una manzana, una obra o el borde del mapa:
    - Chocas y vuelves a empezar desde la base.

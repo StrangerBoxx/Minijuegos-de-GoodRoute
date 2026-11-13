@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Poppins:ital,wght@0,400;0,600;0,700;1,700;1,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="online.css?v=20261113h">
-<link rel="stylesheet" href="multi.css?v=20261113h">
+<link rel="stylesheet" href="multi.css?v=20261113i">
 <style>
 /* Una columna de celular: cabecera, fila sobre el mapa, mapa, barra de tres botones; lo demás en hojas que suben. */
 :root {
@@ -467,7 +467,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     <div class="record-nuevo" id="fin-record" hidden>¡Nuevo récord!</div>
     <p class="record-ant" id="fin-record-ant"></p>
     <div class="stats" id="fin-stats"></div>
-    <div class="dato"><strong>Dato GoodRoute</strong><span id="fin-dato"></span></div>
+    <div class="dato"><p class="dato-tit" id="fin-titular"></p><p class="dato-txt" id="fin-dato"></p></div>
     <form class="guardar" id="form-nombre">
       <input id="nombre" maxlength="14" autocomplete="off" placeholder="Tu nombre" aria-label="Tu nombre" />
       <button class="btn" type="submit">Guardar</button>
@@ -492,7 +492,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     { nombre: "Luis", color: "#4a7d1c", tipo: "interno" },
     { nombre: "Marta", color: "#a8326e", tipo: "interno" },
   ];
-  const EXTERNO = { nombre: "Jorge", color: "#5b6472", tipo: "externo" };
+  const EXTERNO = { nombre: "Jorge (externo)", color: "#5b6472", tipo: "externo" };
   const NIVELES = [
     { titulo: "Un técnico", lead: "Gana la ruta con menos viaje.", internos: 1, externos: 0, ots: 5, conHora: 0, obras: 2, manzanas: 2, veh: [1], hoy: null, reglas: ["todas", "jornada"] },
     { titulo: "Dos técnicos", internos: 2, externos: 0, ots: 6, conHora: 2, obras: 3, manzanas: 2, veh: [1, 2], hoy: null, reglas: ["todas", "tarde", "jornada"] },
@@ -911,15 +911,15 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     const hoyOk = N.ots.filter((o, i) => o.hoy && asign.has(i)).length;
     const atrasos = sims.reduce((s, x) => s + x.tarde, 0);
     const exceden = sims.filter((s) => s.excede).length;
-    const sobreTope = N.tecs.filter((tec, t) => rutas[t].length > tope(tec)).length;
+    const sobreTope = N.tecs.filter((tec, t) => tec.tipo !== "externo" && rutas[t].length > tope(tec)).length;
     const ext = N.tecs.reduce((s, tec, t) => s + (tec.tipo === "externo" ? rutas[t].length : 0), 0);
     const D = {
       todas: { texto: "Todas asignadas", ok: asign.size === N.ots.length, det: `${asign.size}/${N.ots.length}` },
       hoy: { texto: "Las que vencen hoy, asignadas", ok: hoyOk === totalHoy, det: `${hoyOk}/${totalHoy}` },
       tarde: { texto: "Llegar a la hora acordada", ok: atrasos === 0, det: atrasos ? plural(atrasos, "atraso", "atrasos") : "" },
       jornada: { texto: `Terminar antes de las ${hhmm(P.fin)}`, ok: exceden === 0, det: exceden ? plural(exceden, "se pasa", "se pasan") : "" },
-      topes: { texto: `Tope: ${P.topes.interno} por interno, ${P.topes.externo} externo`, ok: sobreTope === 0, det: sobreTope ? `${sobreTope} sobre el tope` : "" },
-      externos: { texto: externosMax ? `Externo: máx. ${plural(externosMax, "orden", "órdenes")}` : "Sin externo", ok: ext <= externosMax, det: `${ext}/${externosMax}` },
+      topes: { texto: `Internos: máx. ${P.topes.interno} órdenes cada uno`, ok: sobreTope === 0, det: sobreTope ? `${sobreTope} sobre el tope` : "" },
+      externos: { texto: externosMax ? `${EXTERNO.nombre}: máx. ${plural(externosMax, "orden", "órdenes")}` : `${EXTERNO.nombre}: sin órdenes`, ok: ext <= externosMax, det: `${ext}/${externosMax}` },
     };
     const reglas = N.cfg.reglas.map((id) => ({ id, ...D[id] }));
     return { reglas, sims, ok: reglas.every((r) => r.ok), ext, viaje: sims.reduce((s, x) => s + x.viaje, 0) };
@@ -956,6 +956,9 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
   let elegido = false, limite = null, deshaceres = 0, nuevosTecs = new Set(), nuevasReglas = new Set(), entrada = false;
   let rutasGr = null, turno = null, turnoT = null, busqueda = null, rotarT = null, refinarT = null, busq = null;
   const oculto = (t) => fase === "intro" && nuevosTecs.has(t);
+  const capacidad = (tec) => (tec.tipo === "externo"
+    ? (N.cfg.reglas.includes("externos") ? N.extMax ?? null : null)
+    : (N.cfg.reglas.includes("topes") ? tope(tec) : null));
   const comparando = () => fase === "resultado" && rutasTu != null;
   const tuyo = () => fase !== "vista" && !(fase === "resultado" && rutasTu == null);
   const palido = (hex) => { const n = parseInt(hex.slice(1), 16), m = (v) => Math.round(v + (255 - v) * 0.62); return `rgb(${m(n >> 16)}, ${m((n >> 8) & 255)}, ${m(n & 255)})`; };
@@ -1025,7 +1028,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     const reglasNivel = evaluar(N, rutas, N.extMax).reglas
       .map((r) => `<li><span>${r.texto}${nuevasReglas.has(r.id) ? ' <span class="mg-nuevo">nueva</span>' : ""}</span></li>`).join("");
     const equipo = N.tecs
-      .map((tec, t) => `<span style="--c:${tec.color}"><i></i>${tec.nombre} <small>(${tec.tipo})</small>${nuevosTecs.has(t) ? ' <span class="mg-nuevo">nuevo</span>' : ""}</span>`).join("");
+      .map((tec, t) => `<span style="--c:${tec.color}"><i></i>${tec.nombre}${nuevosTecs.has(t) ? ' <span class="mg-nuevo">nuevo</span>' : ""}</span>`).join("");
     tarjeta(`
       <p class="eyebrow">${cfg.secreto ? "Nivel secreto" : `Nivel ${idx + 1} de ${NIVELES.length - 1}`}</p>
       <h2>${cfg.titulo}</h2>
@@ -1280,7 +1283,8 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     ];
     $("fin-stats").innerHTML = stats.map(([v, l]) => `<div class="stat"><b>${v}</b><small>${l}</small></div>`).join("");
     const totTu = hechos.reduce((s, r) => s + r.manual, 0), totGr = hechos.reduce((s, r) => s + r.gr, 0);
-    $("fin-dato").innerHTML = `Lo que a ti te tomó ${tiempoTxt(totTu)}, ${GR} lo resolvió en ${msTxt(totGr)}, cumpliendo todas las reglas a la vez.`;
+    $("fin-titular").innerHTML = `Lo que a ti te tomó ${tiempoTxt(totTu)}, ${GR} lo resolvió en ${msTxt(totGr)}, cumpliendo todas las reglas a la vez.`;
+    $("fin-dato").innerHTML = `Hoy la dispatcher considera todos estos objetivos a mano.<br>${GR} entrega la propuesta lista, en segundos.`;
     registro = null;
     $("form-nombre").hidden = total <= 0; $("nombre").value = "";
     pintarRanking($("ranking-final"), null);
@@ -1554,10 +1558,9 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     const simsGr = comparando() && turno === "listo" ? rutasGr.map((r, t) => simular(N, t, r)) : null;
     const escala = Math.max(P.fin, ...ev.sims.map((s) => s.fin), ...(simsGr || []).map((s) => s.fin)) * 1.02;
     const pct = (m) => (m / escala) * 100;
-    const topes = N.cfg.reglas.includes("topes");
     ui.tecs.innerHTML = N.tecs.map((tec, t) => {
       if (oculto(t)) return "";
-      const s = ev.sims[t], sg = simsGr && simsGr[t], tp = tope(tec), sobre = topes && rutas[t].length > tp, nuevo = nuevosTecs.has(t);
+      const s = ev.sims[t], sg = simsGr && simsGr[t], tp = capacidad(tec), sobre = tp != null && rutas[t].length > tp, nuevo = nuevosTecs.has(t);
       const linea = (sim, color) => `<span class="mg-linea${color ? " palida" : ""}"${color ? ` style="--c:${color}"` : ""}>${sim.visitas.map((v) => {
         const o = N.ots[v.i];
         return `<i class="mg-seg viaje" style="left:${pct(v.salida)}%;width:${pct(v.llegada - v.salida)}%"></i>` +
@@ -1567,9 +1570,9 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
       const fin = (sim) => (sim.n ? hhmm(sim.fin) : "libre");
       const datos = sg
         ? `${rutas[t].length} → ${rutasGr[t].length} · fin ${fin(s)} → ${fin(sg)}`
-        : `<span class="${sobre ? "mal" : ""}">${rutas[t].length}${topes ? `/${tp}` : ""}</span> · <span class="${s.excede ? "mal" : ""}">${s.n ? "fin " + hhmm(s.fin) : "libre"}</span>`;
+        : `<span class="${sobre ? "mal" : ""}">${rutas[t].length}${tp != null ? `/${tp}` : ""}</span> · <span class="${s.excede ? "mal" : ""}">${s.n ? "fin " + hhmm(s.fin) : "libre"}</span>`;
       return `<button class="mg-tec${entrada && nuevo ? " entra" : ""}" type="button" data-t="${t}" style="--c:${tec.color}" aria-pressed="${t === sel && fase === "plan"}">
-        <span class="mg-tec-cab"><span class="mg-punto"></span><b>${tec.nombre}</b><span class="tipo">${tec.tipo}</span>${nuevo ? '<span class="mg-nuevo">nuevo</span>' : ""}<span class="datos">${datos}</span></span>
+        <span class="mg-tec-cab"><span class="mg-punto"></span><b>${tec.nombre}</b>${nuevo ? '<span class="mg-nuevo">nuevo</span>' : ""}<span class="datos">${datos}</span></span>
         ${sg ? linea(s, palido(tec.color)) + linea(sg) : linea(s, tuyo() ? palido(tec.color) : null)}
       </button>`;
     }).join("");
@@ -1646,8 +1649,8 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
       : a > 0
         ? pct(`${a}%`, `menos viaje<br>con ${GR}`)
         : a === 0
-          ? pct("=", `mismo viaje<br>que ${GR}`, true)
-          : pct(`${-a}%`, `menos viaje en tu plan<br>que con ${GR}`, true));
+          ? pct("=", `<strong>¡Bien hecho!</strong><br>mismo viaje que ${GR}`, true)
+          : pct(`${-a}%`, `<strong>¡Impresionante!</strong><br>menos viaje en tu plan que con ${GR}`, true));
   }
 
   function pintarElegido(ev) {
@@ -1673,8 +1676,7 @@ button:focus-visible { outline: 3px solid var(--gr); outline-offset: 2px; }
     ui.btnReglas.classList.toggle("mal", reglasMal);
     ui.btnReglas.setAttribute("aria-label", reglasOk ? "Reglas: todas se cumplen" : reglasMal ? `Reglas: ${plural(fallan, "no se cumple", "no se cumplen")}` : "Reglas");
 
-    const topes = N.cfg.reglas.includes("topes");
-    const sobre = N.tecs.filter((tec, t) => (topes && rutas[t].length > tope(tec)) || ev.sims[t].excede).length;
+    const sobre = N.tecs.filter((tec, t) => (capacidad(tec) != null && rutas[t].length > capacidad(tec)) || ev.sims[t].excede).length;
     const antes = Number(ui.insTecs.textContent) || 0;
     ui.insTecs.hidden = !(enPlan && sobre > 0);
     ui.insTecs.textContent = sobre > 0 ? String(sobre) : "";

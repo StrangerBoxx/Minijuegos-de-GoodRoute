@@ -18,6 +18,7 @@
     // ejemplo GitHub Pages o Live Server); abriendo el archivo directo, el
     // navegador no deja ver los toques dentro del juego y queda desactivado.
     volverTrasInactividadMs: 120000,
+    ocultarControlesMs: 2500,
     claveFiltro: "biblioteca.filtro",
     claveControl: "biblioteca.control",
   };
@@ -31,7 +32,7 @@
   };
   const $ = (id) => document.getElementById(id);
   const ui = {
-    biblioteca: $("biblioteca"), filtros: $("filtros"), grilla: $("grilla"), conteo: $("conteo"),
+    biblioteca: $("biblioteca"), filtros: $("filtros"), grilla: $("grilla"),
     sala: $("sala"), marco: $("marco"), barraTitulo: $("barra-titulo"),
     btnAzar: $("btn-azar"), btnAzarTexto: $("btn-azar-texto"),
     barraSub: $("barra-subfiltros"), subfiltros: $("subfiltros"), subDetalle: $("subfiltro-detalle"),
@@ -84,32 +85,27 @@
     const visibles = juegos.filter((j) => !conSub || j.control === control);
     ui.btnAzar.hidden = visibles.length < 2;
     ui.btnAzarTexto.textContent = conSub ? `Juego al azar · ${controles[control].nombre.toLowerCase()}` : "Juego al azar";
-    if (!visibles.length) {
-      ui.grilla.innerHTML = `<p class="vacio">No hay juegos todavía.</p>`;
-      ui.conteo.textContent = `${juegos.length} minijuegos de GoodRoute`;
-      return;
-    }
-    ui.grilla.innerHTML = visibles.map((j) => tarjeta(j, record(j.carpeta))).join("");
-    ui.conteo.textContent = `${juegos.length} minijuegos de GoodRoute`;
+    ui.grilla.style.setProperty("--columnas", Math.max(1, visibles.length));
+    ui.grilla.innerHTML = visibles.length
+      ? visibles.map((j) => tarjeta(j, record(j.carpeta))).join("")
+      : `<p class="vacio">No hay juegos todavía.</p>`;
   }
 
   function tarjeta(j, r) {
-      return `<a class="juego" href="#${encodeURIComponent(j.carpeta)}" aria-label="Jugar ${escapar(j.nombre)}">
-        <div class="miniatura">
-          <img src="biblioteca/miniaturas/${encodeURIComponent(j.carpeta)}.jpg" alt="" loading="lazy" onerror="this.remove()" />
+      return `<a class="tarjeta juego" href="#${encodeURIComponent(j.carpeta)}" aria-label="Jugar ${escapar(j.nombre)}">
+        <div class="tarjeta-portada">
+          <img src="biblioteca/miniaturas/${encodeURIComponent(j.carpeta)}.jpg" alt="" onerror="this.remove()" />
           ${j.nuevo ? '<span class="nuevo">Nuevo</span>' : ""}
-          <span class="jugar-hover"><span>Jugar</span></span>
         </div>
-        <div class="juego-cuerpo">
-          <div class="etiquetas">
-            <span class="etiqueta">${escapar(j.muestra)}</span>
-          </div>
+        <div class="tarjeta-cuerpo">
           <h2>${escapar(j.nombre)}</h2>
+          <p class="muestra">${escapar(j.muestra)}</p>
           <p class="frase">${escapar(j.frase)}</p>
           <div class="datos">
-            <span>${escapar(j.duracion)} · ${escapar(j.rondas)}</span>
-            ${r ? `<span class="record"><small>Récord</small> ${r.puntos}${r.nombre ? ` · ${escapar(r.nombre)}` : ""}</span>` : "<span>Sin récord aún</span>"}
+            <span class="duracion">${escapar(j.duracion)} · ${escapar(j.rondas)}</span>
+            ${r ? `<span class="record"><small>Récord</small>${Math.round(r.puntos).toLocaleString("es-CL")}${r.nombre ? ` · ${escapar(r.nombre)}` : ""}</span>` : '<span class="record sin">Sin récord aún</span>'}
           </div>
+          <span class="btn-jugar">Jugar</span>
         </div>
       </a>`;
   }
@@ -144,7 +140,6 @@
     sorteando = true;
     ui.btnAzar.disabled = true; ui.btnAzar.classList.add("girando");
     ui.grilla.classList.add("sorteando");
-    ui.grilla.scrollIntoView({ behavior: pocoMovimiento() ? "auto" : "smooth", block: "nearest" });
 
     const elegida = Math.floor(Math.random() * tarjetas.length);
     // Pasos: unas vueltas completas y terminar justo en la elegida.
@@ -200,7 +195,13 @@
   function seguirDireccion() {
     const carpeta = decodeURIComponent(location.hash.slice(1));
     const j = juegos.find((x) => x.carpeta === carpeta);
-    if (j) abrir(j); else cerrar();
+    if (j) { window.Marcador.ocultar(); abrir(j); return; }
+    cerrar();
+    const enRanking = carpeta === "ranking";
+    ui.biblioteca.hidden = enRanking;
+    if (enRanking) window.Marcador.mostrar(); else window.Marcador.ocultar();
+    document.title = enRanking ? "Ranking · Minijuegos GoodRoute" : "Minijuegos GoodRoute";
+    mostrarControles();
   }
   addEventListener("hashchange", seguirDireccion);
 
@@ -218,18 +219,57 @@
   };
   $("barra-pantalla").addEventListener("click", alternarPantalla);
   $("btn-pantalla-lib").addEventListener("click", alternarPantalla);
+  $("btn-pantalla-mc").addEventListener("click", alternarPantalla);
+
+  const ajustar = () => document.documentElement.style.setProperty("--k", Math.min(innerWidth / 1920, innerHeight / 1080));
+  addEventListener("resize", ajustar);
+
+  function conexion() {
+    const en = navigator.onLine !== false;
+    for (const v of document.querySelectorAll(".vivo")) {
+      v.classList.toggle("sin-conexion", !en);
+      v.title = en ? "Con conexión" : "Sin conexión";
+      v.setAttribute("aria-label", v.title);
+    }
+  }
+  addEventListener("online", conexion);
+  addEventListener("offline", conexion);
+
+  let controlesT = 0;
+  function mostrarControles() {
+    document.body.classList.remove("quieto");
+    clearTimeout(controlesT);
+    controlesT = setTimeout(() => document.body.classList.add("quieto"), AJUSTES.ocultarControlesMs);
+  }
+  addEventListener("pointermove", mostrarControles);
+  addEventListener("pointerdown", mostrarControles);
+
+  $("btn-a-ranking").addEventListener("click", () => { location.hash = "ranking"; });
+  $("btn-a-juegos").addEventListener("click", () => {
+    history.replaceState(null, "", location.pathname + location.search);
+    seguirDireccion();
+  });
 
   // ---------- Reiniciar récords ----------
   // Borra los rankings y récords de todos los juegos (también los ocultos) guardados en
   // este navegador: las claves "<juego>.ranking" y los récords de los minijuegos de ruta.
   $("btn-reiniciar").addEventListener("click", () => {
-    if (!confirm("¿Borrar los récords y rankings de todos los juegos? No se puede deshacer.")) return;
+    const pasos = [
+      "¿Borrar los récords y rankings de todos los juegos?",
+      "Se borrarán todos los nombres y puntajes guardados en este equipo. ¿Seguir?",
+      "Esto no se puede deshacer. ¿Seguro?",
+      "Última confirmación: ¿borrar todo ahora?",
+    ];
+    for (const [i, texto] of pasos.entries()) {
+      if (!confirm(`(${i + 1}/${pasos.length}) ${texto}`)) return;
+    }
     try {
       for (const k of Object.keys(localStorage)) {
         if (k.endsWith(".ranking") || k === "goodroute.minijuegos.records" || k === "flota-en-vivo.total") localStorage.removeItem(k);
       }
     } catch { /* sin almacenamiento */ }
     pintarGrilla();
+    window.Marcador.pintar(true);
   });
 
   // ---------- Marco del juego ----------
@@ -266,6 +306,8 @@
   // Los récords cambian cuando un juego guarda un puntaje (en otra pestaña o al volver).
   addEventListener("storage", (e) => { if (!abierto && e.key && e.key.endsWith(".ranking")) pintarGrilla(); });
 
+  ajustar();
+  conexion();
   pintarFiltros();
   pintarGrilla();
   seguirDireccion();

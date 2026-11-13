@@ -3,47 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="color-scheme" content="only light" />
   <title>Minijuegos GoodRoute</title>
   <link rel="icon" type="image/png" href="biblioteca/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="biblioteca/biblioteca.css" />
+  <link rel="stylesheet" href="biblioteca/ranking.css" />
 </head>
 <body>
-  <!-- Biblioteca -->
-  <main class="biblioteca" id="biblioteca">
-    <header class="cabecera">
-      <img class="logo" id="logo" src="biblioteca/logo-goodroute.gif" alt="GoodRoute" />
-      <div class="cabecera-texto">
-        <p class="eyebrow">Stand de Control Position</p>
-        <h1>Minijuegos <span class="acento">de ruta</span></h1>
-        <p class="lead">Cada juego muestra una parte del producto en un minuto. Elige uno para empezar.</p>
+  <main class="vista biblioteca" id="biblioteca">
+    <div class="escenario">
+      <header class="cabecera">
+        <img class="logo" id="logo" src="biblioteca/logo-goodroute.gif" alt="GoodRoute" />
+        <h1 class="titulo">Minijuegos <span>de ruta</span></h1>
+        <button class="llamado btn-azar" id="btn-azar" type="button"><img class="dado" src="biblioteca/favicon.png" alt="" aria-hidden="true" /><span id="btn-azar-texto">Juego al azar</span></button>
+      </header>
+      <nav class="filtros" id="filtros" aria-label="Filtrar por modo de juego" hidden></nav>
+      <div class="barra-subfiltros" id="barra-subfiltros" hidden>
+        <nav class="subfiltros" id="subfiltros" aria-label="Filtrar por cómo se juega"></nav>
+        <p class="subfiltro-detalle" id="subfiltro-detalle"></p>
       </div>
-    </header>
-
-    <div class="barra-filtros">
-      <nav class="filtros" id="filtros" aria-label="Filtrar por modo de juego"></nav>
-      <button class="btn-azar" id="btn-azar" type="button"><img class="dado" src="biblioteca/favicon.png" alt="" aria-hidden="true" /> <span id="btn-azar-texto">Juego al azar</span></button>
+      <section class="columnas grilla" id="grilla" aria-live="polite"></section>
+      <footer class="pie">
+        <span>Stand de Control Position</span>
+        <span class="pie-derecha">
+          <span class="controles">
+            <button class="btn-icono" id="btn-pantalla-lib" type="button" title="Pantalla completa" aria-label="Pantalla completa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+            <button class="btn-icono" id="btn-a-ranking" type="button" title="Ranking" aria-label="Ver ranking"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3.4 3M17 6h3v1a3 3 0 0 1-3.4 3"/><path d="M12 14v3M8 20h8M9.5 17h5l.5 3h-6z"/></svg></button>
+          </span>
+          <i class="vivo" role="img"></i>
+        </span>
+      </footer>
     </div>
-    <!-- Sub-filtro por cómo se juega (mouse o táctil); solo aparece si la pestaña tiene de los dos -->
-    <div class="barra-subfiltros" id="barra-subfiltros" hidden>
-      <nav class="subfiltros" id="subfiltros" aria-label="Filtrar por cómo se juega"></nav>
-      <p class="subfiltro-detalle" id="subfiltro-detalle"></p>
-    </div>
-
-    <section class="grilla" id="grilla" aria-live="polite"></section>
-
-    <footer class="pie">
-      <span id="conteo"></span>
-      <span class="pie-botones">
-        <button class="btn-pantalla-lib" id="btn-reiniciar" type="button">↺ Reiniciar récords</button>
-        <button class="btn-pantalla-lib" id="btn-pantalla-lib" type="button">⛶ Pantalla completa</button>
-      </span>
-    </footer>
   </main>
 
-  <!-- Juego abierto -->
+  <section class="vista marcador" id="marcador" hidden>
+    <div class="escenario">
+      <header class="cabecera">
+        <img class="logo" src="biblioteca/logo-goodroute.gif" alt="GoodRoute" />
+        <h1 class="titulo">Ranking <span>del stand</span></h1>
+        <p class="llamado">¡Juega y entra al top 5!</p>
+      </header>
+      <section class="columnas" id="tablas"></section>
+      <footer class="pie">
+        <span>Stand de Control Position</span>
+        <span class="pie-derecha">
+          <span class="controles">
+            <button class="btn-icono" id="btn-reiniciar" type="button" title="Reiniciar récords" aria-label="Reiniciar récords"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></svg></button>
+            <button class="btn-icono" id="btn-pantalla-mc" type="button" title="Pantalla completa" aria-label="Pantalla completa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+            <button class="btn-icono" id="btn-a-juegos" type="button" title="Minijuegos" aria-label="Ver minijuegos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10a5 5 0 0 1 4.9 5.9l-.6 3.4a2.6 2.6 0 0 1-4.6 1.1L15 15H9l-1.7 2.4a2.6 2.6 0 0 1-4.6-1.1l-.6-3.4A5 5 0 0 1 7 7z"/><path d="M7.5 10v4M5.5 12h4"/><circle cx="16" cy="11" r=".6" fill="currentColor"/><circle cx="18" cy="13" r=".6" fill="currentColor"/></svg></button>
+          </span>
+          <i class="vivo" role="img"></i>
+        </span>
+      </footer>
+    </div>
+  </section>
+
   <section class="sala" id="sala" hidden>
     <header class="barra">
       <a class="volver" href="#" id="volver">← Biblioteca</a>
@@ -54,6 +71,7 @@
   </section>
 
   <script src="biblioteca/juegos.js"></script>
+  <script src="biblioteca/ranking.js"></script>
   <script src="biblioteca/biblioteca.js"></script>
 </body>
 </html>

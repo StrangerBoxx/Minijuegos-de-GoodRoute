@@ -47,7 +47,7 @@
     resultado: $("resultado"), resTitulo: $("res-titulo"), resDetalle: $("res-detalle"), resPuntos: $("res-puntos"),
     rTiTu: $("r-ti-tu"), rTiGr: $("r-ti-gr"), rCuTu: $("r-cu-tu"), rCuGr: $("r-cu-gr"), rChTu: $("r-ch-tu"),
     btnSiguiente: $("btn-siguiente"),
-    final: $("final"), finPuntos: $("fin-puntos"), finRecord: $("fin-record"), finRecordAnt: $("fin-record-ant"), finStats: $("fin-stats"), form: $("form-nombre"), nombre: $("nombre"),
+    final: $("final"), finPuntos: $("fin-puntos"), finRecord: $("fin-record"), finRecordAnt: $("fin-record-ant"), finStats: $("fin-stats"), finTitular: $("fin-titular"), finDato: $("fin-dato"), form: $("form-nombre"), nombre: $("nombre"),
     rankingInicio: $("ranking-inicio"), rankingFinal: $("ranking-final"),
   };
   let vista = new C.Vista($("mapa"));       // "let": la pantalla grande dibuja con otra vista (__vivo)
@@ -57,7 +57,7 @@
 
   // ---------- Estado ----------
   let fase = "inicio";            // inicio | cuenta | carrera | resultado | final
-  let nivelIdx = 0, puntosTotal = 0, victorias = 0, choquesTotal = 0, clientesTotal = 0;
+  let nivelIdx = 0, puntosTotal = 0, victorias = 0, choquesTotal = 0, clientesTotal = 0, completos = 0, cuadrasTu = 0, cuadrasOpt = 0, msOpt = 0;
   let mapa = null, base = 0, clientes = [];
   let chip = null;                // { orden, cuadras, tramos, llegadas[], fin, ms }
   let yo = null;                  // camioneta del jugador (posición en coordenadas de grilla)
@@ -205,7 +205,7 @@
     tCarrera = 0; finCarrera = null;
   }
 
-  function nuevaPartida() { nivelIdx = 0; puntosTotal = 0; victorias = 0; choquesTotal = 0; clientesTotal = 0; empezarNivel(); }
+  function nuevaPartida() { nivelIdx = 0; puntosTotal = 0; victorias = 0; choquesTotal = 0; clientesTotal = 0; completos = 0; cuadrasTu = 0; cuadrasOpt = 0; msOpt = 0; empezarNivel(); }
 
   function empezarNivel() {
     serieNivel++;
@@ -220,7 +220,7 @@
     tCarrera = 0; finCarrera = null;
     ui.hud.hidden = false;
     ui.hudNivel.textContent = `Nivel ${nivelIdx + 1} de ${AJUSTES.niveles.length}`;
-    ui.hudAyuda.textContent = "Arrastra la camioneta desde la base";
+    ui.hudAyuda.textContent = tactil() ? "Desliza el dedo en cualquier parte" : "Arrastra la camioneta desde la base";
     ui.hudCentro.classList.remove("urgente");
     ui.hudCentro.textContent = segs(0);
     actualizarHud();
@@ -257,6 +257,8 @@
     const gano = completo && yo.fin < chip.fin;
     if (gano) victorias++;
     choquesTotal += yo.choques; clientesTotal += yo.visitados.length;
+    msOpt += chip.ms;
+    if (completo) { completos++; cuadrasTu += yo.cuadras; cuadrasOpt += chip.cuadras; }
     const eficiencia = yo.cuadras > 0 ? Math.min(1, chip.cuadras / yo.cuadras) * (yo.visitados.length / n) : 0;
     const puntos = Math.round(AJUSTES.puntosEficiencia * eficiencia) + (gano ? AJUSTES.puntosVictoria : 0) +
                    (completo && !yo.choques ? AJUSTES.bonoSinChoques : 0);
@@ -313,6 +315,15 @@
       [clientesTotal, clientesTotal === 1 ? "cliente" : "clientes"],
       [choquesTotal, choquesTotal === 1 ? "choque" : "choques"],
     ]);
+    const GR = '<span class="gr-marca">GoodRoute</span>';
+    const calculo = msOpt < 1 ? "menos de 1 ms" : `${Math.round(msOpt)} ms`;
+    const extra = completos ? Math.round((cuadrasTu / cuadrasOpt - 1) * 100) : null;
+    ui.finTitular.innerHTML = extra == null
+      ? `${GR} calculó la ruta óptima de los ${AJUSTES.niveles.length} niveles en ${calculo}, mientras tú manejabas.`
+      : extra <= 2
+        ? `Manejaste la ruta óptima. ${GR} la calculó en ${calculo}, sin tocar el volante.`
+        : `Tu recorrido fue un ${extra}% más largo que la ruta óptima, que ${GR} calculó en ${calculo}.`;
+    ui.finDato.innerHTML = `${GR} no maneja: planifica. Arma la ruta óptima de cada técnico en milisegundos, sin choques ni vueltas de más.`;
     registro = null; ui.form.hidden = false; ui.nombre.value = "";
     ranking.pintar(ui.rankingFinal, null);
     mostrar(ui.final);
@@ -441,7 +452,7 @@
     if (fase === "carrera" && !yo.agarrado && yo.fin == null && ui.aviso.hidden) {
       const fs = Math.max(12, Math.min(16, c * 0.16));
       ctx.font = `600 ${fs}px "IBM Plex Sans", sans-serif`;
-      const txt = "Arrastra desde aquí", w = ctx.measureText(txt).width + fs;
+      const txt = tactil() ? "Desliza en cualquier parte" : "Arrastra desde aquí", w = ctx.measureText(txt).width + fs;
       // Debajo de la camioneta (o encima, si no cabe), sin salirse de la pantalla
       let ey = y + Math.max(26, c * 0.34) + fs;
       if (ey + fs > innerHeight - 8) ey = y - Math.max(26, c * 0.34) - fs;
@@ -453,11 +464,13 @@
 
   // ---------- Entrada ----------
   const enCarrera = () => fase === "carrera" && yo.fin == null && finCarrera == null;
+  const tactil = () => matchMedia("(pointer: coarse)").matches;
+  if (tactil()) $("paso-arrastre").lastChild.textContent = "Desliza el dedo en cualquier parte de la pantalla: la camioneta copia su movimiento. Llévala por las calles hasta todos los clientes.";
 
   canvas.addEventListener("pointerdown", (e) => {
     if (!enCarrera() || yo.agarrado) return;
     const [x, y] = aPantalla(yo.gx, yo.gy);
-    if (Math.hypot(e.clientX - x, e.clientY - y) > Math.max(34, vista.celda * 0.45)) return;
+    if (e.pointerType === "mouse" && Math.hypot(e.clientX - x, e.clientY - y) > Math.max(34, vista.celda * 0.45)) return;
     yo.agarrado = true;
     yo.offset = [x - e.clientX, y - e.clientY];   // la camioneta no salta al dedo
     ui.aviso.hidden = true;

@@ -68,7 +68,7 @@
     rOkTu: $("r-ok-tu"), rOkGr: $("r-ok-gr"), rKmTu: $("r-km-tu"), rKmGr: $("r-km-gr"),
     rFinTu: $("r-fin-tu"), rFinGr: $("r-fin-gr"),
     final: $("final"), finPuntos: $("fin-puntos"),
-    finRecord: $("fin-record"), finRecordAnt: $("fin-record-ant"), finStats: $("fin-stats"),
+    finRecord: $("fin-record"), finRecordAnt: $("fin-record-ant"), finStats: $("fin-stats"), finTitular: $("fin-titular"), finDato: $("fin-dato"),
     form: $("form-nombre"), nombre: $("nombre"),
     rankingInicio: $("ranking-inicio"), rankingFinal: $("ranking-final"),
   };
@@ -77,7 +77,7 @@
   let fase = "inicio";          // inicio | dia | resultado | final
   let diaIdx = 0;
   let puntosTotal = 0;
-  let diasIgualados = 0, aTiempoTotal = 0, atrasadosTotal = 0;
+  let diasIgualados = 0, aTiempoTotal = 0, atrasadosTotal = 0, clientesTotal = 0, aTiempoGr = 0, msGr = 0;
   let mapa = null;              // { cols, rows, bloqueadas, base, clientes:[{nodo,hora}], arboles }
   let jugador = null;           // ver nuevoTecnico()
   let gr = null;                // { ...tecnico, orden, ms }
@@ -547,7 +547,7 @@
   }
 
   function nuevaPartida() {
-    diaIdx = 0; puntosTotal = 0; diasIgualados = 0; aTiempoTotal = 0; atrasadosTotal = 0;
+    diaIdx = 0; puntosTotal = 0; diasIgualados = 0; aTiempoTotal = 0; atrasadosTotal = 0; clientesTotal = 0; aTiempoGr = 0; msGr = 0;
     empezarDia();
   }
 
@@ -610,6 +610,7 @@
     const iguala = tu.ok >= go.ok && tu.atendidos >= go.atendidos && tu.cuadras <= go.cuadras;
     if (iguala) diasIgualados++;
     aTiempoTotal += tu.ok; atrasadosTotal += tu.tarde;
+    clientesTotal += n; aTiempoGr += go.ok; msGr += gr.ms;
     const eficiencia = tu.atendidos ? Math.min(1, go.cuadras / Math.max(tu.cuadras, 1)) * (tu.atendidos / n) : 0;
     const puntos = tu.ok * AJUSTES.puntosATiempo + tu.tarde * AJUSTES.puntosAtrasado
                  + Math.round(AJUSTES.puntosKm * eficiencia) + (iguala ? AJUSTES.bonoIgualar : 0);
@@ -671,6 +672,13 @@
       [atrasadosTotal, atrasadosTotal === 1 ? "atrasado" : "atrasados"],
       [`${diasIgualados}/${AJUSTES.dias.length}`, "días como GoodRoute"],
     ]);
+    const GR = '<span class="gr-marca">GoodRoute</span>';
+    const calculo = msGr < 1 ? "menos de 1 ms" : `${Math.round(msGr)} ms`;
+    const suyos = aTiempoGr === clientesTotal ? "a todos" : `a ${aTiempoGr}`;
+    ui.finTitular.innerHTML = aTiempoTotal === clientesTotal
+      ? `Llegaste a la hora a tus ${clientesTotal} clientes. ${GR} también, y lo calculó en ${calculo}.`
+      : `Llegaste a la hora a ${aTiempoTotal} de ${clientesTotal} clientes. ${GR} llegó a tiempo ${suyos}, y lo calculó en ${calculo}.`;
+    ui.finDato.innerHTML = `${GR} toma la hora acordada con cada cliente como una regla del plan: ordena las visitas para cumplirla y, entre las rutas que la cumplen, elige la más corta.`;
     registroActual = null;
     ui.form.hidden = false;
     ui.nombre.value = "";
