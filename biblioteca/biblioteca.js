@@ -222,6 +222,19 @@
   $("barra-pantalla").addEventListener("click", alternarPantalla);
   $("btn-pantalla-lib").addEventListener("click", alternarPantalla);
 
+  // ---------- Reiniciar récords ----------
+  // Borra los rankings y récords de todos los juegos (también los ocultos) guardados en
+  // este navegador: las claves "<juego>.ranking" y los récords de los minijuegos de ruta.
+  $("btn-reiniciar").addEventListener("click", () => {
+    if (!confirm("¿Borrar los récords y rankings de todos los juegos? No se puede deshacer.")) return;
+    try {
+      for (const k of Object.keys(localStorage)) {
+        if (k.endsWith(".ranking") || k === "goodroute.minijuegos.records" || k === "flota-en-vivo.total") localStorage.removeItem(k);
+      }
+    } catch { /* sin almacenamiento */ }
+    pintarGrilla();
+  });
+
   // ---------- Marco del juego ----------
   // Se crea un iframe nuevo por juego: cambiar el src de uno existente agrega
   // pasos al historial y el botón "atrás" retrocedería dentro del marco.
