@@ -76,7 +76,7 @@ Reglas de la base de datos: solo permiten leer y escribir partidas (`salas/CÓDI
 
 1. Copia la carpeta del juego junto a las demás.
 2. Agrega su entrada en `biblioteca/juegos.js`: nombre, frase, etiqueta y duración. Para ocultarlo sin borrarlo, usa `oculto: true`.
-3. Pon una captura de 640×400 en `biblioteca/miniaturas/<carpeta>.jpg`.
+3. Pon su portada en `biblioteca/miniaturas/<carpeta>.jpg` (16:10, por ejemplo 960×600). Las portadas actuales están dibujadas en `biblioteca/portadas.html`.
 
 ## Archivos
 
