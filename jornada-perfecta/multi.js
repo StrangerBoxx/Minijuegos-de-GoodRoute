@@ -31,8 +31,11 @@
     puntosPorSegundo: 3,
     imagenesPorSegundo: 10,    // como máximo; si la red no da, se saltan cuadros en vez de acumular atraso
     imagenesEnVuelo: 2,
-    ladoImagen: 360,           // px del lado más largo de la imagen que manda cada celular
-    calidadImagen: 0.55,
+    // Tamaño de la imagen que manda cada celular: el de su recuadro en la pantalla grande
+    // (la pantalla lo mide y lo avisa al empezar), entre estos límites.
+    ladoImagen: 480,           // px del lado más largo, si la pantalla no avisó
+    ladoMin: 360, ladoMax: 1100,
+    calidadImagen: 0.78,
     segundosAutoInicio: 1.5,   // cuando todos confirmaron
   };
   const JUGADORES = [
@@ -179,7 +182,11 @@
         <div class="multi-cuadro-cab"><b>${p + 1}</b><span>${JUGADORES[p].nombre}</span><em class="multi-pts">0 pts</em></div>
         <div class="multi-cuadro-cuerpo"><img alt="" hidden><p class="multi-espera">Esperando su partida…</p><p class="multi-termino" hidden>✓ Terminó</p></div>
       </div>`).join("");
-      sala.publicar("vivo", { fase: "jugar", semilla });
+      // Tamaño real de cada recuadro (en px de pantalla): los celulares mandan imágenes de ese tamaño.
+      const cuerpo = capaVivo.querySelector(".multi-cuadro-cuerpo");
+      const escala = Math.min(window.devicePixelRatio || 1, 1.5);
+      const lado = cuerpo ? Math.round(Math.max(cuerpo.clientWidth, cuerpo.clientHeight) * escala) : AJUSTES.ladoImagen;
+      sala.publicar("vivo", { fase: "jugar", semilla, lado: Math.max(AJUSTES.ladoMin, Math.min(AJUSTES.ladoMax, lado)) });
       pintarVivo();
     }
 
@@ -249,7 +256,7 @@
   function iniciarCelular() {
     const J = JUGADORES[YO];
     let conexion = null, ultimoVivo = null, empezo = false, terminado = false, cortada = false;
-    let envio = 0, envioImg = 0, ultimoPuntaje = -1, enVuelo = 0, ultimaImg = "";
+    let envio = 0, envioImg = 0, ultimoPuntaje = -1, enVuelo = 0, ultimaImg = "", ladoImagen = AJUSTES.ladoImagen;
 
     // Distintivo con el color del jugador, siempre visible.
     document.body.append(crear(`<div class="multi-yo" style="background:${J.color}"><b>${YO + 1}</b>${J.nombre}</div>`));
@@ -285,6 +292,7 @@
       conexion.escuchar("vivo", (v) => {
         if (!v) { if (!empezo) msg.innerHTML = "<b>La partida terminó.</b><br>Para jugar otra, escanea un QR nuevo en la pantalla."; return; }
         const antes = ultimoVivo; ultimoVivo = v;
+        if (v.fase === "jugar" && Number(v.lado) > 0) ladoImagen = Math.max(AJUSTES.ladoMin, Math.min(AJUSTES.ladoMax, Number(v.lado)));
         if (v.fase === "jugar" && (!antes || antes.fase !== "jugar")) cuentaRegresiva(v.semilla);
         if (v.fase === "podio") { if (!terminado) cortar(); puesto(v.podio); }
       });
@@ -339,7 +347,7 @@
       const vb = svgVivo.viewBox && svgVivo.viewBox.baseVal;
       const w0 = (vb && vb.width) || svgVivo.clientWidth, h0 = (vb && vb.height) || svgVivo.clientHeight;
       if (!w0 || !h0) return null;
-      const e = AJUSTES.ladoImagen / Math.max(w0, h0), w = Math.round(w0 * e), h = Math.round(h0 * e);
+      const e = ladoImagen / Math.max(w0, h0), w = Math.round(w0 * e), h = Math.round(h0 * e);
       const copia = svgVivo.cloneNode(true);
       copia.setAttribute("xmlns", "http://www.w3.org/2000/svg");
       copia.setAttribute("width", w); copia.setAttribute("height", h);
@@ -362,7 +370,8 @@
       if (!lienzo || !lienzo.width) return null;
       let r;
       try { r = recorte(); } catch { r = { x: 0, y: 0, w: lienzo.width, h: lienzo.height }; }
-      const e = AJUSTES.ladoImagen / Math.max(r.w, r.h);
+      // sin agrandar más que el lienzo original (no gana nitidez, solo peso)
+      const e = Math.min(1, ladoImagen / Math.max(r.w, r.h));
       const w = Math.max(1, Math.round(r.w * e)), h = Math.max(1, Math.round(r.h * e));
       mini.width = w; mini.height = h;
       const g = mini.getContext("2d");
