@@ -19,7 +19,11 @@ Minijuego del stand de Control Position para mostrar **GoodRoute**. Antes se lla
 4. **El chip:** sale con unos segundos de desventaja y recorre la ruta óptima, en naranjo. Gana quien visite a todos primero. Si el chip llega antes, te quedan 10 s para terminar.
 5. **Resultado:** compara tiempo, cuadras y choques, y muestra en naranjo el orden del chip.
 
-Son 3 niveles: 4, 5 y 6 clientes, con más obras y un chip más rápido en cada uno.
+Son 4 niveles, y cada uno es más difícil:
+- Clientes: 3, 4, 5 y 6.
+- Más obras.
+- Un chip más rápido que sale antes.
+- Calles más angostas, así que es más fácil chocar.
 
 **GoodRoute calcula de verdad:** la ruta del chip es el óptimo exacto (Held-Karp, ruta abierta). Tus cuadras se miden sobre el eje de la calle, así que el zigzag del pulso no cuenta.
 

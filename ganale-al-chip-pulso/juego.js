@@ -17,17 +17,20 @@
   const C = window.Comun;
 
   const AJUSTES = {
-    anchoCalle: 0.38,           // ancho de la calle, como fracción de una cuadra (más ancho = más fácil)
+    anchoCalle: 0.38,           // ancho de la calle por defecto (cada nivel trae el suyo: más angosta = más difícil)
     radioCliente: 0.22,         // a qué distancia del cliente (en cuadras) cuenta como visitado
     largoObra: 0.14,            // media longitud de la obra a lo largo de la calle (en cuadras)
     alChocar: "inicio",         // "inicio": vuelve a la base y se borran los clientes · "cliente": vuelve al último cliente
     segundosExtra: 10,          // tiempo que te queda para terminar después de que llega el chip
     inactividadMs: 40000,
+    // La dificultad sube en cada nivel: más clientes y obras, un chip más rápido que
+    // sale antes y calles más angostas (anchoCalle, en fracción de cuadra).
     niveles: [
       // velocidadChip en cuadras por segundo; ventaja = segundos que espera el chip después del "¡Ya!"
-      { clientes: 4, obras: 4,  velocidadChip: 1.5, ventaja: 2.5 },
-      { clientes: 5, obras: 8,  velocidadChip: 1.9, ventaja: 2.0 },
-      { clientes: 6, obras: 12, velocidadChip: 2.3, ventaja: 1.5 },
+      { clientes: 3, obras: 3,  velocidadChip: 1.4, ventaja: 3.0, anchoCalle: 0.44 },
+      { clientes: 4, obras: 6,  velocidadChip: 1.8, ventaja: 2.2, anchoCalle: 0.40 },
+      { clientes: 5, obras: 9,  velocidadChip: 2.2, ventaja: 1.5, anchoCalle: 0.36 },
+      { clientes: 6, obras: 13, velocidadChip: 2.6, ventaja: 1.0, anchoCalle: 0.32 },
     ],
     puntosEficiencia: 500,      // × (cuadras del chip / tus cuadras) × (visitados / total)
     puntosVictoria: 400,
@@ -60,6 +63,7 @@
   let tCarrera = 0, finCarrera = null, avisoHasta = 0;
 
   const nivel = () => AJUSTES.niveles[nivelIdx];
+  const anchoCalle = () => nivel().anchoCalle ?? AJUSTES.anchoCalle;
   const segs = (t) => t.toFixed(1).replace(".", ",") + " s";
 
   // ---------- Geometría de calles (coordenadas de grilla: 1 = una cuadra) ----------
@@ -73,7 +77,7 @@
    * borde más cercano (en cuadras) o -1 si chocó.
    */
   function holgura(gx, gy) {
-    const h = AJUSTES.anchoCalle / 2, { cols, rows } = mapa;
+    const h = anchoCalle() / 2, { cols, rows } = mapa;
     if (gx < -h || gx > cols - 1 + h || gy < -h || gy > rows - 1 + h) return -1;
     const rx = Math.round(gx), ry = Math.round(gy);
     const dy = Math.abs(gy - ry), dx = Math.abs(gx - rx);
@@ -98,7 +102,7 @@
 
   /** Punto proyectado al eje de la calle, para medir cuadras sin contar el zigzag del pulso. */
   function alEje(gx, gy) {
-    const h = AJUSTES.anchoCalle / 2, rx = Math.round(gx), ry = Math.round(gy);
+    const h = anchoCalle() / 2, rx = Math.round(gx), ry = Math.round(gy);
     const enFila = Math.abs(gy - ry) <= h, enCol = Math.abs(gx - rx) <= h;
     if (enFila && enCol) return [rx, ry];
     return enFila ? [gx, ry] : [rx, gy];
@@ -298,7 +302,7 @@
 
   /** Ciudad con calles anchas (las del juego), manzanas, edificios y obras. */
   function dibujarCiudad() {
-    const { ctx } = vista, c = vista.celda, calle = c * AJUSTES.anchoCalle;
+    const { ctx } = vista, c = vista.celda, calle = c * anchoCalle();
     const enEdificio = new Set(mapa.edificios.flatMap((e) => e.manzanas));
     for (const e of mapa.edificios) {
       vista.edificio(e, calle, Math.min(8, c * 0.08));
@@ -386,7 +390,7 @@
     // Tu camioneta
     const [x, y] = aPantalla(yo.gx, yo.gy);
     if (fase === "carrera" && yo.fin == null) {
-      const hol = holgura(yo.gx, yo.gy), h = AJUSTES.anchoCalle / 2;
+      const hol = holgura(yo.gx, yo.gy), h = anchoCalle() / 2;
       if (!yo.agarrado) {
         // Invita a agarrarla
         const r = Math.max(22, c * 0.3) + 5 * Math.sin(ahora / 180);

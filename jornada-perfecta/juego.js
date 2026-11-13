@@ -25,10 +25,14 @@
     inactividadMs: 40000,      // sin toques por este tiempo → vuelve al inicio
 
     // Días (niveles)
+    // La dificultad sube cada día: más clientes, más con hora acordada, más obras,
+    // horas más justas (holgura: minutos libres entre visitas al generar las horas)
+    // y un reloj más rápido (minutos de juego por segundo real).
     dias: [
-      { clientes: 4, conHora: 2, obras: 5 },    // de calentamiento
-      { clientes: 5, conHora: 3, obras: 11 },
-      { clientes: 6, conHora: 3, obras: 17 },
+      { clientes: 4, conHora: 1, obras: 5,  holgura: [30, 60], minutosPorSegundo: 26 },   // de calentamiento
+      { clientes: 5, conHora: 2, obras: 9,  holgura: [15, 45], minutosPorSegundo: 30 },
+      { clientes: 6, conHora: 3, obras: 13, holgura: [0, 30],  minutosPorSegundo: 34 },
+      { clientes: 7, conHora: 4, obras: 17, holgura: [0, 15],  minutosPorSegundo: 38 },
     ],
     // Holgura que se agrega entre visitas al generar las horas (min). Más
     // holgura = ventanas más separadas = más fácil acomodar a los sin hora.
@@ -270,7 +274,7 @@
     const conHora = new Set(orden.slice().sort(() => Math.random() - 0.5).slice(0, dia.conHora));
     let t = 0, nodo = mapa.base;
     for (const i of orden) {
-      t += entre(...AJUSTES.holguraGenerador);
+      t += entre(...(dia.holgura || AJUSTES.holguraGenerador));
       const llegada = t + camino(nodo, mapa.clientes[i].nodo).length * AJUSTES.minutosPorCuadra;
       if (conHora.has(i)) {
         // hora ∈ [llegada, llegada + 30): llegar en ese recorrido queda dentro de la ventana
@@ -574,10 +578,10 @@
 
   function avanzar(dt) {
     if (fase !== "dia" || reloj == null) return;
-    reloj += dt * AJUSTES.minutosPorSegundo;
+    reloj += dt * (diaActual().minutosPorSegundo || AJUSTES.minutosPorSegundo);
     const todosDecididos = jugador.elegidos.length === mapa.clientes.length;
     // Si ya está todo decidido, adelanta un poco el tramo final para no aburrir.
-    if (todosDecididos) reloj += dt * AJUSTES.minutosPorSegundo * 0.5;
+    if (todosDecididos) reloj += dt * (diaActual().minutosPorSegundo || AJUSTES.minutosPorSegundo) * 0.5;
     actualizarHud();
     if ((todosDecididos && reloj >= jugador.libreDesde) || reloj >= AJUSTES.finJornada) terminarDia();
   }

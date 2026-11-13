@@ -12,7 +12,13 @@ Minijuego del stand de Control Position para mostrar **GoodRoute**, nuestro opti
 4. **El día:** el técnico viaja (5 min por cuadra) y atiende a cada cliente durante 60 min. Si queda sin próximo cliente, se queda parado mientras el reloj sigue corriendo.
 5. **Resultado:** al terminar el día ves la ruta de GoodRoute (en naranjo) y una comparación de clientes a tiempo, kilómetros y hora de término.
 
-Son 3 días, con 4, 5 y 6 clientes. Una partida dura alrededor de un minuto.
+Son 4 días, y cada uno es más difícil:
+- Clientes: 4, 5, 6 y 7. Los que tienen hora acordada: 1, 2, 3 y 4.
+- Más obras.
+- Horas más justas.
+- Un reloj que corre más rápido.
+
+Una partida dura alrededor de un minuto y medio.
 
 **Detalles de diseño:**
 - **GoodRoute de verdad:** su ruta es el óptimo exacto, porque prueba todos los órdenes posibles. Usa las mismas reglas que el jugador: jornada, ventanas, servicio y ruta abierta.

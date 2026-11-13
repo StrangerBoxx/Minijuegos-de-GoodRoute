@@ -672,11 +672,11 @@ const juegoCorta = {
   pasos: [
     "Verás dos mapas con el mismo depósito y los mismos clientes, pero visitados en distinto orden.",
     "Toca la ruta que creas más corta. Cada acierto seguido suma bono de racha.",
-    "Si te equivocas pierdes 3 segundos. Las rondas se vuelven cada vez más parejas.",
+    "Si te equivocas pierdes 3 segundos. Cada ronda es un nivel más: más clientes y rutas más parejas.",
   ],
   dato: "A simple vista dos rutas parecen iguales, pero unos pocos kilómetros por técnico al día se acumulan en toda la flota. Un optimizador compara miles de órdenes posibles y elige el más corto.",
   KM_MAPA: 8,                // lado del mapa en km
-  marcadorInicial: mTiempo(40, 0),
+  marcadorInicial: `⏱ 0:40<span class="sep">·</span>Nivel 1<span class="sep">·</span>0 pts`,
 
   iniciar(E) {
     this.E = E; this.tiempo = 40; this.puntos = 0; this.racha = 0; this.mejorRacha = 0;
@@ -685,13 +685,14 @@ const juegoCorta = {
   },
 
   nuevaRonda() {
-    const n = Math.min(8, 5 + Math.floor(this.nivel / 2));
+    // Dificultad por nivel: más clientes (5 → 9) y rutas cada vez más parejas.
+    const n = Math.min(9, 5 + Math.floor(this.nivel / 2));
     const pts = puntosSeparados(n + 1, 0.17, 0.06);
     const dep = pts.pop();
     const corta = dosOpt(dep, pts, vecinoMasCercano(dep, pts));
     const Lc = largoRuta(dep, pts, corta, true);
     // Diferencia buscada: se achica con el nivel.
-    const objetivo = Math.max(0.03, 0.24 - this.nivel * 0.025);
+    const objetivo = Math.max(0.02, 0.26 - this.nivel * 0.03);
     let mejor = null;
     for (let k = 0; k < 400; k++) {
       const o = corta.slice();
@@ -732,7 +733,7 @@ const juegoCorta = {
     const r = this.ronda;
     if (r.elegida >= 0) { r.espera -= dt; if (r.espera <= 0) { this.nivel++; this.nuevaRonda(); } }
     else this.tiempo -= dt;      // el reloj se detiene mientras se muestra la respuesta
-    this.E.marcador(mTiempo(this.tiempo, this.puntos));
+    this.E.marcador(`⏱ ${reloj(this.tiempo)}<span class="sep">·</span>Nivel ${this.nivel + 1}<span class="sep">·</span>${fmt(this.puntos)} pts`);
     if (this.tiempo <= 0) this.E.terminar(this.puntos, [
       [this.aciertos, "aciertos"], [this.errores, "errores"], [this.mejorRacha, "mejor racha"],
     ]);
